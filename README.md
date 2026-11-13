@@ -75,3 +75,15 @@ Pomlčka značí chybějící údaj; nula je platná hodnota. Detekce rozhraní 
 Přístup vyžaduje zabezpečený kontext (HTTPS nebo localhost). Povolení pohybu/orientace se vyžádá z kliknutí tam, kde prohlížeč poskytuje requestPermission. Sledování se zastaví při odchodu z laboratoře nebo přepnutí do pozadí a znovu se zapíná ručně. Údaje se drží jen v paměti otevřené stránky, neodesílají se a neukládají. Po zastavení zůstávají viditelné poslední hodnoty; při odchodu z laboratoře se vymažou.
 
 Testy: `node tests/phone-lab.test.cjs`. Ověřují aktivaci, povolení, nulové/chybějící hodnoty, mapování os, kalibraci, ukončení geolokačního sledování i s ID 0, zastavení na pozadí a odchod během čekání na povolení. Skutečná dostupnost senzorů a přesnost polohy vyžadují ověření na fyzickém zařízení.
+
+## Verze 1.5.0 · Ultra kompaktní laboratoř
+
+V laboratoři použij přepínač **Kompaktní / Podrobně**. Přepínání zachová běžící měření. Kompaktní panel vyplňuje dostupnou výšku okna a zobrazuje vše bez scrollování; na šířku použije čtyři karty vedle sebe. Vizuálně ověřeno pro 360 × 640, 390 × 760 a desktopové rozložení.
+
+- Jediné tlačítko v kompaktním panelu zapíná a vypíná pohybová měření i polohu. Požadavky na oprávnění jsou spuštěné z téhož kliknutí. Neúspěch jednoho zdroje neblokuje ostatní. Opětovné kliknutí zruší i dosud čekající zapnutí.
+- Opravený směr grafického natočení: pokles orientačního úhlu při otočení doprava se převede na kladné otáčení CSS po směru hodinových ručiček. Původní číselné úhly v podrobném režimu zůstávají nezměněné.
+- Zrychlení i rychlost otáčení ukazují čáry se středovou nulou a šipkou. Kladné hodnoty směřují doprava, záporné doleva. Rozsah čar je ±10 m/s² a ±180 °/s; číselný údaj zůstává nezkrácený i mimo rozsah, nasycená čára je zvýrazněna. Pomlčka stále znamená chybějící údaj a nula prázdnou čáru.
+- Kalibrace je dostupná přímo z kompaktního panelu. Kompaktní úhly a vizualizace jsou vůči kalibraci, podrobná čísla ukazují původní hodnoty.
+- Po vypnutí jsou kompaktní ukazatele ztlumené a hodnoty prázdné. Během čekání nebo při nedostupném zdroji ukazují stavové popisky dostupnost dat.
+
+Regresní testy byly rozšířeny o směr otáčení před/po kalibraci, přepínání režimů za běhu, směrové čáry, překročení rozsahu a společné vypnutí včetně probíhajícího požadavku na povolení. Fyzickou odezvu senzorů je třeba ověřit na konkrétním telefonu.
