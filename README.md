@@ -87,3 +87,13 @@ V laboratoři použij přepínač **Kompaktní / Podrobně**. Přepínání zach
 - Po vypnutí jsou kompaktní ukazatele ztlumené a hodnoty prázdné. Během čekání nebo při nedostupném zdroji ukazují stavové popisky dostupnost dat.
 
 Regresní testy byly rozšířeny o směr otáčení před/po kalibraci, přepínání režimů za běhu, směrové čáry, překročení rozsahu a společné vypnutí včetně probíhajícího požadavku na povolení. Fyzickou odezvu senzorů je třeba ověřit na konkrétním telefonu.
+
+## Verze 1.6.0 · Systémové Zpět
+
+`navigation.js` propojuje navigaci kolekce s historií prohlížeče/PWA. Vstup do Pongu, Pinballu nebo laboratoře přidá jeden krok; otevření nastavení přidá další. Zpět nejprve zavře nastavení, další Zpět vrátí do menu. Stejnou historii používají tlačítka uvnitř aplikace, takže po návratu nezůstávají neviditelné kroky.
+
+Při odchodu se zavolá původní ukončení hry nebo laboratoře: zastaví animace, měření senzorů a sledování polohy. Historie neobsahuje senzorová data ani souřadnice. Po návratu Dopředu se hra otevře jako nová hra, laboratoř bez automatického zapnutí senzorů. Přímé odkazy `#pong`, `#pinball` a `#lab` mají návrat do menu. Přepnutí kompaktního režimu nevytváří nový navigační krok.
+
+Z hlavního menu už Zpět ponecháváme systému/prohlížeči. Některé mobilní prohlížeče mohou při prvním Zpět nejprve ukončit fullscreen; to je samostatné systémové chování.
+
+Kontrola: `node tests/navigation.test.cjs`. V prohlížeči ověřeno menu → laboratoř → Zpět → menu a menu → Pong → nastavení → Zpět → Pong → Zpět → menu.
