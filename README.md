@@ -58,3 +58,20 @@ Kontroly fyziky: `node tests/pinball-engine.test.cjs`. Ověřují průchod vyst�
 - `assets/neon-playfield.jpg` je originální generovaný ilustrovaný podklad, součást offline cache. Přesná kolizní geometrie a pohyblivé prvky se vykreslují kódem nad ním.
 
 Doplněné regresní testy ověřují znovunabití vráceného i stojícího míčku, zachování skóre a počtu míčků a úplný zdvih obou páček do 33 ms simulovaného času.
+
+## Verze 1.4.0 · Laboratoř telefonu
+
+Nová součást kolekce je samostatné funkční demo, nezávislé na hrách. V menu otevři **Laboratoř telefonu**, potom vyber **Zapnout senzory**. Pro polohu použij zvlášť **Zapnout polohu**. Pokud prohlížeč požádá o oprávnění, povol příslušný přístup.
+
+Zobrazuje:
+
+- Náklon a orientaci α/β/γ ve stupních, absolutní/relativní referenci, vizualizaci náklonu a natočení. Kalibrace nastaví neutrální polohu vizualizace, původní úhly zůstávají dostupné. Nejde o garantovaný kompas.
+- Zrychlení X/Y/Z s gravitací i bez gravitace v m/s². Velikost zrychlení se počítá jen při dostupnosti všech tří os.
+- Rychlost otáčení X/Y/Z (β/γ/α) v °/s z DeviceMotionEvent.rotationRate, interval událostí a jejich průměrnou četnost.
+- Zeměpisnou šířku/délku, přesnost, výšku, přesnost výšky, rychlost v km/h, směr pohybu a čas posledního určení polohy. Poloha může vycházet z různých systémových zdrojů, není zaručeno přímé GPS měření.
+
+Pomlčka značí chybějící údaj; nula je platná hodnota. Detekce rozhraní není důkazem dostupného hardwaru: demo rozlišuje čekání, odmítnutí přístupu, události bez hodnot, zastaralá data a živá data. Některá zařízení neposkytují všechny údaje. Data senzorů nejsou získávána z cloudu ani simulována.
+
+Přístup vyžaduje zabezpečený kontext (HTTPS nebo localhost). Povolení pohybu/orientace se vyžádá z kliknutí tam, kde prohlížeč poskytuje requestPermission. Sledování se zastaví při odchodu z laboratoře nebo přepnutí do pozadí a znovu se zapíná ručně. Údaje se drží jen v paměti otevřené stránky, neodesílají se a neukládají. Po zastavení zůstávají viditelné poslední hodnoty; při odchodu z laboratoře se vymažou.
+
+Testy: `node tests/phone-lab.test.cjs`. Ověřují aktivaci, povolení, nulové/chybějící hodnoty, mapování os, kalibraci, ukončení geolokačního sledování i s ID 0, zastavení na pozadí a odchod během čekání na povolení. Skutečná dostupnost senzorů a přesnost polohy vyžadují ověření na fyzickém zařízení.
