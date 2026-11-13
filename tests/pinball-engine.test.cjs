@@ -24,3 +24,21 @@ for(let i=0;i<3;i++){e.ready=false;e.ball.y=1100;e.step(1/240)}
 assert(e.over);assert.equal(e.number,3);
 e.reset();assert(!e.over);assert(e.ready);assert.equal(e.score,0);
 console.log('PASS: launch powers, stable physics, bumper, moving flipper, target bonus, three balls, reset');
+// Regression: returning to the plunger must re-arm without consuming a ball.
+const reloadEvents=[];const returned=new Engine(table,type=>reloadEvents.push(type));
+returned.launch();returned.score=1234;returned.leftLauncher=true;
+returned.ball={x:550,y:910,vx:0,vy:200,r:10};returned.step(1/240);
+assert(returned.ready);assert.equal(returned.number,1);assert.equal(returned.score,1234);assert(reloadEvents.includes('reload'));
+returned.launch(.4);assert(!returned.ready);assert(returned.ball.vy<0);
+// A low-speed ball at the bottom of the lane also becomes playable again.
+const settled=new Engine(table);settled.launch();settled.launchAge=2;
+settled.ball={x:550,y:925,vx:0,vy:0,r:10};settled.step(1/240);assert(settled.ready);
+// The original shot must not be mistaken for a returning ball.
+const fresh=new Engine(table);fresh.launch();fresh.step(1/240);assert(!fresh.ready);
+// Full active travel in at most 33 ms, with motion in the first fixed step.
+const responsive=new Engine(table);responsive.step(1/240,[true,true]);
+assert(responsive.flippers[0].angle<table.flippers[0].rest);
+for(let i=1;i<8;i++)responsive.step(1/240,[true,true]);
+assert(Math.abs(responsive.flippers[0].angle-table.flippers[0].active)<1e-9);
+assert(Math.abs(responsive.flippers[1].angle-table.flippers[1].active)<1e-9);
+console.log('PASS: returning/settled launch-lane ball, preserved score and ball count, re-launch, <=33 ms flipper travel');

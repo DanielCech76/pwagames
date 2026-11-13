@@ -48,3 +48,13 @@ Body: odrážeč 100, nový terč 250, boční odrážeč 25. Kompletní sada te
 Aktuální vykreslení je pro stůl 600 × 1000. Další stůl stejného typu může použít jinou geometrii a nastavení; pro nový vizuální styl se přidá renderer a pro nový druh mechaniky odpovídající kolizní prvek. Při přidání druhého stolu se doplní výběr z registru před spuštěním. Rampy a multiball nejsou součástí první verze.
 
 Kontroly fyziky: `node tests/pinball-engine.test.cjs`. Ověřují průchod vystřelovací dráhou při třech silách, stabilitu simulace, odraz a skóre, aktivní páčku, bonus, tři míčky a reset.
+
+## Verze 1.3.0 · Návrat míčku, grafika a odezva
+
+- Míček, který se vrátí do spodní části vystřelovací šachty, se znovu připraví k vystřelení. Počet míčků, skóre a terče zůstávají zachované. Ošetřený je i téměř stojící míček v šachtě.
+- Plný zdvih páčky má rychlost 32 rad/s místo 13 rad/s: přibližně 29 ms místo 70 ms. Pohyb začíná v prvním fyzikálním kroku po zachycení vstupu. Celková dotyková latence závisí na displeji a prohlížeči.
+- Ilustrovaný podklad stolu, kovové lišty, číslované svítící terče a detailnější mechanické prvky.
+- `pinball-renderer.js` odděluje vykreslování od ovládání. Pozadí, lišty a těla odrážečů se připraví do jedné statické vrstvy; páčky, kulička a světla používají připravené obrázky. Náročné stíny a ilustrace se nepřepočítávají každý snímek.
+- `assets/neon-playfield.jpg` je originální generovaný ilustrovaný podklad, součást offline cache. Přesná kolizní geometrie a pohyblivé prvky se vykreslují kódem nad ním.
+
+Doplněné regresní testy ověřují znovunabití vráceného i stojícího míčku, zachování skóre a počtu míčků a úplný zdvih obou páček do 33 ms simulovaného času.
