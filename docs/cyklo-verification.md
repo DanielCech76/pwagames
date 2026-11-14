@@ -51,3 +51,6 @@ See [cyklo-navigation.md](cyklo-navigation.md) for the implemented workflow, pro
 
 ## 1.2.0 — sloupcový profil a vzhled A/B
 Všechny regresní sady prošly. Přidán test vážení podle vzdálenosti, chybějících/nulových výšek, krátkých vrcholů, přístupných popisů a synchronizace aktuálního sloupce se seekem simulace. Lokální preview je obsazeno jiným projektem; jeho běh nebyl přerušen. V publikovaném sestavení ověřena aktualizace 1.0.3 → 1.2.0, import ukázkového plánu, vykreslení 24 sloupců a spuštění simulace. Pauza a seek na 850/1000 přepnuly aktuální sloupec na 21 a výškový štítek na 188,3 m. Hlavička uvádí Simulace, skutečné jízdní metriky jsou skryté. Snímek: `screenshots/cyklo-1.2.0-elevation.jpg`. Mobilní fyzické zařízení nebylo součástí této vizuální kontroly.
+
+## 1.3.0 — kontrola vzhledu a ovládání
+Všechny regresní sady a build/check-build prošly. Nové testy ověřují devět kombinací vzhledu, migraci nastavení, pevné rozměry, adaptivní osu, odpojení observeru a kompaktní kameru. V prohlížeči ověřeny rozměry 390 × 844 a 390 × 680, kruhová tlačítka 48 × 48 px, vodorovný zoom na nízké mapě, seek a profil simulace, všechna témata a rozložení a zachování volby po obnovení. Snímek: screenshots/cyklo-1.3.0-layout.jpg. Cloudový prohlížeč nemá použitelný WebGL; vizuální kontrola použila schematický fallback. Fyzická GPS a renderer na telefonu tím nejsou ověřeny.

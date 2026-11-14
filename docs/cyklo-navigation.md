@@ -46,3 +46,9 @@
 - Nastavení Mapy.com: **Otestovat klíč** a automatické ověření po **Použít klíč a podklad**. GET jedné pevné světové dlaždice `basic/256/0/0/0` (bez GPS), bez ukládání odpovědi, timeout 15 s. Úspěšný HTTP obrázek potvrzuje přístup k Map tiles, nikoli funkčnost WebGL či všech oblastí ostatních mapových sad.
 - Nastavení oprávnění klíče: HTTP referer `danielcech76.github.io` bez protokolu a cesty; povolená služba Map tiles. Podle oficiální dokumentace se změny omezení mohou projevit do přibližně 15 minut: https://developer.mapy.com/my-account/api-key-security/.
 - Reálný klíč uživatele nebyl čten ani testován. Přesnou příčinu jeho HTTP odmítnutí lze určit až z výsledku testu na jeho zařízení. Samotný původní snímek potvrzuje náhradní podklad, nikoli konkrétní chybu klíče.
+
+## 1.3.0 — rozložení, témata a stabilní zoom
+- Nastavení → Vzhled a rozložení: analogový rychloměr dole / nahoře / vodorovný rychlostní pruh nahoře. Výchozí je horní pruh a Lesní krém. Další témata: Modrá mlha a Noční grafit. Volby jsou nezávislé, okamžité a uložené do nastavení každé edice bez změny historie nebo API klíče.
+- Rychlostní pruh využívá stejnou vyhlazenou rychlost jako ručička; přesný údaj zůstává doplňkový. Není interaktivním posuvníkem.
+- Zoom: pevná kruhová tlačítka 48 × 48 px, kulatý jezdec 24 px na dotykové ploše 48 px. Délka dráhy se přizpůsobuje, tlačítka se nesmršťují. Při výšce mapy pod 320 px se ovládání přesune vodorovně dole. AUTO a zaměření jsou samostatně vpravo nahoře. Kamera i schematický fallback ponechávají místo nad kompaktním ovládáním.
+- Témata mění ovládání, ciferník a výškový profil; mapový podklad zůstává ve vlastní paletě poskytovatele. Obě edice sdílejí implementaci.

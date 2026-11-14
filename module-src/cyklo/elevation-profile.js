@@ -63,6 +63,7 @@
 
   function render(canvas, route, options = {}) {
     const profile = model(route), current = state(profile, options.along);
+    const palette = root.CykloAppearance?.palette() || {ink:'#153f29',muted:'#52664a',grid:'#cad4bf',past:['#87aa64','#205a37'],future:['#d7e3c8','#c3d3b2'],accent:['#ffa128','#eb7b0c'],onAccent:'#172820'};
     const width = canvas.clientWidth || 320, height = options.compact ? 106 : 170;
     const dpr = Math.min(3, root.devicePixelRatio || 1);
     if (canvas.width !== Math.round(width * dpr)) canvas.width = Math.round(width * dpr);
@@ -70,7 +71,7 @@
     const ctx = canvas.getContext('2d');
     if (!ctx) return profile;
     ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, width, height);
-    ctx.font = '11px system-ui'; ctx.fillStyle = '#496247';
+    ctx.font = '11px system-ui'; ctx.fillStyle = palette.muted;
     if (!profile.available) {
       ctx.fillText('Výšková data nejsou dostupná', 12, height / 2);
       canvas.setAttribute?.('aria-label', 'Výškový profil: výšková data nejsou dostupná');
@@ -83,9 +84,9 @@
     const gridCount = options.compact ? 2 : 4;
     for (let i = 0; i <= gridCount; i++) {
       const value = profile.low + (profile.high - profile.low) * i / gridCount, py = y(value);
-      ctx.strokeStyle = '#cad4bf'; ctx.beginPath(); ctx.moveTo(left, py); ctx.lineTo(right, py); ctx.stroke();
+      ctx.strokeStyle = palette.grid; ctx.beginPath(); ctx.moveTo(left, py); ctx.lineTo(right, py); ctx.stroke();
       if (!options.compact || i === 0 || i === gridCount) {
-        ctx.fillStyle = '#476044'; ctx.textAlign = 'right'; ctx.fillText(label(value) + ' m', left - 6, py + 4);
+        ctx.fillStyle = palette.muted; ctx.textAlign = 'right'; ctx.fillText(label(value) + ' m', left - 6, py + 4);
       }
     }
     const slot = chartWidth / profile.bins.length, gap = Math.min(4, slot * .22);
@@ -95,17 +96,17 @@
       const x = left + i * slot + gap / 2, py = y(bin.value), h = Math.max(2, bottom - py);
       const active = i === current.index, future = current.active && i > current.index;
       const gradient = ctx.createLinearGradient?.(0, py, 0, bottom);
-      const colors = active ? ['#ffa128', '#eb7b0c'] : future ? ['#d7e3c8', '#c3d3b2'] : ['#87aa64', '#205a37'];
+      const colors = active ? palette.accent : future ? palette.future : palette.past;
       if (gradient?.addColorStop) { gradient.addColorStop(0, colors[0]); gradient.addColorStop(1, colors[1]); ctx.fillStyle = gradient; }
       else ctx.fillStyle = colors[1];
       rounded(ctx, x, py, Math.max(1, slot - gap), h, Math.min(4, (slot - gap) / 2, h / 2));
       // Quiet min/max whiskers retain short peaks hidden by interval averaging.
       if (bin.max - bin.min > .2) {
-        ctx.strokeStyle = future ? '#b4c4a5' : active ? '#d56800' : '#45734b';
+        ctx.strokeStyle = future ? palette.future[1] : active ? palette.accent[1] : palette.past[1];
         ctx.beginPath(); ctx.moveTo(x + (slot - gap) / 2, y(bin.min)); ctx.lineTo(x + (slot - gap) / 2, y(bin.max)); ctx.stroke();
       }
     }
-    ctx.textAlign = 'left'; ctx.fillStyle = '#345139';
+    ctx.textAlign = 'left'; ctx.fillStyle = palette.ink;
     ctx.fillText('0', left, height - 6);
     ctx.textAlign = 'center'; ctx.fillText(label(profile.length / 2000), left + chartWidth / 2, height - 6);
     ctx.textAlign = 'right'; ctx.fillText(label(profile.length / 1000) + ' km', right, height - 6);
@@ -113,9 +114,9 @@
       const x = left + (current.index + .5) * slot;
       const text = finite(options.altitude) ? label(options.altitude) + ' m' : '— m';
       const pillWidth = Math.max(42, text.length * 6.5 + 14), px = clamp(x - pillWidth / 2, left, right - pillWidth);
-      ctx.fillStyle = '#ee8012'; rounded(ctx, px, 2, pillWidth, 20, 6);
+      ctx.fillStyle = palette.accent[1]; rounded(ctx, px, 2, pillWidth, 20, 6);
       ctx.beginPath(); ctx.moveTo(x - 4, 22); ctx.lineTo(x + 4, 22); ctx.lineTo(x, 27); ctx.fill();
-      ctx.font = 'bold 11px system-ui'; ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(text, px + pillWidth / 2, 16);
+      ctx.font = 'bold 11px system-ui'; ctx.fillStyle = palette.onAccent; ctx.textAlign = 'center'; ctx.fillText(text, px + pillWidth / 2, 16);
     }
     canvas.setAttribute?.('aria-label', 'Sloupcový výškový profil, ' + profile.bins.length + ' úseků, rozsah ' + label(profile.low) + ' až ' + label(profile.high) + ' metrů' + (current.active ? ', aktuální úsek ' + (current.index + 1) + ', výška ' + (finite(options.altitude) ? label(options.altitude) + ' metrů' : 'není dostupná') : ''));
     return profile;
