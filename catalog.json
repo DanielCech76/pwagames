@@ -42,22 +42,23 @@
     },
     {
       "id": "pong",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "apiVersion": 1,
       "minCoreVersion": "2.0.0",
       "maxCoreMajor": 2,
       "dataSchema": 1,
       "name": "Pong",
-      "description": "Proti počítači nebo ve dvou. Ovládací pásy mimo hřiště.",
+      "description": "Pong s dotykem a pěti režimy pohybového ovládání, kalibrací a filtrem pro chůzi.",
       "icon": "▌ • ▐",
       "theme": "violet",
       "permissions": [
-        "Celá obrazovka"
+        "Celá obrazovka",
+        "Pohyb a orientace telefonu (volitelné)"
       ],
       "fullscreen": true,
-      "manifest": "modules/pong/2.0.0/manifest.json",
-      "manifestSha256": "ca8badbda25d2c6a64187c2cc2a1c4097d7bc9e3de62d7eec56f348674402c5c",
-      "size": 19671
+      "manifest": "modules/pong/2.1.0/manifest.json",
+      "manifestSha256": "24bd3a13b842e1adfb42325cdcdb680beb0fbd59a69c6e15d776f1c984e2b5fe",
+      "size": 31708
     }
   ]
 }

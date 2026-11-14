@@ -1,0 +1,46 @@
+{
+  "format": 1,
+  "id": "pong",
+  "version": "2.1.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.0.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Pong",
+  "description": "Pong s dotykem a pěti režimy pohybového ovládání, kalibrací a filtrem pro chůzi.",
+  "icon": "▌ • ▐",
+  "theme": "violet",
+  "permissions": [
+    "Celá obrazovka",
+    "Pohyb a orientace telefonu (volitelné)"
+  ],
+  "fullscreen": true,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "bridge.js",
+      "size": 1994,
+      "sha256": "274714f9194d58b1c8f24f5d0357981e316ba77242bf47ad9063fd8163aae433"
+    },
+    {
+      "path": "game.js",
+      "size": 13821,
+      "sha256": "a98ca6ceaca26cf22b1edcd24670a02ee862825941618497c2a629fc8b49a806"
+    },
+    {
+      "path": "index.html",
+      "size": 4200,
+      "sha256": "a2f3c4c60beaaf39b5f9f3b5ec5328a3ff3ad2d37a068e9ba9ddc6cf699744c6"
+    },
+    {
+      "path": "motion.js",
+      "size": 3672,
+      "sha256": "7653a8305f1f74945e9741434ea6d082fc79128d0cc18ca2116ac68d204a9d7a"
+    },
+    {
+      "path": "style.css",
+      "size": 8021,
+      "sha256": "53756523aac0728713ca22f0679e0594d370c8d8cffaad3ef8ddefe6ca0246d2"
+    }
+  ]
+}

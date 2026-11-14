@@ -32,6 +32,8 @@ jobs:
           node tests/migration.test.cjs
           node tests/pinball-engine.test.cjs
           node tests/phone-lab.test.cjs
+          node tests/pong-motion.test.cjs
+          node tests/pong-ui.test.cjs
       - uses: actions/configure-pages@v5
         with:
           enablement: true

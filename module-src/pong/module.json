@@ -1,16 +1,17 @@
 {
   "id": "pong",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "apiVersion": 1,
   "minCoreVersion": "2.0.0",
   "maxCoreMajor": 2,
   "dataSchema": 1,
   "name": "Pong",
-  "description": "Proti počítači nebo ve dvou. Ovládací pásy mimo hřiště.",
+  "description": "Pong s dotykem a pěti režimy pohybového ovládání, kalibrací a filtrem pro chůzi.",
   "icon": "▌ • ▐",
   "theme": "violet",
   "permissions": [
-    "Celá obrazovka"
+    "Celá obrazovka",
+    "Pohyb a orientace telefonu (volitelné)"
   ],
   "fullscreen": true
 }
