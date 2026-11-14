@@ -1,0 +1,60 @@
+{
+  "format": 1,
+  "id": "pinball",
+  "version": "2.0.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.0.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Pinball",
+  "description": "Neon Arcade, tři míčky, terče a bonusy.",
+  "icon": "✦ ● ✦",
+  "theme": "mint",
+  "permissions": [
+    "Celá obrazovka"
+  ],
+  "fullscreen": true,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "assets/neon-playfield.jpg",
+      "size": 476380,
+      "sha256": "dc570b2dda7423b24d537dfb965bcca4a0bcfa7eb10ef75710a15e6a01d22906"
+    },
+    {
+      "path": "bridge.js",
+      "size": 1994,
+      "sha256": "274714f9194d58b1c8f24f5d0357981e316ba77242bf47ad9063fd8163aae433"
+    },
+    {
+      "path": "game.js",
+      "size": 5511,
+      "sha256": "f938ad0f2fd1a2c3d3880c0be94e5fd9854c719f7508347f12867d48ba2281fc"
+    },
+    {
+      "path": "index.html",
+      "size": 2431,
+      "sha256": "537c8bc570f58de8905ff3566eb4d62649a893922af1149e6cebabaa91e4faf0"
+    },
+    {
+      "path": "pinball-engine.js",
+      "size": 3934,
+      "sha256": "c7e447b370dae28fa601a01222f3f13529da1931f10081532f233ecfede8217f"
+    },
+    {
+      "path": "pinball-renderer.js",
+      "size": 7022,
+      "sha256": "351bad3bba36595dfe30e283a2a00179014deb65346ddbac8fa006a73ed5ba75"
+    },
+    {
+      "path": "pinball-tables.js",
+      "size": 1368,
+      "sha256": "14d099176e97d2508a5265d5cfe749a7f24acdc87a2c1743fd18a1a3eee0308c"
+    },
+    {
+      "path": "style.css",
+      "size": 5860,
+      "sha256": "5dd5144fccab15800a45e0bc426d751cd1bcb621be2dbd658b3aabc73368a5be"
+    }
+  ]
+}

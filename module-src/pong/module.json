@@ -1,0 +1,16 @@
+{
+  "id": "pong",
+  "version": "2.0.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.0.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Pong",
+  "description": "Proti počítači nebo ve dvou. Ovládací pásy mimo hřiště.",
+  "icon": "▌ • ▐",
+  "theme": "violet",
+  "permissions": [
+    "Celá obrazovka"
+  ],
+  "fullscreen": true
+}

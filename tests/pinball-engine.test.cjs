@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict');
-const Engine=require('../pinball-engine');
-const table=require('../pinball-tables')[0];
+const Engine=require('../module-src/pinball/pinball-engine');
+const table=require('../module-src/pinball/pinball-tables')[0];
 for(const power of [0,.5,1]){
  const e=new Engine(table);e.launch(power);let reachedField=false;
  for(let i=0;i<240*12;i++){

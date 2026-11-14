@@ -1,0 +1,16 @@
+{
+  "id": "pinball",
+  "version": "2.0.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.0.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Pinball",
+  "description": "Neon Arcade, tři míčky, terče a bonusy.",
+  "icon": "✦ ● ✦",
+  "theme": "mint",
+  "permissions": [
+    "Celá obrazovka"
+  ],
+  "fullscreen": true
+}

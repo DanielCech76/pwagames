@@ -1,99 +1,82 @@
-# Kapesní arkáda · PWA Games
+# Kapesní arkáda 2.0 · modulární offline PWA
 
-## Pong 1.1.0
+Jedna aplikace, vlastní výběr her a nástrojů. Malé jádro neobsahuje herní kód a žádné moduly nestahuje automaticky. V nabídce jsou samostatné moduly **Pong**, **Pinball / Neon Arcade** a **Laboratoř telefonu**.
 
-Pong v češtině pro jednoho hráče proti počítači nebo pro dva hráče na jednom displeji. První na 7 bodů vyhrává. Součástí kolekce je také Pinball Neon Arcade.
+## Vyzkoušení
 
-- Celookenní hra, automatický požadavek na celou obrazovku při spuštění (podle možností prohlížeče).
-- Samostatné dotykové pásy mimo hřiště; pro dva hráče fungují současně.
-- Automatické rozložení na výšku/šířku, ruční otočení v nastavení.
-- Fialovo-mentolový vzhled, světelné pálky a stopa míčku.
-- Pauza, nová hra a automatické pozastavení při přepnutí do pozadí.
-- PWA instalace a offline provoz po prvním úplném načtení.
+https://danielcech76.github.io/pwagames/?upgrade=2.0
 
-## Ovládání
+Při prvním otevření vyber moduly v průvodci a stiskni **Stáhnout vybrané**. Vše je původně neoznačené. Po dokončení použij **Pokračovat do kolekce**. Instalované moduly fungují offline; můžeš to ověřit režimem letadlo. Tlačítko **Moduly** otevře správu instalací, verzí a dat.
 
-Táhni prstem v ovládacím pásu. Poloha v pásu odpovídá poloze pálky. Na výšku máš pás dole, soupeř nahoře. Na šířku jsou pásy na bocích. Počítač ovládací pás nepotřebuje.
+### Přechod z původní aplikace
 
-Klávesnice: šipky vlevo/vpravo nebo A/D pro tebe; J/L pro druhého hráče. Mezerník pozastaví hru. Režim, novou hru, otočení a celou obrazovku najdeš pod ozubeným kolem.
+Původní service worker může stále zobrazovat starou stránku z cache. Odkaz s `?upgrade=2.0` umožní otevřít nové rozhraní. Pokud se objeví připravená verze jádra, stiskni **Použít novou verzi**. Původní Pinball rekord se zkopíruje do dat modulu, žádná hra se však sama nevybere ani nestáhne. Po úspěšném zachování dat se stará společná offline cache uvolní. Data nevymazávej přes nastavení prohlížeče, pokud je chceš zachovat.
 
-## Lokálně
+## Správce modulů
 
-Bez sestavení a bez závislostí: `python -m http.server 8000`, pak http://localhost:8000. Service worker vyžaduje HTTPS nebo localhost.
+- Individuální nebo hromadné stažení, průběh a možnost zrušení.
+- Ověření manifestu, velikostí a SHA-256 každého souboru před dokončením instalace.
+- Automatická kontrola katalogu po otevření, při návratu do aplikace a po 15 minutách aktivního používání; ruční stažení aktualizací.
+- Aktivace stažené aktualizace při příštím spuštění modulu.
+- Jedna předchozí funkční verze, návrat bez sítě a její samostatné odstranění.
+- Skrytí modulu v kolekci bez odebrání jeho souborů.
+- Odebrání standardně ponechá rekordy/nastavení. Výslovná volba smaže i data a zálohy.
+- Body obnovy dat před aktualizací; obnova i vrácení poslední obnovy.
+- Přehled využitého úložiště a žádost o trvalejší ochranu.
 
-## GitHub Pages
+Nová verze jádra se připraví automaticky, ale použije se až po potvrzení z menu. Zavření všech oken nevybírá novou verzi uživatelského jádra bez potvrzení. Instalace a verze modulů jsou na jádře nezávislé.
 
-Workflow `.github/workflows/pages.yml` publikuje větev `main`. V Settings → Pages nastav Source na **GitHub Actions**, pokud automatické zapnutí není povoleno. Adresa: https://danielcech76.github.io/pwagames/
+## Navigace a ovládání
 
-Android Chrome: otevři web a vyber Instalovat aplikaci / Přidat na plochu. Úplný fullscreen závisí na prohlížeči; při odmítnutí hra využije celé dostupné okno.
+Systémové Zpět / gesto: nejdřív zavře nastavení, potom se vrátí na předchozí obrazovku. Android může prvním Zpět nejprve ukončit fullscreen. Odchod ukončí relaci modulu, animace i měření. Dopředu otevře modul jako novou relaci; senzory se samy nezapnou.
 
-## Aktualizace
+Pong: dotykové pásy, A/D nebo šipky pro hráče; J/L pro druhého hráče; mezerník pauza. Pinball: A/D nebo šipky pro páčky, podržení/pouštění mezerníku pro vystřelení, P pro pauzu. Laboratoř: samostatné nebo společné zapnutí měření, podrobný/kompaktní režim, kalibrace. Data senzorů ani souřadnice se neukládají a neodesílají.
 
-Při změně statických souborů zvyš verzi cache v `sw.js`. Nová verze se po stažení aktivuje automaticky a obnoví stránku. Rozehrané skóre se neukládá.
+## Sestavení a lokální spuštění
 
-## Pinball 1.2.0 · Neon Arcade
+Bez externích knihoven: Python 3 a Node.js 22+.
 
-V menu vyber Pinball. Hra obsahuje tři odrážeče, šest terčů, dvě páčky, vystřelovací dráhu a tři míčky. Podrž VYSTŘELIT a pusť pro nastavení síly. Obě velká tlačítka páček fungují současně a jsou mimo hřiště. Na šířku je stůl zachovaný na výšku a ovládání je vedle něj. Rekord je uložen lokálně pro konkrétní stůl.
+```sh
+python scripts/build-site.py
+python scripts/check-build.py
+node tests/packages.test.mjs
+node tests/worker.test.cjs
+node tests/bridge.test.cjs
+node tests/migration.test.cjs
+node tests/pinball-engine.test.cjs
+node tests/phone-lab.test.cjs
+python -m http.server 8000 --directory _site
+```
 
-Klávesnice: A/D nebo šipky vlevo/vpravo, mezerník vystřelí, P pozastaví. Páčky je možné držet. Přepnutí do pozadí pozastaví hru. Novou hru najdeš v nastavení.
+Otevři http://localhost:8000. Pro telefon použij HTTPS hosting. Service worker a instalace vyžadují HTTPS nebo localhost. Server nesmí měnit distribuované soubory — změny HTML způsobí správné odmítnutí kontrolního součtu.
 
-Body: odrážeč 100, nový terč 250, boční odrážeč 25. Kompletní sada terčů přidá 2 000 bodů a zvýší násobič až na ×5. Body se násobí aktuálním bonusem. Terče se po kompletní sadě obnoví.
+## Zdrojové soubory a vydávání
 
-### Rozšíření o další stoly
+- `core/`: rozhraní, navigace, úložiště a obecný správce balíčků.
+- `module-src/<id>/`: samostatný zdroj modulu s `module.json`.
+- `scripts/module-bridge.js`: společný protokol důvěryhodného modulu v1.
+- `modules/<id>/<version>/`: kompletní neměnná distribuce s manifestem a součty.
+- `catalog.json`: první strana katalogu; žádné cizí zdroje ani ZIP import.
+- `release.json`: verze jádra a API; z ní se generuje `core/version.js`.
+- `scripts/build-packages.py`: balení modulů a katalogu.
+- `scripts/build-core.py`: úplná offline cache samotného jádra a její otisk.
+- `docs/modularization-plan.md`: schválená rozhodnutí a architektura.
 
-- `pinball-tables.js`: registr stolů a deklarativní geometrie, gravitace, páčky, počty míčků, barvy a bodování. Každý stůl má stabilní `id` pro oddělený rekord.
-- `pinball-engine.js`: fyzika nezávislá na DOM, pevný krok 1/240 s, kolize a rychlost pohybujících se páček. Události oddělují pravidla od rozhraní.
-- `pinball.js`: ovládání, herní smyčka, vykreslení Neon Arcade a lokální rekord.
+Při změně modulu zvyš **jeho** verzi v `module-src/<id>/module.json`. Při změně jádra zvyš `coreVersion` v `release.json`. Sestavení odmítne přepsat obsah již vydané stejné verze. Nový modul přidej jako další složku do `module-src`; menu a správce se vytvoří z katalogu, bez změny jádra. Starší distribuční balíčky zachovej, aby zůstaly dostupné existujícím instalacím.
 
-Aktuální vykreslení je pro stůl 600 × 1000. Další stůl stejného typu může použít jinou geometrii a nastavení; pro nový vizuální styl se přidá renderer a pro nový druh mechaniky odpovídající kolizní prvek. Při přidání druhého stolu se doplní výběr z registru před spuštěním. Rampy a multiball nejsou součástí první verze.
+Modul musí implementovat `ArcadeHost.register({start, pause, stop, dialogs})`. Vlastní data ukládá přes `ArcadeHost.storage`. Současné schéma je 1; nepodporovaná změna schématu je zablokovaná. Nový formát musí nejprve získat konkrétní migrační podporu a testy. Rámce oddělují životní cyklus a styly; nejsou bezpečnostním sandboxem pro libovolné cizí autory.
 
-Kontroly fyziky: `node tests/pinball-engine.test.cjs`. Ověřují průchod vystřelovací dráhou při třech silách, stabilitu simulace, odraz a skóre, aktivní páčku, bonus, tři míčky a reset.
+## Publikování
 
-## Verze 1.3.0 · Návrat míčku, grafika a odezva
+GitHub Actions sestaví, zkontroluje a nasadí `_site`. Settings → Pages → Source musí být **GitHub Actions**. Pro hostování přímo z větve jsou v repozitáři také připravené distribuční soubory.
 
-- Míček, který se vrátí do spodní části vystřelovací šachty, se znovu připraví k vystřelení. Počet míčků, skóre a terče zůstávají zachované. Ošetřený je i téměř stojící míček v šachtě.
-- Plný zdvih páčky má rychlost 32 rad/s místo 13 rad/s: přibližně 29 ms místo 70 ms. Pohyb začíná v prvním fyzikálním kroku po zachycení vstupu. Celková dotyková latence závisí na displeji a prohlížeči.
-- Ilustrovaný podklad stolu, kovové lišty, číslované svítící terče a detailnější mechanické prvky.
-- `pinball-renderer.js` odděluje vykreslování od ovládání. Pozadí, lišty a těla odrážečů se připraví do jedné statické vrstvy; páčky, kulička a světla používají připravené obrázky. Náročné stíny a ilustrace se nepřepočítávají každý snímek.
-- `assets/neon-playfield.jpg` je originální generovaný ilustrovaný podklad, součást offline cache. Přesná kolizní geometrie a pohyblivé prvky se vykreslují kódem nad ním.
+## Testovací postup na telefonu
 
-Doplněné regresní testy ověřují znovunabití vráceného i stojícího míčku, zachování skóre a počtu míčků a úplný zdvih obou páček do 33 ms simulovaného času.
+1. Otevři přechodový odkaz, případně potvrď novou verzi jádra. Nic není předvybrané.
+2. Stáhni Pong, spusť ho a vrať se systémovým Zpět. V nastavení vyzkoušej návrat ve dvou krocích.
+3. Zapni režim letadlo, znovu otevři aplikaci a spusť stažený Pong.
+4. Po připojení stáhni Pinball a Laboratoř; ověř obě páčky a kompaktní panel senzorů.
+5. Odeber Pinball s ponecháním dat, znovu ho stáhni a ověř rekord.
+6. Při příští vydané aktualizaci ověř ruční stažení, aktivaci až při spuštění a návrat předchozí verze offline.
 
-## Verze 1.4.0 · Laboratoř telefonu
-
-Nová součást kolekce je samostatné funkční demo, nezávislé na hrách. V menu otevři **Laboratoř telefonu**, potom vyber **Zapnout senzory**. Pro polohu použij zvlášť **Zapnout polohu**. Pokud prohlížeč požádá o oprávnění, povol příslušný přístup.
-
-Zobrazuje:
-
-- Náklon a orientaci α/β/γ ve stupních, absolutní/relativní referenci, vizualizaci náklonu a natočení. Kalibrace nastaví neutrální polohu vizualizace, původní úhly zůstávají dostupné. Nejde o garantovaný kompas.
-- Zrychlení X/Y/Z s gravitací i bez gravitace v m/s². Velikost zrychlení se počítá jen při dostupnosti všech tří os.
-- Rychlost otáčení X/Y/Z (β/γ/α) v °/s z DeviceMotionEvent.rotationRate, interval událostí a jejich průměrnou četnost.
-- Zeměpisnou šířku/délku, přesnost, výšku, přesnost výšky, rychlost v km/h, směr pohybu a čas posledního určení polohy. Poloha může vycházet z různých systémových zdrojů, není zaručeno přímé GPS měření.
-
-Pomlčka značí chybějící údaj; nula je platná hodnota. Detekce rozhraní není důkazem dostupného hardwaru: demo rozlišuje čekání, odmítnutí přístupu, události bez hodnot, zastaralá data a živá data. Některá zařízení neposkytují všechny údaje. Data senzorů nejsou získávána z cloudu ani simulována.
-
-Přístup vyžaduje zabezpečený kontext (HTTPS nebo localhost). Povolení pohybu/orientace se vyžádá z kliknutí tam, kde prohlížeč poskytuje requestPermission. Sledování se zastaví při odchodu z laboratoře nebo přepnutí do pozadí a znovu se zapíná ručně. Údaje se drží jen v paměti otevřené stránky, neodesílají se a neukládají. Po zastavení zůstávají viditelné poslední hodnoty; při odchodu z laboratoře se vymažou.
-
-Testy: `node tests/phone-lab.test.cjs`. Ověřují aktivaci, povolení, nulové/chybějící hodnoty, mapování os, kalibraci, ukončení geolokačního sledování i s ID 0, zastavení na pozadí a odchod během čekání na povolení. Skutečná dostupnost senzorů a přesnost polohy vyžadují ověření na fyzickém zařízení.
-
-## Verze 1.5.0 · Ultra kompaktní laboratoř
-
-V laboratoři použij přepínač **Kompaktní / Podrobně**. Přepínání zachová běžící měření. Kompaktní panel vyplňuje dostupnou výšku okna a zobrazuje vše bez scrollování; na šířku použije čtyři karty vedle sebe. Vizuálně ověřeno pro 360 × 640, 390 × 760 a desktopové rozložení.
-
-- Jediné tlačítko v kompaktním panelu zapíná a vypíná pohybová měření i polohu. Požadavky na oprávnění jsou spuštěné z téhož kliknutí. Neúspěch jednoho zdroje neblokuje ostatní. Opětovné kliknutí zruší i dosud čekající zapnutí.
-- Opravený směr grafického natočení: pokles orientačního úhlu při otočení doprava se převede na kladné otáčení CSS po směru hodinových ručiček. Původní číselné úhly v podrobném režimu zůstávají nezměněné.
-- Zrychlení i rychlost otáčení ukazují čáry se středovou nulou a šipkou. Kladné hodnoty směřují doprava, záporné doleva. Rozsah čar je ±10 m/s² a ±180 °/s; číselný údaj zůstává nezkrácený i mimo rozsah, nasycená čára je zvýrazněna. Pomlčka stále znamená chybějící údaj a nula prázdnou čáru.
-- Kalibrace je dostupná přímo z kompaktního panelu. Kompaktní úhly a vizualizace jsou vůči kalibraci, podrobná čísla ukazují původní hodnoty.
-- Po vypnutí jsou kompaktní ukazatele ztlumené a hodnoty prázdné. Během čekání nebo při nedostupném zdroji ukazují stavové popisky dostupnost dat.
-
-Regresní testy byly rozšířeny o směr otáčení před/po kalibraci, přepínání režimů za běhu, směrové čáry, překročení rozsahu a společné vypnutí včetně probíhajícího požadavku na povolení. Fyzickou odezvu senzorů je třeba ověřit na konkrétním telefonu.
-
-## Verze 1.6.0 · Systémové Zpět
-
-`navigation.js` propojuje navigaci kolekce s historií prohlížeče/PWA. Vstup do Pongu, Pinballu nebo laboratoře přidá jeden krok; otevření nastavení přidá další. Zpět nejprve zavře nastavení, další Zpět vrátí do menu. Stejnou historii používají tlačítka uvnitř aplikace, takže po návratu nezůstávají neviditelné kroky.
-
-Při odchodu se zavolá původní ukončení hry nebo laboratoře: zastaví animace, měření senzorů a sledování polohy. Historie neobsahuje senzorová data ani souřadnice. Po návratu Dopředu se hra otevře jako nová hra, laboratoř bez automatického zapnutí senzorů. Přímé odkazy `#pong`, `#pinball` a `#lab` mají návrat do menu. Přepnutí kompaktního režimu nevytváří nový navigační krok.
-
-Z hlavního menu už Zpět ponecháváme systému/prohlížeči. Některé mobilní prohlížeče mohou při prvním Zpět nejprve ukončit fullscreen; to je samostatné systémové chování.
-
-Kontrola: `node tests/navigation.test.cjs`. V prohlížeči ověřeno menu → laboratoř → Zpět → menu a menu → Pong → nastavení → Zpět → Pong → Zpět → menu.
+Automatické testy pokrývají také poškození, zrušení, nedostatek místa, opravu, migraci, body obnovy a oddělenou aktivaci jádra. Skutečnou latenci senzorů a specifické chování Androidu je třeba ověřit na konkrétním zařízení.

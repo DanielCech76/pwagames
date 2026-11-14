@@ -1,0 +1,17 @@
+{
+  "id": "phone-lab",
+  "version": "2.0.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.0.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Laboratoř telefonu",
+  "description": "Živý náklon, zrychlení, otáčení a poloha.",
+  "icon": "◎ ⌁",
+  "theme": "blue",
+  "permissions": [
+    "Pohyb a orientace (až po zapnutí)",
+    "Poloha (až po zapnutí)"
+  ],
+  "fullscreen": false
+}

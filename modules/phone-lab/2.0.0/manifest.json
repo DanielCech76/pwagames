@@ -1,0 +1,41 @@
+{
+  "format": 1,
+  "id": "phone-lab",
+  "version": "2.0.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.0.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Laboratoř telefonu",
+  "description": "Živý náklon, zrychlení, otáčení a poloha.",
+  "icon": "◎ ⌁",
+  "theme": "blue",
+  "permissions": [
+    "Pohyb a orientace (až po zapnutí)",
+    "Poloha (až po zapnutí)"
+  ],
+  "fullscreen": false,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "bridge.js",
+      "size": 1994,
+      "sha256": "274714f9194d58b1c8f24f5d0357981e316ba77242bf47ad9063fd8163aae433"
+    },
+    {
+      "path": "game.js",
+      "size": 15392,
+      "sha256": "14c05bec2967b1d0b6c5660a038bcb87e4608efbbad0b4ec9ea4bd0a385c831b"
+    },
+    {
+      "path": "index.html",
+      "size": 9705,
+      "sha256": "0c2042579ed22478dcf33e222606caecd6a050c7f1d667b9e80fd10a55526c3c"
+    },
+    {
+      "path": "style.css",
+      "size": 14271,
+      "sha256": "e841ebac1b24b369eaa2585be179dd238e4852e7edb8d208570f80e991b06fe9"
+    }
+  ]
+}
