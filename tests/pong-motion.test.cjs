@@ -14,3 +14,5 @@ const m=setup('velocity');assert(run(m,80,2)<=472);m.reset();assert(!m.zero);ass
 // Screen rotation is accounted for before mapping; the same gravity projection yields the same input.
 const a=setup('position'),b=setup('position');a.orientation(0,20,0,10);b.orientation(20,0,90,10);assert(Math.abs(a.raw.tilt-b.raw.tilt)<1e-8);
 console.log('PASS: all five motion mappings, signs, dead zone, filters, bounds, stale sensor isolation, invalid inputs, wheel geometry, rotation and reset');
+
+const tuned=setup('velocity');assert(tuned.setLimits(10,30,.4));assert.equal(tuned.limits().left,10);assert(!tuned.setLimits(-1,20,1));const limited=run(tuned,60,1);assert(limited<=236+472*.4+1,'custom max speed');tuned.mode='gyro';assert.equal(tuned.limits().left,65,'mode-specific limits');tuned.mode='velocity';assert.equal(tuned.limits().right,30);tuned.reset();assert.equal(tuned.limits().speed,.4,'sensor reset retains tuning');console.log('PASS: per-mode asymmetric limits, speed cap, validation and tuning retention');

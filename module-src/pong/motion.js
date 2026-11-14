@@ -5,7 +5,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const profiles={direct:{tau:.045,dead:2,accel:4200},balanced:{tau:.11,dead:3,accel:2600},walking:{tau:.19,dead:5,accel:1700}};
 const wrap=x=>((x+180)%360+360)%360-180;
 class PongMotion {
- constructor(){this.reset();this.mode='touch';this.profile='balanced';this.sensitivity=1;}
+ constructor(){this.reset();this.mode='touch';this.profile='balanced';this.sensitivity=1;this.tuning={};}
  reset(){this.filtered=0;this.speed=0;this.active=false;this.input=0;this.zero=null;this.lastOrientation=0;this.lastRate=0;this.lastAcceleration=0;this.raw=null;this.rate=null;this.acceleration=null;}
  orientation(beta,gamma,angle=0,time=performance.now()){
   if(!Number.isFinite(beta)||!Number.isFinite(gamma))return;
@@ -30,22 +30,33 @@ class PongMotion {
   if(!this.ready(now))return false;
   this.zero={tilt:this.raw?.tilt||0,wheel:this.raw?.wheel||0,rate:this.rate||0,acc:this.acceleration||0};this.filtered=0;this.speed=0;this.input=0;this.active=false;return true;
  }
+ reading(){
+  if(!this.zero)return 0;
+  return this.mode==='gyro'?this.rate-this.zero.rate:this.mode==='impulse'?this.acceleration-this.zero.acc:wrap(this.raw[this.mode==='wheel'?'wheel':'tilt']-this.zero[this.mode==='wheel'?'wheel':'tilt']);
+ }
+ limits(){const def=this.mode==='gyro'?65:this.mode==='impulse'?2:22;return this.tuning[this.mode]||{left:def,right:def,speed:1.25};}
+ setLimits(left,right,speed){
+  const min=this.mode==='impulse'?.2:this.mode==='gyro'?12:6,max=this.mode==='impulse'?30:this.mode==='gyro'?360:85;
+  if(![left,right,speed].every(Number.isFinite)||left<min||right<min||left>max||right>max||speed<.2||speed>3)return false;
+  this.tuning[this.mode]={left,right,speed};this.speed=0;return true;
+ }
  step(dt,position,range,now=performance.now()){
   if(this.mode==='touch'||!this.zero||!this.ready(now))return position;
   const p=profiles[this.profile]||profiles.balanced;
-  let value=this.mode==='gyro'?this.rate-this.zero.rate:this.mode==='impulse'?this.acceleration-this.zero.acc:wrap(this.raw[this.mode==='wheel'?'wheel':'tilt']-this.zero[this.mode==='wheel'?'wheel':'tilt']);
+  let value=this.reading();
   this.filtered+=(value-this.filtered)*(1-Math.exp(-dt/p.tau));value=this.filtered*this.sensitivity;
   const dead=this.mode==='gyro'?p.dead*1.5:this.mode==='impulse'?p.dead*.13:p.dead;
   if(Math.abs(value)>dead)this.active=true;else if(Math.abs(value)<dead*.7)this.active=false;
   this.input=this.active?Math.sign(value)*Math.max(0,Math.abs(value)-dead*.7):0;
-  const max=range/.8;
+  const limits=this.limits(),max=range*limits.speed;
+  const normalized=clamp(this.input/(Math.max(.01,(this.input<0?limits.left:limits.right)-dead*.7)),-1,1);
   let target=0;
   if(this.mode==='position'||this.mode==='wheel'){
-   const desired=range/2+clamp(this.input/22,-1,1)*range/2;
+   const desired=range/2+clamp(normalized,-1,1)*range/2;
    target=clamp((desired-position)*9,-max,max);
-  }else if(this.mode==='gyro')target=clamp(this.input/65,-1,1)*max;
-  else if(this.mode==='impulse')target=clamp(this.speed*Math.exp(-dt*3.5)+this.input*dt*max*2,-max,max);
-  else target=Math.sign(this.input)*Math.pow(clamp(Math.abs(this.input)/18,0,1),1.5)*max;
+  }else if(this.mode==='gyro')target=clamp(normalized,-1,1)*max;
+  else if(this.mode==='impulse')target=clamp(this.speed*Math.exp(-dt*3.5)+normalized*dt*max*4,-max,max);
+  else target=Math.sign(this.input)*Math.pow(clamp(Math.abs(normalized),0,1),1.5)*max;
   this.speed+=clamp(target-this.speed,-p.accel*dt,p.accel*dt);
   const next=clamp(position+this.speed*dt,0,range);if(next===0||next===range)this.speed=0;return next;
  }
