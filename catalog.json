@@ -3,7 +3,7 @@
   "modules": [
     {
       "id": "cyklo",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "apiVersion": 1,
       "minCoreVersion": "2.1.0",
       "maxCoreMajor": 2,
@@ -18,9 +18,9 @@
       ],
       "fullscreen": false,
       "largeData": true,
-      "manifest": "modules/cyklo/1.0.0/manifest.json",
-      "manifestSha256": "1bc2afad2217ff44c50e842d1850af151206ef6e8499c338e587772ba4fc6a1a",
-      "size": 1144192
+      "manifest": "modules/cyklo/1.0.1/manifest.json",
+      "manifestSha256": "8d0fb6a59a52f3a4b1bb4c4b10381f897c66aeddce7e9d49ae30230497b9fa6e",
+      "size": 1144195
     },
     {
       "id": "phone-lab",
