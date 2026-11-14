@@ -1,4 +1,4 @@
-# Kapesní arkáda 2.0 · modulární offline PWA
+# Kapesní arkáda 2.0.1 · modulární offline PWA
 
 Jedna aplikace, vlastní výběr her a nástrojů. Malé jádro neobsahuje herní kód a žádné moduly nestahuje automaticky. V nabídce jsou samostatné moduly **Pong**, **Pinball / Neon Arcade** a **Laboratoř telefonu**.
 
@@ -80,3 +80,7 @@ GitHub Actions sestaví, zkontroluje a nasadí `_site`. Settings → Pages → S
 6. Při příští vydané aktualizaci ověř ruční stažení, aktivaci až při spuštění a návrat předchozí verze offline.
 
 Automatické testy pokrývají také poškození, zrušení, nedostatek místa, opravu, migraci, body obnovy a oddělenou aktivaci jádra. Skutečnou latenci senzorů a specifické chování Androidu je třeba ověřit na konkrétním zařízení.
+
+### Ověření publikované verze
+
+Na GitHub Pages bylo ověřeno první spuštění bez předvýběru, hromadná instalace všech tří modulů s úplnou integritou, samostatné spuštění každého z nich, kompaktní režim Laboratoře, nastavení Pongu a dvoukrokové Zpět, skrytí/obnovení položky a odebrání/opětovná instalace Pinballu. Návraty verzí, přerušení, nedostatek místa a offline odpovědi workeru pokrývají automatické testy.
