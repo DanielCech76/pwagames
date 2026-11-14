@@ -2,6 +2,27 @@
   "format": 1,
   "modules": [
     {
+      "id": "azulejo",
+      "version": "1.0.0",
+      "apiVersion": 1,
+      "minCoreVersion": "2.1.0",
+      "maxCoreMajor": 2,
+      "dataSchema": 1,
+      "name": "Azulejo QR Studio",
+      "description": "Ornamentální QR kódy, šest keramických vzorů, vlastní obrázek s ořezem a PNG/SVG export.",
+      "icon": "▦",
+      "theme": "blue",
+      "permissions": [
+        "Import obrázku (na pokyn)",
+        "Místní úložiště a export souborů"
+      ],
+      "fullscreen": false,
+      "largeData": true,
+      "manifest": "modules/azulejo/1.0.0/manifest.json",
+      "manifestSha256": "300b7d902d7e3c32a476c5118a31c7e29aa3a83b20d945a5971ab3fd8366212e",
+      "size": 2519209
+    },
+    {
       "id": "cyklo",
       "version": "1.2.0",
       "apiVersion": 1,

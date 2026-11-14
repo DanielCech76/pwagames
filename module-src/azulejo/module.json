@@ -1,0 +1,18 @@
+{
+  "id": "azulejo",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.1.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Azulejo QR Studio",
+  "description": "Ornamentální QR kódy, šest keramických vzorů, vlastní obrázek s ořezem a PNG/SVG export.",
+  "icon": "▦",
+  "theme": "blue",
+  "permissions": [
+    "Import obrázku (na pokyn)",
+    "Místní úložiště a export souborů"
+  ],
+  "fullscreen": false,
+  "largeData": true
+}

@@ -1,0 +1,112 @@
+{
+  "format": 1,
+  "id": "azulejo",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.1.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Azulejo QR Studio",
+  "description": "Ornamentální QR kódy, šest keramických vzorů, vlastní obrázek s ořezem a PNG/SVG export.",
+  "icon": "▦",
+  "theme": "blue",
+  "permissions": [
+    "Import obrázku (na pokyn)",
+    "Místní úložiště a export souborů"
+  ],
+  "fullscreen": false,
+  "largeData": true,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "artwork/coimbra.jpg",
+      "size": 341722,
+      "sha256": "daba03e5327b62daad164b40a9ae0d6b987bb957b46845488a7c7f94d8f247b1"
+    },
+    {
+      "path": "artwork/delft.jpg",
+      "size": 345623,
+      "sha256": "8c0614db42a806efc78a3be3e43a8440e66d4b7cfb88a86737eb0d3405c8756d"
+    },
+    {
+      "path": "artwork/lisbon.jpg",
+      "size": 358088,
+      "sha256": "e173102097fd612810c6c9761fd58e7a507b5fbae7160def21402ce0f5771979"
+    },
+    {
+      "path": "artwork/madeira.jpg",
+      "size": 341209,
+      "sha256": "ca103c2e86725c2b5f2cfae65751250adb7d35bda8859dc5c910b0468423d11b"
+    },
+    {
+      "path": "artwork/porto.jpg",
+      "size": 365387,
+      "sha256": "f84eb3abe829d745db34181e105accd4064c8230cc56a1ab67371f02ac441ab7"
+    },
+    {
+      "path": "artwork/seville.jpg",
+      "size": 409507,
+      "sha256": "77eacbea962b9871ff016eee8528259952874adce17f21c8f690b07341ab9f63"
+    },
+    {
+      "path": "assets.js",
+      "size": 250,
+      "sha256": "e6a443d6e57c8b8cc138d413289199bf180be91f922751c4fe6ce605998437ad"
+    },
+    {
+      "path": "bridge.js",
+      "size": 2360,
+      "sha256": "891609a1bf50d92233282ffa3911c30650a01c3c38f6abf9ffa800c2f954260d"
+    },
+    {
+      "path": "dot-engine.js",
+      "size": 2178,
+      "sha256": "8f5bad87635a4b9ddf0aa0e15ce7517edf28bb7a867d0c415d210999fe78b029"
+    },
+    {
+      "path": "index.html",
+      "size": 5337,
+      "sha256": "9a06c89bab38292ff5b2df4099aa93d0966b6ae987772070320c599455f5c01d"
+    },
+    {
+      "path": "lifecycle.js",
+      "size": 982,
+      "sha256": "ce1d6d40bb434d02d943e63d9d83c85ce3b1a49f5a4c3e4fc526cbd867ade6f3"
+    },
+    {
+      "path": "module-data.js",
+      "size": 2541,
+      "sha256": "c262c018874e1fdba92690f7701b35b0c664e4c8623e0e6db189d73e42759be0"
+    },
+    {
+      "path": "studio.js",
+      "size": 13574,
+      "sha256": "be0942176e5e41d474dd7c44c7a0b9f6c3b6d99ae2c2a6d712f9a804384e1c5d"
+    },
+    {
+      "path": "style.css",
+      "size": 4433,
+      "sha256": "448b1de08586a39068c468eb64f70b8735fe2cc12097d9eff00c37c9b3c947ad"
+    },
+    {
+      "path": "vendor/jsQR-LICENSE.txt",
+      "size": 11358,
+      "sha256": "c6596eb7be8581c18be736c846fb9173b69eccf6ef94c5135893ec56bd92ba08"
+    },
+    {
+      "path": "vendor/jsQR.js",
+      "size": 256885,
+      "sha256": "bc40c8a15196236b2314db0856f72ca0b49980cd5413b8c852a7349f5fee0859"
+    },
+    {
+      "path": "vendor/qrcode-LICENSE.txt",
+      "size": 1081,
+      "sha256": "e23030bf8d16c1f84cd0d49bc08c1a6aa6364bd9e511799b919cc880c2104407"
+    },
+    {
+      "path": "vendor/qrcode.js",
+      "size": 56694,
+      "sha256": "18ae399f81182bc9de916e9c77b195df20cc58d6f2d55a62b085a299f1bf1780"
+    }
+  ]
+}

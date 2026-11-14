@@ -1,6 +1,6 @@
 # Kapesní kolekce 2.1.0 · hry a nástroje v modulární PWA
 
-Jedna aplikace, vlastní výběr her a nástrojů. Malé jádro neobsahuje herní kód a žádné moduly nestahuje automaticky. V nabídce jsou samostatné moduly **Pong**, **Pinball / Neon Arcade**, **Laboratoř telefonu** a **CYKLO**.
+Jedna aplikace, vlastní výběr her a nástrojů. Malé jádro neobsahuje herní kód a žádné moduly nestahuje automaticky. V nabídce jsou samostatné moduly **Pong**, **Pinball / Neon Arcade**, **Laboratoř telefonu**, **CYKLO** a **Azulejo QR Studio**.
 
 ## Vyzkoušení
 
@@ -94,3 +94,17 @@ Mapa: směr jízdy / sever, 2D / perspektivní 3D, sklon 0–60°, nastavitelný
 Historie: lokální detail, GPS profil v čase, přejmenování, celá trasa, GPX a JSON export. Výšky jsou nekorigované WGS84 a orientační. Pozice při pauze a výpadku nejsou propojené falešným úsekem. Data jsou v generickém IndexedDB úložišti modulů; odebrání ponechá historii, volba včetně dat smaže i její body a zálohy. Záloha JSON je export, import není součástí první verze.
 
 Implementované a ověřené scénáře: viz `docs/cyklo-verification.md`. Specifikace a plán zůstávají v `docs/cyklo-specification.md` a `docs/cyklo-implementation-plan.md`; skutečná fyzická přesnost GPS a ovládání při jízdě se musí ověřit na cílovém telefonu.
+
+## Azulejo QR Studio 1.0.0
+
+Ve správci modulů obnov katalog a stáhni **Azulejo QR Studio** (jádro 2.1.0+).
+Modul obsahuje šest keramických ornamentů a všechny knihovny/obrázky, takže po instalaci funguje offline.
+QR měřítko, krytí, kontrast ornamentu, síla QR a barva se nastavují samostatně.
+Vlastní obrázek lze vložit z PNG/JPG/WebP/GIF/AVIF, přiblížit a oříznout; zůstává místní a nevkládá se do sdíleného katalogu.
+Nastavení jsou ve jmenném prostoru modulu, oříznutý obrázek v jeho velkém úložišti IndexedDB.
+Zálohy, ponechání dat při odebrání a úplné smazání spravuje jádro.
+Tlačítko **← Kolekce** i systémové Zpět používají navigaci hostitele; Zpět nejdřív zavře ořez nebo zvětšený náhled.
+PNG a SVG export zůstává zachován; samostatné HTML se z modulu neexportuje, offline instalaci zajišťuje správce modulů.
+Kontrola čitelnosti rozlišuje celý obraz a izolovanou oblast QR. Nízké krytí a výrazný ornament mohou skenování znemožnit; před tiskem ověř konkrétní výstup telefonem.
+
+Podrobnosti integrace a ověření: `docs/azulejo-module.md`.
