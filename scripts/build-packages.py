@@ -8,7 +8,9 @@ for source in sorted((ROOT/'module-src').iterdir()):
  meta=json.loads((source/'module.json').read_text());id=meta['id'];version=meta['version'];out=ROOT/'modules'/id/version
  with tempfile.TemporaryDirectory() as temp:
   stage=Path(temp)/'package';shutil.copytree(source,stage);(stage/'module.json').unlink()
-  (stage/'bridge.js').write_bytes((ROOT/'scripts/module-bridge.js').read_bytes())
+  bridge='module-bridge-v2.js' if meta.get('largeData') else 'module-bridge.js'
+  (stage/'bridge.js').write_bytes((ROOT/'scripts'/bridge).read_bytes())
+  if meta.get('largeData'):(stage/'module-data.js').write_bytes((ROOT/'core/module-data.js').read_bytes())
   (stage/'index.html').write_text((stage/'index.html').read_text().replace('<script src="./bridge.js">','<script data-module-id="'+id+'" src="./bridge.js">'))
   files=[]
   for f in sorted(stage.rglob('*')):

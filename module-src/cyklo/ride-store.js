@@ -1,0 +1,13 @@
+(function(root){'use strict';
+class RideStore{
+ constructor(storage){this.storage=storage;this.queue=Promise.resolve();this.index=[];}
+ async init(){this.index=await this.storage.get('rides')||[];return this.index}
+ save(engine,points=[]){const state=engine.export(),chunk=points.map(p=>({...p}));this.queue=this.queue.catch(()=>{}).then(async()=>{const index=await this.storage.get('rides')||[],summary={id:state.id,name:state.name,startAt:state.startAt,endAt:state.endAt,state:state.state,distanceM:state.distanceM,movingMs:state.movingMs};const n=index.findIndex(r=>r.id===state.id);if(n<0)index.unshift(summary);else index[n]=summary;
+ const items=[{key:'ride:'+state.id,value:state},{key:'rides',value:index}];for(const p of chunk)items.push({key:'point:'+state.id+':'+String(p.seq).padStart(9,'0'),value:p});await this.storage.batch(items);this.index=index;});return this.queue;}
+ async load(id){const state=await this.storage.get('ride:'+id);const rows=await this.storage.entries();return {state,points:rows.filter(r=>r.key.startsWith('point:'+id+':')).map(r=>r.value).sort((a,b)=>a.seq-b.seq)}}
+ async remove(id){await this.queue;const rows=await this.storage.entries(),index=(await this.storage.get('rides')||[]).filter(r=>r.id!==id);await this.storage.batch([...rows.filter(r=>r.key==='ride:'+id||r.key.startsWith('point:'+id+':')).map(r=>({key:r.key,delete:true})),{key:'rides',value:index}]);this.index=index;}
+}
+function xml(v){return String(v).replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&apos;'}[c]))}
+function gpx(state,points){let out='<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="CYKLO" xmlns="http://www.topografix.com/GPX/1/1"><metadata><desc>Výška je nekorigovaná orientační GPS výška WGS84. Mezery a pauzy jsou oddělené segmenty.</desc></metadata><trk><name>'+xml(state.name)+'</name>';let segment=null;for(const p of points){if(p.segment!==segment){if(segment!==null)out+='</trkseg>';out+='<trkseg>';segment=p.segment;}out+=`<trkpt lat="${p.lat}" lon="${p.lon}">${Number.isFinite(p.alt)?'<ele>'+p.alt+'</ele>':''}<time>${new Date(p.t).toISOString()}</time></trkpt>`;}if(segment!==null)out+='</trkseg>';return out+'</trk></gpx>';}
+root.CykloStore={RideStore,gpx};if(typeof module!=='undefined')module.exports=root.CykloStore;
+})(globalThis);

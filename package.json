@@ -1,0 +1,1 @@
+{"name":"modular-pwa-checks","private":true,"version":"2.1.0","description":"Development-only regression dependencies; module runtime libraries are vendored.","devDependencies":{"fake-indexeddb":"6.2.5"}}
