@@ -54,3 +54,9 @@ Všechny regresní sady prošly. Přidán test vážení podle vzdálenosti, chy
 
 ## 1.3.0 — kontrola vzhledu a ovládání
 Všechny regresní sady a build/check-build prošly. Nové testy ověřují devět kombinací vzhledu, migraci nastavení, pevné rozměry, adaptivní osu, odpojení observeru a kompaktní kameru. V prohlížeči ověřeny rozměry 390 × 844 a 390 × 680, kruhová tlačítka 48 × 48 px, vodorovný zoom na nízké mapě, seek a profil simulace, všechna témata a rozložení a zachování volby po obnovení. Snímek: screenshots/cyklo-1.3.0-layout.jpg. Cloudový prohlížeč nemá použitelný WebGL; vizuální kontrola použila schematický fallback. Fyzická GPS a renderer na telefonu tím nejsou ověřeny.
+
+## 1.3.1 — simulace a svislý zoom
+- Volba jiné spodní obrazovky přeruší simulaci, zruší časovač i simulační polohu a otevře vybraný režim. Interní přechod plánovače do mapy při spuštění simulace ji nepřeruší. Spuštění skutečné jízdy nejprve ukončí simulaci. Přepnutí obrazovky samo nezapíná GPS ani záznam.
+- Zoom je vždy svisle vpravo, včetně simulace. Automatický vodorovný režim z 1.3.0 je odstraněn. Minimální výška mapy 320 px zajišťuje místo pro ovladač; při nedostatku místa je obsah posuvný.
+- Nastavení → Vzhled a rozložení → Průměr ovladače zoomu: 40 / 48 / 56 px (výchozí 48). Tlačítka +/− a jezdec jsou kruhové, mění se jejich průměr i šířka lišty. Celková výška lišty závisí na mapě, nikoli na zvoleném průměru; při změně velikosti zůstává stejná. Volba je uložená lokálně pro každou edici.
+- Všech 20 testovacích souborů, build a kontrola balíčků prošly. Integrační UI test spouští skutečný plánovač a ověřuje přechod ze simulace do Jízdy, Tras i Historie bez vytvoření záznamu. Prohlížeč: přechod na Trasy a opětovné spuštění simulace, svislý ovladač 8 px od pravého okraje; změna průměru 48 → 56 px ponechala výšku 216 px, tlačítko i jezdec mají 56 px. Snímek screenshots/cyklo-1.3.1-zoom.jpg. WebGL v cloudovém prohlížeči není dostupné, ověřeno na schematickém podkladu.

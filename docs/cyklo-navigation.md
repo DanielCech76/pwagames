@@ -52,3 +52,9 @@
 - Rychlostní pruh využívá stejnou vyhlazenou rychlost jako ručička; přesný údaj zůstává doplňkový. Není interaktivním posuvníkem.
 - Zoom: pevná kruhová tlačítka 48 × 48 px, kulatý jezdec 24 px na dotykové ploše 48 px. Délka dráhy se přizpůsobuje, tlačítka se nesmršťují. Při výšce mapy pod 320 px se ovládání přesune vodorovně dole. AUTO a zaměření jsou samostatně vpravo nahoře. Kamera i schematický fallback ponechávají místo nad kompaktním ovládáním.
 - Témata mění ovládání, ciferník a výškový profil; mapový podklad zůstává ve vlastní paletě poskytovatele. Obě edice sdílejí implementaci.
+
+## 1.3.1 — simulace a svislý zoom
+- Volba jiné spodní obrazovky přeruší simulaci, zruší časovač i simulační polohu a otevře vybraný režim. Interní přechod plánovače do mapy při spuštění simulace ji nepřeruší. Spuštění skutečné jízdy nejprve ukončí simulaci. Přepnutí obrazovky samo nezapíná GPS ani záznam.
+- Zoom je vždy svisle vpravo, včetně simulace. Automatický vodorovný režim z 1.3.0 je odstraněn. Minimální výška mapy 320 px zajišťuje místo pro ovladač; při nedostatku místa je obsah posuvný.
+- Nastavení → Vzhled a rozložení → Průměr ovladače zoomu: 40 / 48 / 56 px (výchozí 48). Tlačítka +/− a jezdec jsou kruhové, mění se jejich průměr i šířka lišty. Celková výška lišty závisí na mapě, nikoli na zvoleném průměru; při změně velikosti zůstává stejná. Volba je uložená lokálně pro každou edici.
+- Všech 20 testovacích souborů, build a kontrola balíčků prošly. Integrační UI test spouští skutečný plánovač a ověřuje přechod ze simulace do Jízdy, Tras i Historie bez vytvoření záznamu. Prohlížeč: přechod na Trasy a opětovné spuštění simulace, svislý ovladač 8 px od pravého okraje; změna průměru 48 → 56 px ponechala výšku 216 px, tlačítko i jezdec mají 56 px. Snímek screenshots/cyklo-1.3.1-zoom.jpg. WebGL v cloudovém prohlížeči není dostupné, ověřeno na schematickém podkladu.

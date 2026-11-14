@@ -1,0 +1,70 @@
+/* Theme concerns UI chrome only. Provider maps keep their original cartography. */
+:root{--ink:#153f29;--muted:#52664a;--surface:#faf5e8;--card:#fffbee;--card-alt:#eef1df;--edge:#bdcbb0;--header:#153f29;--header-text:#fffbee;--primary:#153f29;--on-primary:#fffbee;--accent:#ee8012;--on-accent:#172820;--selected:#d1e0bd;--grid:#cad4bf;--shadow:0 2px 5px #153f290c,0 6px 16px #153f2907;color-scheme:light}
+:root[data-theme=mist]{--ink:#17354e;--muted:#4b6477;--surface:#eaf0f7;--card:#f6f9ff;--card-alt:#dbe7f3;--edge:#b5c9db;--header:#153653;--header-text:#f6f9ff;--primary:#245475;--on-primary:#fff;--accent:#f29318;--on-accent:#142f48;--selected:#ccdeec;--grid:#bdcddc}
+:root[data-theme=night]{--ink:#ebf2f5;--muted:#b0c3cc;--surface:#172129;--card:#25313d;--card-alt:#293b46;--edge:#4a5c69;--header:#101b24;--header-text:#ebf2f5;--primary:#76c9b0;--on-primary:#102820;--accent:#ffa726;--on-accent:#172129;--selected:#314f52;--grid:#465b64;--shadow:0 2px 9px #0003;color-scheme:dark}
+:root{--green:var(--ink);--cream:var(--surface);--orange:var(--accent);--card-edge:var(--edge)}
+body,#app,dialog,#instruments,#simulationPanel{color:var(--ink);background:var(--surface)}
+header{background:var(--header);color:var(--header-text)}
+button,select,input[type=text],input[type=password],input[type=search],#actionInput,#searchQuery{background:var(--card);color:var(--ink);border-color:var(--edge)}
+header button{background:#ffffff12;color:var(--header-text)}
+button.primary{background:var(--primary);color:var(--on-primary)}
+button.orange{background:var(--accent);color:var(--on-accent)}
+nav button{background:transparent;color:var(--ink)}nav button.active{background:var(--selected)}
+.hint,#simMetrics small,.elevation-heading small{color:var(--muted)}
+#status,#navigationBar,#recovery,#locationPanel{background:var(--card-alt);color:var(--ink);border-color:var(--edge)}
+#navigationBar{border-bottom-color:var(--accent)}
+.ride-card,.elevation-card{background:linear-gradient(145deg,var(--card),var(--surface));border-color:var(--edge);box-shadow:var(--shadow)}
+.waypoint,#instruments,nav{border-color:var(--edge)}
+.appearance-settings{border:1px solid var(--edge);border-radius:16px;padding:0 12px 8px;margin:14px 0;background:var(--card);box-shadow:var(--shadow)}
+.appearance-settings h3{font-size:17px;margin-bottom:8px}.appearance-summary{font-size:12px;font-weight:700;padding:8px;border-radius:9px;background:var(--selected)}
+#app[data-layout] #rideView{display:flex;flex-direction:column;overflow:auto;min-height:0}
+#app[data-layout] #mapArea{order:2;min-height:320px;flex:1 0 320px;width:100%;isolation:isolate}
+#app[data-layout] #locationPanel,#app[data-layout] #simulationPanel{order:3;flex-shrink:0;position:static;width:auto;max-height:none;overflow:visible}
+#app[data-layout] #instruments{order:4;flex:0 0 auto;display:flex;flex-direction:row;width:100%;padding:5px 12px}
+#app[data-layout] .ride-actions{order:5;position:static;flex:0 0 auto}
+#app[data-layout] #gaugeWrap{width:44%;flex:0 0 44%}
+#app[data-layout] #gauge{max-height:125px}
+#app[data-layout=top] #instruments{order:1;border:1px solid var(--edge);border-radius:14px;margin:5px 8px;width:calc(100% - 16px);box-shadow:var(--shadow);background:var(--card)}
+#app[data-layout=top] #gauge{max-height:105px}
+#app[data-layout=bar] #gaugeWrap{display:none}
+#app[data-layout=bar] #linearSpeed{display:flex;order:1;flex:0 0 auto;align-items:center;gap:14px;padding:7px 12px;background:var(--card);border-bottom:1px solid var(--edge);box-shadow:var(--shadow)}
+.linear-visual{min-width:0;flex:1}#linearSpeedQuality{font-size:10px;color:var(--muted);display:block;margin-bottom:5px}
+#speedMeter{height:12px;border-radius:8px;background:var(--grid);overflow:hidden}
+#speedFill{height:100%;width:100%;transform:scaleX(0);transform-origin:left;background:var(--accent);border-radius:8px}
+.speed-scale{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums}
+#linearSpeedValue{font-size:22px;min-width:91px;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+#app[data-layout] #gauge text{fill:var(--ink)}#app[data-layout] #gauge line{stroke:var(--ink)}
+#app[data-layout] #gauge>path:first-child{stroke:var(--grid)}#app[data-layout] #gaugeArc{stroke:var(--accent)}#app[data-layout] #needle path{fill:var(--accent)}#app[data-layout] #gauge>circle{fill:var(--ink)}
+#app[data-layout].simulating #metrics{display:none}
+#app[data-layout].simulating #instruments{display:flex;min-height:82px}
+#app[data-layout=bar].simulating #instruments{display:none}
+#app[data-layout=bar].map-expanded:not(.simulating):not(.navigating) #instruments{display:none}
+#app[data-layout].map-expanded #metrics>div:nth-child(n+3){display:none}
+/* Fixed geometry: only the track changes length. No circular child can shrink. */
+#app[data-layout] #zoomControl{position:absolute;top:58px;right:8px;bottom:auto;left:auto;display:flex;flex-direction:column;align-items:center;gap:4px;width:var(--rail-width,58px);height:var(--rail-height,240px);max-height:none;padding:4px;border:1px solid var(--edge);border-radius:30px;background:var(--card);box-shadow:var(--shadow);z-index:3;overflow:visible}
+#app[data-layout] #recenter{box-sizing:border-box;flex:0 0 48px;min-width:48px;max-width:48px;width:48px;min-height:48px;max-height:48px;height:48px;aspect-ratio:1;border-radius:50%;padding:0;font-size:25px;display:grid;place-items:center}
+#app[data-layout] #zoomControl button{box-sizing:border-box;flex:0 0 var(--zoom-diameter,48px);width:var(--zoom-diameter,48px);min-width:var(--zoom-diameter,48px);max-width:var(--zoom-diameter,48px);height:var(--zoom-diameter,48px);min-height:var(--zoom-diameter,48px);max-height:var(--zoom-diameter,48px);aspect-ratio:1;border-radius:50%;padding:0;display:grid;place-items:center;font-size:25px}
+#app[data-layout] #zoomControl .slider-wrap{flex:1 1 auto;min-height:0;min-width:0;width:calc(var(--rail-width,58px) - 10px);align-items:stretch;position:static}
+#app[data-layout] #zoomSlider{appearance:none;-webkit-appearance:none;writing-mode:vertical-lr;direction:ltr;width:calc(var(--rail-width,58px) - 10px);height:100%;min-height:0;min-width:0;margin:0;touch-action:none;background:transparent;cursor:ns-resize}
+#app[data-layout] #zoomSlider::-webkit-slider-runnable-track{width:6px;background:var(--primary);border-radius:6px}
+#app[data-layout] #zoomSlider::-webkit-slider-thumb{appearance:none;-webkit-appearance:none;box-sizing:border-box;width:var(--thumb-diameter,48px);height:var(--thumb-diameter,48px);border:2px solid var(--card);border-radius:50%;background:var(--accent);margin-left:calc((6px - var(--thumb-diameter,48px))/2);box-shadow:0 1px 5px #0004}
+#app[data-layout] #zoomSlider::-moz-range-track{width:6px;background:var(--primary)}
+#app[data-layout] #zoomSlider::-moz-range-thumb{box-sizing:border-box;width:var(--thumb-diameter,48px);height:var(--thumb-diameter,48px);border:2px solid var(--card);border-radius:50%;background:var(--accent)}
+#app[data-layout] #zoomBubble{position:absolute;right:calc(var(--rail-width,58px) + 4px);top:calc(50% - 14px);font-size:11px;background:var(--card);color:var(--ink);border-color:var(--edge)}
+#app[data-layout] #mapTools{position:absolute;right:8px;top:8px;display:flex;gap:6px;align-items:center;z-index:4}
+#app[data-layout] #mapTools #autoZoom{min-width:54px;height:48px;min-height:48px;padding:0 6px;font-size:11px;background:var(--card);color:var(--ink)}
+#app[data-layout] #mapTools #autoZoom.active{background:var(--primary);color:var(--on-primary)}
+#app[data-layout] .map-top{right:125px;gap:4px;z-index:3}
+#app[data-layout] .map-top>*{background:var(--card);border-color:var(--edge)}
+#app[data-layout] .map-top button{color:var(--ink);min-height:40px;white-space:nowrap;font-size:11px;padding:4px 6px}
+#app[data-layout] .segmented button.active{background:var(--primary);color:var(--on-primary)}
+#app[data-layout] #lookaheadLabel{display:none}
+#app[data-layout] #mapMessage{top:58px;bottom:auto;left:8px;right:76px;max-width:calc(100% - 88px);white-space:nowrap;text-overflow:ellipsis;overflow:hidden;max-height:18px;border-radius:4px;background:var(--card);color:var(--muted);z-index:2}
+#app[data-layout] #mapyLogo{bottom:4px;left:8px;background:#fff9ed;z-index:2}
+#app[data-provider=mapy] .maplibregl-ctrl-attrib{max-width:calc(100% - 150px);color:#172129;background:#fffefa;white-space:normal}
+#app[data-layout] .maplibregl-ctrl-bottom-right{z-index:2}
+#app[data-theme=night] .danger{color:#ffb1a0}
+@media(max-width:350px){#app[data-layout] #mapTools{gap:3px}#app[data-layout] .map-top{right:120px}.map-top button{font-size:10px}#linearSpeedValue{font-size:19px;min-width:82px}}
+@media(max-height:700px){#app[data-layout] #gauge{max-height:95px}#app[data-layout] #instruments{min-height:0}#app[data-layout] .extra{display:none}}
+#app[data-layout] #mapMessage{right:150px;max-width:calc(100% - 160px)}
+:root[data-theme=night] .danger,:root[data-theme=night] #planDelete{color:#ffb1a0}
