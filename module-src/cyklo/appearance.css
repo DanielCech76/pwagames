@@ -68,3 +68,48 @@ nav button{background:transparent;color:var(--ink)}nav button.active{background:
 @media(max-height:700px){#app[data-layout] #gauge{max-height:95px}#app[data-layout] #instruments{min-height:0}#app[data-layout] .extra{display:none}}
 #app[data-layout] #mapMessage{right:150px;max-width:calc(100% - 160px)}
 :root[data-theme=night] .danger,:root[data-theme=night] #planDelete{color:#ffb1a0}
+/* B — Aero Glass / G — LED Pulse: one control geometry across screens. */
+header h1{display:flex;align-items:center;gap:7px;font-size:20px}header h1 svg{width:29px;height:24px;flex:none}header{gap:6px}#editionBadge{font-size:9px}#gpsState{font-size:10px;max-width:80px}
+:root[data-style] button,:root[data-style] select{border-radius:12px;min-height:44px;font-weight:650}
+:root[data-style] .elevation-card,:root[data-style] .ride-card,:root[data-style] .appearance-settings{border-radius:16px}
+:root[data-style] .ride-card{padding:12px 14px;font-size:15px}
+:root[data-style] #app{background:linear-gradient(155deg,var(--surface),var(--card-alt))}
+:root[data-style] header{background:linear-gradient(120deg,var(--header),color-mix(in srgb,var(--header),#00d1e0 22%));box-shadow:0 2px 14px #053b4e25;z-index:5}
+:root[data-style] .map-top>*,:root[data-style] #mapTools button,:root[data-style] #zoomControl,:root[data-style] #revealControls{background:color-mix(in srgb,var(--card) 90%,transparent);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid color-mix(in srgb,var(--edge),white 35%);box-shadow:0 3px 12px #062b4020,inset 0 1px 0 #ffffff90}
+:root[data-style] button.primary,:root[data-style] button.orange{box-shadow:0 3px 10px #062b4024,inset 0 1px 0 #ffffff50;background:linear-gradient(110deg,var(--primary),color-mix(in srgb,var(--primary),#00dce4 28%));color:var(--on-primary)}
+:root[data-style] #linearSpeed,:root[data-style] #instruments{background:linear-gradient(130deg,var(--card),color-mix(in srgb,var(--card),#65d8e5 12%));border:1px solid var(--edge);border-radius:16px;margin:6px 8px;width:calc(100% - 16px);box-shadow:0 3px 12px #062b4012,inset 0 1px 0 #fff9}
+:root[data-style] nav{padding:5px 8px;gap:4px;background:var(--card)}:root[data-style] nav button{min-height:48px;border-radius:12px;font-size:20px}:root[data-style] nav button span{font-size:11px}
+:root[data-style] .detail-actions{gap:7px}:root[data-style] .detail-actions button{font-size:13px;padding:8px 10px;min-height:44px}
+:root[data-style=pulse] header{background:linear-gradient(120deg,#091d30,#143b53);color:#edfcff}
+#ledSegments{display:none}
+#app[data-layout=led] #linearSpeed{display:flex;order:1;flex:0 0 auto;align-items:center;gap:10px;padding:9px 12px;background:linear-gradient(120deg,#071521,#16374b);border:1px solid #3d8194;color:#e9fdff;box-shadow:inset 0 1px 0 #b4efff55,0 3px 12px #051e3328}
+#app[data-layout=led] #linearSpeedQuality,#app[data-layout=led] .speed-scale{color:#b4d3df}
+#app[data-layout=led] #linearSpeedValue{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:27px;letter-spacing:-1px;min-width:112px;color:#f0fcff;text-shadow:0 0 8px #bceeff40}
+#app[data-layout=led] #gaugeWrap{display:none}
+#app[data-layout=led] #speedMeter{height:22px;overflow:visible;border-radius:0;background:transparent}
+#app[data-layout=led] #speedFill{display:none}
+#app[data-layout=led] #ledSegments{display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:2px;height:100%}
+.led-cell{background:#163240;box-shadow:inset 0 0 0 1px #7eebff18;border-radius:0}
+.led-cell[data-zone=mid]{background:#493b20}.led-cell[data-zone=high]{background:#452528}
+.led-cell.lit[data-zone=low]{background:#13e2cd;box-shadow:0 0 5px #12d9d255}.led-cell.lit[data-zone=mid]{background:#ffd044;box-shadow:0 0 5px #ffd04455}.led-cell.lit[data-zone=high]{background:#ff6159;box-shadow:0 0 5px #ff615955}
+#app[data-layout=led].simulating #instruments,#app[data-layout=led].map-expanded:not(.simulating):not(.navigating) #instruments{display:none}
+#quickPause{display:grid;place-items:center;min-width:44px;font-size:21px}
+#revealControls{position:absolute;right:8px;bottom:45px;z-index:6;min-height:44px;font-size:12px;padding:7px 10px;color:var(--ink);border-radius:12px}
+#app.focus-enabled:not(.controls-hidden) #revealControls{display:none}
+#app.controls-hidden #quickPause{display:grid;place-items:center}
+#app.controls-hidden .map-top,#app.controls-hidden #zoomControl,#app.controls-hidden #mapTools,#app.controls-hidden #mapMessage{opacity:0;visibility:hidden;pointer-events:none}
+#app.controls-hidden nav,#app.controls-hidden #simulationPanel,#app.controls-hidden #locationPanel,#app.controls-hidden #metrics,#app.controls-hidden #navigationBar .detail-actions{display:none}
+#app.controls-hidden[data-layout=bar] #instruments,#app.controls-hidden[data-layout=led] #instruments{display:none}
+#app.controls-hidden .ride-actions:has(#pause:not([hidden])){display:none}
+#app.controls-hidden #mapArea{min-height:320px;flex-grow:1}
+#app.controls-hidden #rideView{overflow:hidden}
+#app[data-layout=led] .linear-visual{min-width:0}#app[data-layout=led] .speed-scale{font-size:9px}
+@media(max-width:350px){header h1{font-size:17px}header h1 svg{width:23px}#gpsState{max-width:65px;font-size:9px}#app[data-layout=led] #linearSpeedValue{font-size:23px;min-width:98px}}
+@media(prefers-reduced-transparency:reduce){:root[data-style] #zoomControl,:root[data-style] .map-top>*,:root[data-style] #mapTools button{background:var(--card);backdrop-filter:none}}
+.more-actions{margin:10px 0;border:1px solid var(--edge);border-radius:12px;background:var(--card)}.more-actions summary{padding:13px;cursor:pointer;font-size:13px;font-weight:650;min-height:44px}.more-actions .detail-actions{padding:0 10px 10px}
+#quickPause::before{content:"";display:block;width:14px;height:18px;background:linear-gradient(to right,currentColor 0 4px,transparent 4px 10px,currentColor 10px 14px)}
+#quickPause[data-paused=true]::before{width:0;height:0;background:none;border-left:14px solid currentColor;border-top:9px solid transparent;border-bottom:9px solid transparent}
+.led-cell[data-zone=green]{background:#254326}.led-cell.lit[data-zone=green]{background:#7ef445;box-shadow:0 0 5px #7ef44555}
+#ledDigital{display:none}#app[data-layout=led] #ledDigital{display:flex;align-items:baseline;gap:3px;color:#eefdff;filter:drop-shadow(0 0 3px #a3e9ff33);flex-shrink:0}
+#ledDigital svg{height:38px;width:auto;max-width:116px}#ledDigital small{font-size:11px}
+#app[data-layout=led] #linearSpeedValue{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
