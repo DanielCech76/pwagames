@@ -85,6 +85,10 @@ Automatické testy pokrývají také poškození, zrušení, nedostatek místa, 
 
 Na GitHub Pages bylo ověřeno první spuštění bez předvýběru, hromadná instalace všech tří modulů s úplnou integritou, samostatné spuštění každého z nich, kompaktní režim Laboratoře, nastavení Pongu a dvoukrokové Zpět, skrytí/obnovení položky a odebrání/opětovná instalace Pinballu. Návraty verzí, přerušení, nedostatek místa a offline odpovědi workeru pokrývají automatické testy.
 
+## CYKLO 1.5.0 — navigace a reliéf
+
+Obě edice nově obsahují vypínatelnou horní lištu příští odbočky, automatický přepočet (výchozí tolerance 50 m / 15 s), samostatné přepínače budov/3D terénu/stínování/vrstevnic a úsporný režim. Nastavení zůstává místní. Mapterhorn dodává online výškové dlaždice, maplibre-contour 0.1.1 je přibalený s BSD licencí. Bez odbočovacích pokynů se zobrazuje sledování linie, nikoli vymyšlená odbočka. Podrobnosti a hranice: [navigace](docs/cyklo-navigation.md), [reliéf](docs/cyklo-terrain.md), [ověření](docs/cyklo-verification.md).
+
 ## CYKLO 1.0.3 (první verze / beta pro ověření na telefonu)
 
 Nejdřív použij jádro **2.1.0**, pak stáhni CYKLO ve správci modulů. Otevření nevyžaduje GPS; záznam začne po **Spustit jízdu** a prvním platném fixu. Analogový rychloměr, vzdálenost, celkový a čistý čas, GPS výška. Automatická pauza má hysterezi; ruční pauzu ukončíš ručně. Po zamčení/přepnutí aplikace se jízda přeruší, po návratu pokračuj výslovně. Záznam na pozadí není garantovaný.

@@ -1,6 +1,6 @@
 {
   "id": "cyklo",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "apiVersion": 1,
   "minCoreVersion": "2.1.0",
   "maxCoreMajor": 2,
@@ -12,7 +12,8 @@
   "permissions": [
     "Poloha (na pokyn)",
     "Online mapy, BRouter a Photon",
-    "Udržení obrazovky (pokud podporováno)"
+    "Udržení obrazovky (pokud podporováno)",
+    "Online výškové dlaždice Mapterhorn (terén/vrstevnice)"
   ],
   "fullscreen": false,
   "largeData": true,

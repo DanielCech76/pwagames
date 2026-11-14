@@ -7,7 +7,7 @@ class Controls{
  setScreen(name){this.screen=name;this.configure()}
  show(hidden){if(this.hidden===hidden)return;this.hidden=hidden;this.$('app').classList.toggle('controls-hidden',hidden);this.$('revealControls').setAttribute('aria-expanded',String(!hidden));this.onResize?.()}
  reveal(){if(this.closed)return;this.show(false);this.schedule()}
- schedule(){clearTimeout(this.timer);if(this.closed||!this.eligible()||document.hidden||this.pointers.size)return;this.timer=setTimeout(()=>{if(document.querySelector('dialog[open]')||this.pointers.size||document.activeElement?.matches?.('button:focus-visible,input:focus-visible,select:focus-visible')){this.schedule();return}this.show(true)},this.settings.controlsDelay*1000)}
+ schedule(){clearTimeout(this.timer);if(this.closed||!this.eligible()||document.hidden||this.pointers.size)return;this.timer=setTimeout(()=>{if(document.querySelector('dialog[open],details[open]')||this.pointers.size||document.activeElement?.matches?.('button:focus-visible,input:focus-visible,select:focus-visible')){this.schedule();return}this.show(true)},this.settings.controlsDelay*1000)}
  destroy(){this.closed=true;clearTimeout(this.timer);for(const [type,fn]of this.listeners)document.removeEventListener(type,fn,true);this.pointers.clear();this.show(false)}
 }
 root.CykloControls=Controls;

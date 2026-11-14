@@ -24,7 +24,7 @@
     },
     {
       "id": "cyklo",
-      "version": "1.4.1",
+      "version": "1.5.0",
       "apiVersion": 1,
       "minCoreVersion": "2.1.0",
       "maxCoreMajor": 2,
@@ -36,19 +36,20 @@
       "permissions": [
         "Poloha (na pokyn)",
         "Online mapy, BRouter a Photon",
-        "Udržení obrazovky (pokud podporováno)"
+        "Udržení obrazovky (pokud podporováno)",
+        "Online výškové dlaždice Mapterhorn (terén/vrstevnice)"
       ],
       "fullscreen": false,
       "largeData": true,
       "edition": "open",
-      "manifest": "modules/cyklo/1.4.1/manifest.json",
-      "manifestSha256": "d8e749e001bc821c185eb7788e39454702f1bc339a5ee5cac821fda564862f80",
-      "size": 1321767
+      "manifest": "modules/cyklo/1.5.0/manifest.json",
+      "manifestSha256": "d9297210d2db995ef57b537d340e411bd272e13f0ef86e3292651ca7ea26ddd2",
+      "size": 1376986
     },
     {
       "id": "cyklo-mapy",
       "edition": "mapy",
-      "version": "1.4.1",
+      "version": "1.5.0",
       "apiVersion": 1,
       "minCoreVersion": "2.1.0",
       "maxCoreMajor": 2,
@@ -59,13 +60,14 @@
       "theme": "mint",
       "permissions": [
         "Poloha (na pokyn)",
-        "Online služby Mapy.com (vlastní klíč)"
+        "Online služby Mapy.com (vlastní klíč)",
+        "Online výškové dlaždice Mapterhorn (terén/vrstevnice)"
       ],
       "fullscreen": false,
       "largeData": true,
-      "manifest": "modules/cyklo-mapy/1.4.1/manifest.json",
-      "manifestSha256": "6820c30d46d817ad4b023545d13cedb75e642d3e4f1b9e32cc7f775b718173f5",
-      "size": 1321772
+      "manifest": "modules/cyklo-mapy/1.5.0/manifest.json",
+      "manifestSha256": "c8ec51d5d9fa623596c2069cee240e0eba170d07317a091d78ac8c8e51edc4da",
+      "size": 1376991
     },
     {
       "id": "phone-lab",

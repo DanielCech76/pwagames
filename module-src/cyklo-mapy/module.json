@@ -2,7 +2,7 @@
   "id": "cyklo-mapy",
   "sourceFrom": "cyklo",
   "edition": "mapy",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "apiVersion": 1,
   "minCoreVersion": "2.1.0",
   "maxCoreMajor": 2,
@@ -13,7 +13,8 @@
   "theme": "mint",
   "permissions": [
     "Poloha (na pokyn)",
-    "Online služby Mapy.com (vlastní klíč)"
+    "Online služby Mapy.com (vlastní klíč)",
+    "Online výškové dlaždice Mapterhorn (terén/vrstevnice)"
   ],
   "fullscreen": false,
   "largeData": true
