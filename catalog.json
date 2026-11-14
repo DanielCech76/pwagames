@@ -3,24 +3,48 @@
   "modules": [
     {
       "id": "cyklo",
-      "version": "1.0.3",
+      "version": "1.1.0",
       "apiVersion": 1,
       "minCoreVersion": "2.1.0",
       "maxCoreMajor": 2,
       "dataSchema": 1,
-      "name": "CYKLO",
-      "description": "Cyklopočítač: ručičková rychlost, GPS záznam, mapa 2D/3D, historie a GPX. Záznam při otevřené obrazovce; podklady online.",
+      "name": "CYKLO Open",
+      "description": "GPS i bez jízdy, 2D/3D mapa, cyklistický plánovač, uložené trasy, simulace a sledování trasy.",
       "icon": "🚲",
       "theme": "mint",
       "permissions": [
-        "Poloha (až po spuštění jízdy)",
+        "Poloha (na pokyn)",
+        "Online mapy, BRouter a Photon",
         "Udržení obrazovky (pokud podporováno)"
       ],
       "fullscreen": false,
       "largeData": true,
-      "manifest": "modules/cyklo/1.0.3/manifest.json",
-      "manifestSha256": "594bb51728690e933f48b34da9c056f9d92abbd09e3d91f06fb9decb797e999a",
-      "size": 1144480
+      "edition": "open",
+      "manifest": "modules/cyklo/1.1.0/manifest.json",
+      "manifestSha256": "84955bc0dfb6bfa632c399bcdbac72586695b1ff33ea0a7e97d176c0b1bcd6df",
+      "size": 1265000
+    },
+    {
+      "id": "cyklo-mapy",
+      "edition": "mapy",
+      "version": "1.1.0",
+      "apiVersion": 1,
+      "minCoreVersion": "2.1.0",
+      "maxCoreMajor": 2,
+      "dataSchema": 1,
+      "name": "CYKLO Mapy.com",
+      "description": "Testovací varianta s mapami Mapy.com, GPS, plánovačem a simulací. Vyžaduje vlastní API klíč; bez registrace v katalogu Mapy.com.",
+      "icon": "🚲",
+      "theme": "mint",
+      "permissions": [
+        "Poloha (na pokyn)",
+        "Online služby Mapy.com (vlastní klíč)"
+      ],
+      "fullscreen": false,
+      "largeData": true,
+      "manifest": "modules/cyklo-mapy/1.1.0/manifest.json",
+      "manifestSha256": "2fb3e3749fa419680c55edc37d630c96837699b72d65d6336154df2a47a28aa8",
+      "size": 1265005
     },
     {
       "id": "phone-lab",

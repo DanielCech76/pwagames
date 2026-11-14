@@ -1,18 +1,20 @@
 {
   "id": "cyklo",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "apiVersion": 1,
   "minCoreVersion": "2.1.0",
   "maxCoreMajor": 2,
   "dataSchema": 1,
-  "name": "CYKLO",
-  "description": "Cyklopočítač: ručičková rychlost, GPS záznam, mapa 2D/3D, historie a GPX. Záznam při otevřené obrazovce; podklady online.",
+  "name": "CYKLO Open",
+  "description": "GPS i bez jízdy, 2D/3D mapa, cyklistický plánovač, uložené trasy, simulace a sledování trasy.",
   "icon": "🚲",
   "theme": "mint",
   "permissions": [
-    "Poloha (až po spuštění jízdy)",
+    "Poloha (na pokyn)",
+    "Online mapy, BRouter a Photon",
     "Udržení obrazovky (pokud podporováno)"
   ],
   "fullscreen": false,
-  "largeData": true
+  "largeData": true,
+  "edition": "open"
 }
