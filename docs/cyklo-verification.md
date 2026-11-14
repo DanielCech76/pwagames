@@ -48,3 +48,6 @@ Verze 1.0.3 opravuje prostor pro horní popisek ciferníku, umístění hlášky
 
 ## 1.1.0 — navigation extension
 See [cyklo-navigation.md](cyklo-navigation.md) for the implemented workflow, provider/persistence boundaries and remaining physical-device checks. Both editions are generated from one source, with separate module storage. Existing `cyklo` histories remain intact. All repository regression suites pass; additional navigation and planner suites run in Pages CI.
+
+## 1.2.0 — sloupcový profil a vzhled A/B
+Všechny regresní sady prošly. Přidán test vážení podle vzdálenosti, chybějících/nulových výšek, krátkých vrcholů, přístupných popisů a synchronizace aktuálního sloupce se seekem simulace. Lokální preview je obsazeno jiným projektem; jeho běh nebyl přerušen. Vizuální kontrola navazuje na publikované sestavení.

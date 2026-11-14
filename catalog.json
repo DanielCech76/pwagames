@@ -3,7 +3,7 @@
   "modules": [
     {
       "id": "cyklo",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "apiVersion": 1,
       "minCoreVersion": "2.1.0",
       "maxCoreMajor": 2,
@@ -20,14 +20,14 @@
       "fullscreen": false,
       "largeData": true,
       "edition": "open",
-      "manifest": "modules/cyklo/1.1.0/manifest.json",
-      "manifestSha256": "84955bc0dfb6bfa632c399bcdbac72586695b1ff33ea0a7e97d176c0b1bcd6df",
-      "size": 1265000
+      "manifest": "modules/cyklo/1.2.0/manifest.json",
+      "manifestSha256": "0bf94b172300be59176463669d63f5e189de953d6b6b63e5b7e0b569f3db42a8",
+      "size": 1275340
     },
     {
       "id": "cyklo-mapy",
       "edition": "mapy",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "apiVersion": 1,
       "minCoreVersion": "2.1.0",
       "maxCoreMajor": 2,
@@ -42,9 +42,9 @@
       ],
       "fullscreen": false,
       "largeData": true,
-      "manifest": "modules/cyklo-mapy/1.1.0/manifest.json",
-      "manifestSha256": "2fb3e3749fa419680c55edc37d630c96837699b72d65d6336154df2a47a28aa8",
-      "size": 1265005
+      "manifest": "modules/cyklo-mapy/1.2.0/manifest.json",
+      "manifestSha256": "7c3e2f55d80059f516422fa71adc28db2914a3707b4e07388357c7ca832c7918",
+      "size": 1275345
     },
     {
       "id": "phone-lab",

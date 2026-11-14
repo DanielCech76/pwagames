@@ -30,3 +30,12 @@
 - UI test ověřuje jednotlivý GPS fix a průběžné sledování bez vytvoření jízdy, nulovou výšku i zastavení watch ID 0 při pozadí.
 - Prohlížeč: skutečné hledání Praha hl. n. / Vyšehrad přes Photon, výpočet BRouter (3,6 km), výškový profil, uložení a spuštění simulace.
 - Cloudový prohlížeč neposkytl použitelný WebGL; zobrazení podkladu/gesta na telefonu a fyzická GPS zůstávají k terénnímu ověření. Skutečné Mapy.com API nelze ověřit bez uživatelského klíče; testovány kontrakty a chování bez klíče.
+
+## 1.2.0 — jemné karty a sloupcová výška
+- Zachovaný layout a paleta, jemné okraje a stíny podle varianty A; výškové sloupce s decentním barevným přechodem podle varianty B.
+- Plán, historie i simulace používají společný profil: 24 stejně dlouhých úseků podle vzdálenosti. Výška sloupce je průměr vážený délkou úseku, nikoli počtem vzorků. Tenké značky min/max zachovávají krátké vrcholy; neúplná výšková data zůstávají jako mezery.
+- Graf jasně označuje lokální rozsah v metrech (minimální rozsah 2 m pro roviny) a vzdálenost v km. Nulová i záporná výška jsou platná data.
+- Simulace obsahuje kompaktní profil pod mapou: projeté zelené sloupce, oranžový aktuální sloupec s výškovým štítkem a světlejší budoucí úseky. Pauza, seek, rychlost přehrávání a konec trasy aktualizují profil ze stejného simulačního stavu.
+- Hlavička během simulace uvádí „Simulace“, nezobrazuje starý GPS fix. Skutečné jízdní metriky jsou nahrazeny vysvětlením modelové rychlosti. Opakované informační proužky byly sjednoceny.
+- Agregace se cachuje podle trasy; při přehrávání se znovu nezpracovává celý seznam GPS bodů. Změna rozměrů/otočení překreslí oba profily.
+- Test `cyklo-elevation.test.cjs` ověřuje vážení, mezery, nulu, rovinu, zachování vrcholů, krajní polohy simulace, cache a přístupný popis grafu. Planner test ověřuje profil i posun jeho aktuálního sloupce při seeku.

@@ -1,1 +1,20 @@
-{"id":"cyklo-mapy","sourceFrom":"cyklo","edition":"mapy","version":"1.1.0","apiVersion":1,"minCoreVersion":"2.1.0","maxCoreMajor":2,"dataSchema":1,"name":"CYKLO Mapy.com","description":"Testovací varianta s mapami Mapy.com, GPS, plánovačem a simulací. Vyžaduje vlastní API klíč; bez registrace v katalogu Mapy.com.","icon":"🚲","theme":"mint","permissions":["Poloha (na pokyn)","Online služby Mapy.com (vlastní klíč)"],"fullscreen":false,"largeData":true}
+{
+  "id": "cyklo-mapy",
+  "sourceFrom": "cyklo",
+  "edition": "mapy",
+  "version": "1.2.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.1.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "CYKLO Mapy.com",
+  "description": "Testovací varianta s mapami Mapy.com, GPS, plánovačem a simulací. Vyžaduje vlastní API klíč; bez registrace v katalogu Mapy.com.",
+  "icon": "🚲",
+  "theme": "mint",
+  "permissions": [
+    "Poloha (na pokyn)",
+    "Online služby Mapy.com (vlastní klíč)"
+  ],
+  "fullscreen": false,
+  "largeData": true
+}

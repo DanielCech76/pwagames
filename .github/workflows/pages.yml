@@ -45,6 +45,7 @@ jobs:
           node tests/cyklo-map.test.cjs
           node tests/cyklo-navigation.test.cjs
           node tests/cyklo-planner.test.cjs
+          node tests/cyklo-elevation.test.cjs
       - uses: actions/configure-pages@v5
         with:
           enablement: true
