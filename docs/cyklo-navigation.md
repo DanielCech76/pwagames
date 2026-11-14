@@ -39,3 +39,10 @@
 - Hlavička během simulace uvádí „Simulace“, nezobrazuje starý GPS fix. Skutečné jízdní metriky jsou nahrazeny vysvětlením modelové rychlosti. Opakované informační proužky byly sjednoceny.
 - Agregace se cachuje podle trasy; při přehrávání se znovu nezpracovává celý seznam GPS bodů. Změna rozměrů/otočení překreslí oba profily.
 - Test `cyklo-elevation.test.cjs` ověřuje vážení, mezery, nulu, rovinu, zachování vrcholů, krajní polohy simulace, cache a přístupný popis grafu. Planner test ověřuje profil i posun jeho aktuálního sloupce při seeku.
+
+## 1.2.1 — obnova mapy a diagnostika Mapy.com
+- Opraveno trvalé překrytí mapy náhradním plátnem po jediné chybě dlaždice. Skutečně načtená rastrová dlaždice obnoví podklad; chyba jedné dlaždice nezakryje již funkční mapu. Metadata zdroje sama nepotvrzují úspěšné načtení dlaždice.
+- Chyby rozlišují HTTP 401/403, 402, 404, 429, serverové potíže, síť a WebGL. Žádné URL ani API klíče se nevypisují do uživatelského hlášení.
+- Nastavení Mapy.com: **Otestovat klíč** a automatické ověření po **Použít klíč a podklad**. GET jedné pevné světové dlaždice `basic/256/0/0/0` (bez GPS), bez ukládání odpovědi, timeout 15 s. Úspěšný HTTP obrázek potvrzuje přístup k Map tiles, nikoli funkčnost WebGL či všech oblastí ostatních mapových sad.
+- Nastavení oprávnění klíče: HTTP referer `danielcech76.github.io` bez protokolu a cesty; povolená služba Map tiles. Podle oficiální dokumentace se změny omezení mohou projevit do přibližně 15 minut: https://developer.mapy.com/my-account/api-key-security/.
+- Reálný klíč uživatele nebyl čten ani testován. Přesnou příčinu jeho HTTP odmítnutí lze určit až z výsledku testu na jeho zařízení. Samotný původní snímek potvrzuje náhradní podklad, nikoli konkrétní chybu klíče.
