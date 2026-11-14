@@ -42,13 +42,13 @@
     },
     {
       "id": "pong",
-      "version": "2.2.0",
+      "version": "2.3.0",
       "apiVersion": 1,
       "minCoreVersion": "2.0.0",
       "maxCoreMajor": 2,
       "dataSchema": 1,
       "name": "Pong",
-      "description": "Pong s dotykem a pěti režimy pohybového ovládání, kalibrací a filtrem pro chůzi.",
+      "description": "Pong s kalibrací, opravou směru gyroskopu a experimentálním řízením podle posunu telefonu.",
       "icon": "▌ • ▐",
       "theme": "violet",
       "permissions": [
@@ -56,9 +56,9 @@
         "Pohyb a orientace telefonu (volitelné)"
       ],
       "fullscreen": true,
-      "manifest": "modules/pong/2.2.0/manifest.json",
-      "manifestSha256": "69dd64fe6d363cf2496d4d0329613a4f268dfffdf3bf3ae43a89fa82d36a91fe",
-      "size": 37687
+      "manifest": "modules/pong/2.3.0/manifest.json",
+      "manifestSha256": "db6c65fc8a04e11fa9402aedeec1a5f24987e553e8360044b2d45ff76984c321",
+      "size": 40102
     }
   ]
 }

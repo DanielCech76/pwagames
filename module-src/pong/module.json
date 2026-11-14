@@ -1,12 +1,12 @@
 {
   "id": "pong",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "apiVersion": 1,
   "minCoreVersion": "2.0.0",
   "maxCoreMajor": 2,
   "dataSchema": 1,
   "name": "Pong",
-  "description": "Pong s dotykem a pěti režimy pohybového ovládání, kalibrací a filtrem pro chůzi.",
+  "description": "Pong s kalibrací, opravou směru gyroskopu a experimentálním řízením podle posunu telefonu.",
   "icon": "▌ • ▐",
   "theme": "violet",
   "permissions": [

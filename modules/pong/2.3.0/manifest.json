@@ -1,0 +1,46 @@
+{
+  "format": 1,
+  "id": "pong",
+  "version": "2.3.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.0.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Pong",
+  "description": "Pong s kalibrací, opravou směru gyroskopu a experimentálním řízením podle posunu telefonu.",
+  "icon": "▌ • ▐",
+  "theme": "violet",
+  "permissions": [
+    "Celá obrazovka",
+    "Pohyb a orientace telefonu (volitelné)"
+  ],
+  "fullscreen": true,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "bridge.js",
+      "size": 1994,
+      "sha256": "274714f9194d58b1c8f24f5d0357981e316ba77242bf47ad9063fd8163aae433"
+    },
+    {
+      "path": "game.js",
+      "size": 17936,
+      "sha256": "e3d3911dfff7616435d82a3257b94b04ac6e2af02979f865d3f1f5d7e7580833"
+    },
+    {
+      "path": "index.html",
+      "size": 5756,
+      "sha256": "424e3d3feb6a6e544cb2fbb27b87885808158732b59d292f569e45ab6f56980c"
+    },
+    {
+      "path": "motion.js",
+      "size": 5718,
+      "sha256": "9138067845c532f9acfc3cd2e996f27638bc69894c892ba3fb5aff58e24fb184"
+    },
+    {
+      "path": "style.css",
+      "size": 8698,
+      "sha256": "734b6a088ebd4344cd562e019ba243785764aaed48a7801a42dba0c96bbc8b55"
+    }
+  ]
+}
