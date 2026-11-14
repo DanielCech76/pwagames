@@ -1,4 +1,4 @@
-# CYKLO 1.0.2 / jádro 2.1.0 — ověření a hranice
+# CYKLO 1.0.3 / jádro 2.1.0 — ověření a hranice
 
 Datum: 14. 11. 2026. První funkční vydání je beta pro ověření na cílovém telefonu.
 
@@ -43,3 +43,5 @@ Fyzická GPS, kvalita signálu, slunce, rukavice a uchycení musí být ověřen
 ## Kontrola publikované aplikace v prohlížeči
 
 Ověřena skutečná aktualizace jádra 2.0.1 → 2.1.0 se zachováním starých modulů, stažení CYKLO s ověřením součtů, otevření bez GPS žádosti, nastavení limitu a změna přiblížení do manuálu, prázdná historie, zavření nastavení přes společnou navigaci a odchod do správce. První kontrola odhalila použití neexistujícího MapLibre supported(); opraveno. Následná kontrola ukázala, že cloudový prohlížeč má WebGL vypnuté; ověřen proto skutečný fallback, nikoli vykreslený online mapový podklad nebo skutečná kamera. Verze 1.0.2 navíc zpřístupňuje nastavení mapy před prvním GPS fixem a odstraňuje technický WebGL výpis z uživatelského stavu. Skutečný mapový renderer, mobilní rozměry a GPS je třeba dále ověřit na podporovaném telefonu.
+
+Verze 1.0.3 opravuje prostor pro horní popisek ciferníku, umístění hlášky náhradního podkladu a orientaci GPS šipky v mapových souřadnicích. Natočení šipky musí být GPS heading mínus bearing kamery, nikoli samotný bearing.

@@ -85,7 +85,7 @@ Automatické testy pokrývají také poškození, zrušení, nedostatek místa, 
 
 Na GitHub Pages bylo ověřeno první spuštění bez předvýběru, hromadná instalace všech tří modulů s úplnou integritou, samostatné spuštění každého z nich, kompaktní režim Laboratoře, nastavení Pongu a dvoukrokové Zpět, skrytí/obnovení položky a odebrání/opětovná instalace Pinballu. Návraty verzí, přerušení, nedostatek místa a offline odpovědi workeru pokrývají automatické testy.
 
-## CYKLO 1.0.0 (první verze / beta pro ověření na telefonu)
+## CYKLO 1.0.3 (první verze / beta pro ověření na telefonu)
 
 Nejdřív použij jádro **2.1.0**, pak stáhni CYKLO ve správci modulů. Otevření nevyžaduje GPS; záznam začne po **Spustit jízdu** a prvním platném fixu. Analogový rychloměr, vzdálenost, celkový a čistý čas, GPS výška. Automatická pauza má hysterezi; ruční pauzu ukončíš ručně. Po zamčení/přepnutí aplikace se jízda přeruší, po návratu pokračuj výslovně. Záznam na pozadí není garantovaný.
 
