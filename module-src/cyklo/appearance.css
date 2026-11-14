@@ -113,3 +113,79 @@ header h1{display:flex;align-items:center;gap:7px;font-size:20px}header h1 svg{w
 #ledDigital{display:none}#app[data-layout=led] #ledDigital{display:flex;align-items:baseline;gap:3px;color:#eefdff;filter:drop-shadow(0 0 3px #a3e9ff33);flex-shrink:0}
 #ledDigital svg{height:38px;width:auto;max-width:116px}#ledDigital small{font-size:11px}
 #app[data-layout=led] #linearSpeedValue{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+/* Faithful B/G chrome: floating instrument docks instead of recolored legacy cards. */
+:root[data-style]{--glass-edge:#b8e3ed;--glass-shadow:0 5px 16px #002e4830,inset 0 1px 0 #ffffffbb}
+:root[data-style] #rideView{position:relative}
+:root[data-style] header{padding:7px 10px;min-height:58px;gap:7px;background:linear-gradient(120deg,#062b42 0%,#07536a 65%,#086278);border-bottom:1px solid #52c4d780;box-shadow:inset 0 1px 0 #9ce4f433,0 3px 12px #00304035}
+:root[data-style] header h1{font-size:22px;font-weight:760;letter-spacing:1px;gap:8px;color:#f0fcff}
+:root[data-style] header button{width:42px;min-width:42px;height:42px;min-height:42px;border-radius:13px;border:1px solid #85d9eb50;box-shadow:inset 0 1px 0 #fff3;background:linear-gradient(140deg,#568ca44d,#10395070);color:#effcff}
+:root[data-style] #editionBadge{border:1px solid #8cd9e16b;color:#c5f3fb;border-radius:10px;padding:3px 5px;font-size:8px}
+:root[data-style] #gpsState{color:#c7f3ee;font-size:10px;max-width:76px}
+:root[data-style] #status{min-height:22px;padding:3px 10px;background:#d7edf2;color:#254d5d;font-size:10px;border-bottom:1px solid #bbd8e0}
+:root[data-style] #app #linearSpeed{border-radius:18px;margin:6px 8px 5px;width:calc(100% - 16px);min-height:83px;padding:10px 12px;border:1px solid #b8dce5;background:linear-gradient(125deg,#f7fdff,#d6f0f5);box-shadow:var(--glass-shadow);gap:12px}
+:root[data-style] #linearSpeedQuality{font-size:9px;color:#4c727f;margin:0 0 5px}
+:root[data-style] #linearSpeedValue{font-size:31px;letter-spacing:-1px;color:#092e46;min-width:113px}
+:root[data-style] #speedMeter{height:16px;background:#b9d6df;box-shadow:inset 0 1px 3px #083c4f20;border-radius:4px}
+:root[data-style] #speedFill{background:linear-gradient(90deg,#00c8d5,#0aa1be);border-radius:3px}
+:root[data-style] .speed-scale{font-size:9px;color:#436b7b}
+:root[data-style] #app .map-top{top:10px;left:10px;right:124px;gap:6px}
+:root[data-style] #app .map-top>*,:root[data-style] #app #mapTools button{border-radius:13px;background:linear-gradient(135deg,#f4fdffed,#bfe5eeeb);border:1px solid #a8d4e0;color:#103e53;box-shadow:var(--glass-shadow)}
+:root[data-style] #app .map-top button{min-height:44px;font-size:12px;padding:6px 9px;border-radius:12px;color:#103e53}
+:root[data-style] #app .segmented button.active{background:linear-gradient(135deg,#008ba5,#006075);color:#f2feff;box-shadow:inset 0 1px 0 #8cffff70}
+:root[data-style] #app #mapTools{top:10px;right:10px;gap:6px}
+:root[data-style] #app #mapTools #autoZoom{height:44px;min-height:44px;min-width:53px;font-size:11px}
+:root[data-style] #app #recenter{width:44px;height:44px;min-width:44px;min-height:44px;max-width:44px;max-height:44px;flex-basis:44px;border-radius:13px}
+:root[data-style] #app #zoomControl{top:64px;right:10px;border-radius:20px;background:linear-gradient(135deg,#e9faffec,#c5e8f0e8);border:1px solid #add8e4;box-shadow:var(--glass-shadow)}
+:root[data-style] #app #zoomControl button{background:linear-gradient(135deg,#f8feff,#d6f0f6);border:1px solid #a5d1de;color:#103d52;box-shadow:0 2px 6px #00394f22,inset 0 1px 0 #fff;font-weight:500}
+:root[data-style] #app #zoomBubble{background:#e5f8fd;color:#143f53;border-color:#a7d8e5;border-radius:8px}
+:root[data-style] #app #mapMessage{top:auto;bottom:25px;right:90px;max-width:calc(100% - 105px);padding:3px 6px;font-size:9px;max-height:20px;background:#f3fbf9cf;box-shadow:0 1px 4px #002e4015;color:#31596b}
+:root[data-style] #app #instruments{padding:8px 12px;border-radius:16px;margin:6px 8px;width:calc(100% - 16px);background:linear-gradient(125deg,#f2fcff,#cfebf2);border-color:#acd3df;box-shadow:var(--glass-shadow);color:#133e52}
+:root[data-style] #metrics{gap:8px 14px}:root[data-style] #metrics small{font-size:10px}:root[data-style] #metrics strong{font-size:17px}
+:root[data-style] #app .ride-actions{padding:5px 10px 8px;gap:7px}:root[data-style] #app .ride-actions button{min-height:45px;font-size:15px;border-radius:14px;background:linear-gradient(115deg,#007d94,#01b9c6);border:1px solid #81eaf2;color:#fff;box-shadow:0 3px 10px #003b5140,inset 0 1px 0 #c3ffff88}
+:root[data-style] nav{margin:0 8px 7px;width:calc(100% - 16px);padding:4px;gap:4px;border:1px solid #a6d4df;border-radius:17px;background:linear-gradient(120deg,#f3fcffed,#c1e6f0eb);box-shadow:var(--glass-shadow);backdrop-filter:blur(14px)}
+:root[data-style] nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:48px;border-radius:12px;color:#0a3a50;padding:4px;font-size:12px}
+:root[data-style] nav button.active{background:linear-gradient(130deg,#a5ecf3,#b4e0f1);color:#00617c;border:1px solid #8cdbe6;box-shadow:inset 0 1px 0 #fff9}
+.nav-icon{width:25px;height:23px;display:block;flex-shrink:0}
+:root[data-style] #app #revealControls{right:0;bottom:72px;max-width:45px;min-height:108px;writing-mode:vertical-rl;padding:11px 9px;border-radius:15px 0 0 15px;font-size:11px;background:linear-gradient(120deg,#e5faffee,#a8e1eeef);color:#083d55;border:1px solid #9ad5e5;box-shadow:var(--glass-shadow)}
+:root[data-style] #app.controls-hidden .ride-actions{position:absolute;right:8px;bottom:9px;z-index:7;padding:0;width:auto}
+:root[data-style] #app.controls-hidden .ride-actions button{font-size:13px;min-height:44px;padding:8px 15px;max-width:190px;border-radius:13px}
+:root[data-style] #app.controls-hidden #mapArea{min-height:320px}
+/* G — navy glass surrounds a large left-hand digital readout and the LED tape. */
+:root[data-style=pulse] #app{background:#061b2c;color:#e8faff}
+:root[data-style=pulse] header{background:linear-gradient(115deg,#051b2d,#103e57);border-color:#35bdcf8c}
+:root[data-style=pulse] #status{background:#103346;color:#b5e7f2;border-color:#26728466}
+:root[data-style=pulse] #app #linearSpeed{padding:11px 12px;min-height:90px;gap:14px;align-items:center;background:linear-gradient(130deg,#061724,#143c53 80%,#071f32);border:1px solid #69cadfa8;box-shadow:0 0 0 1px #c2efff25,inset 0 1px 0 #b4eaff65,0 6px 15px #001b3566;color:#eefdff;border-radius:19px}
+:root[data-style=pulse] #app[data-layout=led] #ledDigital{order:0;align-items:flex-end;gap:4px;flex-shrink:0;min-width:115px;padding-right:8px;border-right:1px solid #7cc2d344}
+:root[data-style=pulse] #app[data-layout=led] #ledDigital svg{height:53px;max-width:98px;filter:drop-shadow(0 0 4px #9be6ff5c)}
+:root[data-style=pulse] #ledDigital small{font-size:10px;padding-bottom:3px;color:#e1f5ff}
+:root[data-style=pulse] #app[data-layout=led] .linear-visual{order:1;display:flex;flex-direction:column;flex:1;min-width:0}
+:root[data-style=pulse] #app[data-layout=led] #linearSpeedQuality{order:0;font-size:8px;color:#afd8e5;line-height:1.25;min-height:11px;margin-bottom:5px}
+:root[data-style=pulse] #app[data-layout=led] #speedMeter{order:2;height:19px;margin-top:4px;background:none;box-shadow:none}
+:root[data-style=pulse] #app[data-layout=led] .speed-scale{order:1;color:#e1f4fa;font-size:10px;margin:0;font-variant-numeric:tabular-nums}
+:root[data-style=pulse] #app #ledSegments{gap:2px}.led-cell{border-radius:0;box-shadow:inset 0 0 0 1px #7ecbdd38}
+:root[data-style=pulse] #app #ledSegments[style]{opacity:1!important}
+:root[data-style=pulse] .led-cell[data-zone=low]{background:#124355}:root[data-style=pulse] .led-cell[data-zone=green]{background:#244b32}:root[data-style=pulse] .led-cell[data-zone=mid]{background:#58441d}:root[data-style=pulse] .led-cell[data-zone=high]{background:#542326}
+:root[data-style=pulse] .led-cell.lit[data-zone=low]{background:#00ece0;box-shadow:0 0 5px #00ede06b}:root[data-style=pulse] .led-cell.lit[data-zone=green]{background:#77ff3c;box-shadow:0 0 5px #77ff3c66}:root[data-style=pulse] .led-cell.lit[data-zone=mid]{background:#ffd044}:root[data-style=pulse] .led-cell.lit[data-zone=high]{background:#ff5f50}
+:root[data-style=pulse] #app .map-top>*,:root[data-style=pulse] #app #mapTools button,:root[data-style=pulse] #app #zoomControl,:root[data-style=pulse] #app #zoomControl button,:root[data-style=pulse] #app #revealControls{background:linear-gradient(125deg,#164c65ee,#061c32f2);color:#e5fbff;border:1px solid #68dbecb5;box-shadow:inset 0 1px 0 #b9efff60,0 3px 10px #00304e55,0 0 5px #15bfe12b;backdrop-filter:blur(14px)}
+:root[data-style=pulse] #app .map-top button{color:#ddf9ff}
+:root[data-style=pulse] #app .segmented button.active,:root[data-style=pulse] #app #mapTools #autoZoom.active{background:linear-gradient(130deg,#01e5db,#04a9cd);color:#002b42;box-shadow:inset 0 1px 0 #cfffff99,0 0 8px #03dcd644}
+:root[data-style=pulse] #app #zoomBubble{background:#0b3247;color:#d8faff;border-color:#5acbdf}
+:root[data-style=pulse] #app #zoomSlider::-webkit-slider-runnable-track{background:#7aafbd;width:3px}
+:root[data-style=pulse] #app #zoomSlider::-webkit-slider-thumb{background:#00d6d3;border-color:#d7ffff;box-shadow:0 0 8px #00eeed66;margin-left:calc((3px - var(--thumb-diameter,48px))/2)}
+:root[data-style=pulse] #app #zoomSlider::-moz-range-track{background:#7aafbd;width:3px}:root[data-style=pulse] #app #zoomSlider::-moz-range-thumb{background:#00d6d3;border-color:#d7ffff}
+:root[data-style=pulse] #app nav{background:linear-gradient(110deg,#10445de8,#071c32f2);border-color:#4ac6df;box-shadow:inset 0 1px 0 #b6efff55,0 0 10px #00bcd42b}
+:root[data-style=pulse] #app nav button{color:#d4effa}:root[data-style=pulse] #app nav button.active{color:#00fff0;border-color:#38cfdf;background:linear-gradient(120deg,#11718b88,#06354f);box-shadow:inset 0 -2px 0 #00efe8,0 0 8px #00d6dc38}
+:root[data-style=pulse] #app #instruments{background:linear-gradient(120deg,#10394c,#0a2338);border-color:#357b92;color:#e6f8ff}
+:root[data-style=pulse] #app .ride-actions button{background:linear-gradient(120deg,#0f4660,#06243a);border-color:#5ccee3;color:#f2feff}
+@media(max-width:350px){:root[data-style] header{gap:5px;padding:6px 8px}:root[data-style] header h1{font-size:19px}:root[data-style] header button{width:38px;min-width:38px}:root[data-style=pulse] #app[data-layout=led] #ledDigital{min-width:96px;padding-right:5px}:root[data-style=pulse] #app[data-layout=led] #ledDigital svg{height:45px}:root[data-style=pulse] #app #linearSpeed{gap:8px;padding:10px}}
+:root[data-style=pulse]{--ink:#e6f8ff;--muted:#a6cad8;--surface:#061b2c;--card:#10364a;--card-alt:#0e2e41;--edge:#3c8095;--primary:#09d4d1;--on-primary:#052c3d;--accent:#00d8d4;--on-accent:#052c3d;--selected:#0a5269;--grid:#345c70;--shadow:0 4px 12px #00142155,inset 0 1px 0 #9ee6f32b}
+:root[data-style=pulse] #app #mapTools #autoZoom{background:linear-gradient(125deg,#164c65ee,#061c32f2);color:#e5fbff;border-color:#68dbecb5;box-shadow:inset 0 1px 0 #b9efff60,0 3px 10px #00304e55}
+:root[data-style=pulse] #app #mapTools #autoZoom.active{background:linear-gradient(130deg,#01e5db,#04a9cd);color:#002b42}
+:root[data-style] #app #metrics .extra{display:none}
+:root[data-style] #app[data-layout=bar] #metrics,:root[data-style] #app[data-layout=led] #metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+:root[data-style] #app[data-layout=bar] #metrics strong,:root[data-style] #app[data-layout=led] #metrics strong{font-size:14px;letter-spacing:-.3px}
+:root[data-style] #app[data-layout=bar] #metrics small,:root[data-style] #app[data-layout=led] #metrics small{font-size:9px}
+:root[data-style=pulse] #app[data-layout=led] #speedMeter{opacity:1!important}
+:root[data-style] .ride-actions button{display:flex;align-items:center;justify-content:center;gap:7px}
+.action-icon{width:17px;height:17px;flex:none;display:block}
+:root[data-style] #planUse{order:-1;flex:1 0 100%;min-height:46px;font-size:16px;border-radius:13px}
