@@ -138,3 +138,7 @@ Denser configurable vegetation, broadleaf/mixed/conifer crowns, regional elevati
 ## CYKLO 1.11.0
 
 Independent map search via a compact magnifier, place markers and saved-place actions without starting GPS or changing a plan. Vegetation range now supports 100m–2km with distance bands and bounded far coverage. Both editions share this release.
+
+## CYKLO 1.15.0
+
+Tři nezávislé vrstvy vegetace: původní 3D modely, pseudo 3D koruny ke kameře a orientované shluky korun. Tři vzdálenostní detaily, stínování podle sklonu terénu a zachování vzdálené plošné textury. Výchozí jsou pseudo 3D koruny a shluky; skutečné 3D lze zapnout pro porovnání. Nových 100 % nadále odpovídá původním 50 %. Obě edice používají stejné změny. Podrobnosti a hranice ověření: [vrstvy vegetace](docs/cyklo-landscape-lod.md#1150--nezávislé-vrstvy-a-koruny-ke-kameře).
