@@ -73,3 +73,10 @@ Výtvarné atlasy byly připraveny podle přiložených malovaných a low-poly n
 Hláška z cílového telefonu potvrzuje přechod vrstvy do `failed`, ale 1.15.1 ve všech cestách původní výjimku zahazovala. Tento patch předá původní chybu a fázi z inicializace, sestavení, načítání/odeslání atlasu i mapového zdroje. Překlad a linkování zachovají hlášení grafického ovladače. Chyby kreslení jsou zachyceny po obnovení GL stavu a uvedeny ve stejném stavovém textu. `lastFailure` ukládá fázi a normalizovaný důvod (nejvýše 600 znaků); nový pokus ho vynuluje.
 
 Regrese v `tests/cyklo-canopy.test.cjs` injektují chybu shaderu, načítání a uploadu obrázku, zdroje i vykreslení. Testy neprokazují konkrétní příčinu na telefonu: skutečný důvod je nutné přečíst z této diagnostické verze na cílovém zařízení. Nebyly provedeny spekulativní změny geometrie, atlasů nebo LOD.
+
+
+## 1.15.3 — částečně dostupné výšky
+
+Stav „Stromy čekají na výškový podklad“ mohl přetrvávat při `isSourceLoaded('cyklo-relief-dem') === false`, ačkoli místní dotazy již vracely výšku. Globální bariéra je odstraněna; aktivní terén je stále nutný, jednotlivé neznámé výšky se vynechávají. Počet a druhy ve stavu odpovídají skutečně dostupným výškám. Pokud žádný vzorek výšku nemá, geometrie se vyprázdní a cache klíč zneplatní. Každá událost relevantního výškového/lesního zdroje zvýší revizi i bez pole `tile`, aby neúplná geometrie nezůstala v cache.
+
+Test `cyklo-landscape-lod.test.cjs` pokrývá celkově nenačtený zdroj s dostupnými výškami, nulovou a částečnou dostupnost a obnovu po události bez `tile`. Mobilní GPU není tímto testem simulováno; případné další chyby zobrazí diagnostika z 1.15.2.

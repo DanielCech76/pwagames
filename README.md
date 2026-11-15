@@ -153,3 +153,10 @@ Oprava stromů podle původních návrhů: skutečné průhledné malované/low-
 Telefon ve verzi 1.15.1 hlásí obecné „3D vegetace není dostupná“, přestože pseudo 3D i orientované koruny jsou zapnuté. Přesná příčina zatím není potvrzená. Verze 1.15.2 zachová ve stavovém textu fázi selhání a původní chybovou zprávu, včetně protokolu překladu/linkování shaderu. Rozliší načtení a GPU nahrání konkrétního obrázku, chybu mapových dat, přípravu geometrie a vykreslení. Chyba při vykreslení nově projde stejným řízeným ukončením a obnovou GL stavu. Tlačítko Obnovit vegetaci zahájí nový pokus a vymaže předchozí diagnostiku.
 
 Jde o diagnostické vydání pro obě edice, nikoli o potvrzenou opravu příčiny na Androidu. Vzhled korun, přepínače, uložené trasy a datové schéma se nemění. Testy simulují odlišná selhání a ověřují zachování důvodu, obnovu GL stavu a opakování pokusu. Předchozí balíčky zůstávají neměnné.
+
+
+## CYKLO 1.15.3 — stromy při částečně načteném terénu
+
+Při načítání DEM už vegetace nečeká na `isSourceLoaded` celého výškového zdroje. Stromy se vytvoří pro jednotlivé body, kde `queryTerrainElevation` vrací konečnou výšku; ostatní počkají na další událost zdroje. Události výškových dat nově invalidují geometrii i bez pole `tile`. Stav rozlišuje čekání na místní výšky a částečně zobrazený porost; počty zahrnují pouze prvky se známou výškou. Stromy bez výšky se neposazují na nulu.
+
+Regresní test ověřuje vykreslení při globálně nedokončeném zdroji, úplně chybějící i částečné místní výšky a doplnění po načtení DEM bez pohybu mapy. Vzhled, tři přepínače a původní diagnostika zůstávají. Oprava řeší prokázanou blokující podmínku; výsledek na telefonu je nutné ověřit.
