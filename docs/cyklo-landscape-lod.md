@@ -66,3 +66,10 @@ Verze 1.15.0 používala sférické billboardy a jednoduché procedurální koru
 Automatická regrese dekóduje skutečný PNG atlas, kontroluje průhledné pozadí, typy a detaily, UV meze, kalibraci paty, přepínání vrstev, načtení obrázků a obnovu obou texture units. Volitelný EGL test nově používá skutečné PNG obrázky a přes transform feedback čte výstup světových souřadnic přímo z vertex shaderu: pro různé azimuty, výšky kamery a úrovně detailu ověřuje shodné X/Y paty a vrcholu a patu v DEM. Kontroluje i vykreslení všech tří detailů, pohled shora a dosah. Skript vyžaduje Mesa EGL/GLES3 a Pillow.
 
 Výtvarné atlasy byly připraveny podle přiložených malovaných a low-poly návrhů s požadavkem na průhlednost, čelní svislé stromy, tři shodné typy a tři úrovně detailu; doplňkový atlas používá odpovídající koruny z ptačí perspektivy. Nejde již o procedurální náhradní kresbu z 1.15.0. Skutečný vzhled na živé mapě a výkon na Androidu stále vyžadují ověření na cílovém zařízení.
+
+
+## 1.15.2 — zachování důvodu selhání
+
+Hláška z cílového telefonu potvrzuje přechod vrstvy do `failed`, ale 1.15.1 ve všech cestách původní výjimku zahazovala. Tento patch předá původní chybu a fázi z inicializace, sestavení, načítání/odeslání atlasu i mapového zdroje. Překlad a linkování zachovají hlášení grafického ovladače. Chyby kreslení jsou zachyceny po obnovení GL stavu a uvedeny ve stejném stavovém textu. `lastFailure` ukládá fázi a normalizovaný důvod (nejvýše 600 znaků); nový pokus ho vynuluje.
+
+Regrese v `tests/cyklo-canopy.test.cjs` injektují chybu shaderu, načítání a uploadu obrázku, zdroje i vykreslení. Testy neprokazují konkrétní příčinu na telefonu: skutečný důvod je nutné přečíst z této diagnostické verze na cílovém zařízení. Nebyly provedeny spekulativní změny geometrie, atlasů nebo LOD.

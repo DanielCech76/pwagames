@@ -146,3 +146,10 @@ Tři nezávislé vrstvy vegetace: původní 3D modely, pseudo 3D koruny ke kame�
 ## CYKLO 1.15.1
 
 Oprava stromů podle původních návrhů: skutečné průhledné malované/low-poly textury, svislé kmeny otáčené pouze kolem světové svislé osy a stabilní pata na terénu. Pohled shora používá samostatné koruny. Nahrazuje procedurální náhradní vzhled a naklápění billboardů z 1.15.0. Obě edice; původní přepínače zůstávají zachované. [Podrobnosti opravy](docs/cyklo-landscape-lod.md#1151--oprava-svislé-orientace-a-výtvarné-shody).
+
+
+## CYKLO 1.15.2 — diagnostika zmizení vegetace
+
+Telefon ve verzi 1.15.1 hlásí obecné „3D vegetace není dostupná“, přestože pseudo 3D i orientované koruny jsou zapnuté. Přesná příčina zatím není potvrzená. Verze 1.15.2 zachová ve stavovém textu fázi selhání a původní chybovou zprávu, včetně protokolu překladu/linkování shaderu. Rozliší načtení a GPU nahrání konkrétního obrázku, chybu mapových dat, přípravu geometrie a vykreslení. Chyba při vykreslení nově projde stejným řízeným ukončením a obnovou GL stavu. Tlačítko Obnovit vegetaci zahájí nový pokus a vymaže předchozí diagnostiku.
+
+Jde o diagnostické vydání pro obě edice, nikoli o potvrzenou opravu příčiny na Androidu. Vzhled korun, přepínače, uložené trasy a datové schéma se nemění. Testy simulují odlišná selhání a ověřují zachování důvodu, obnovu GL stavu a opakování pokusu. Předchozí balíčky zůstávají neměnné.
