@@ -20,3 +20,7 @@ Shader vypíná detail za hranicí dosahu a posledních 25 % překrývá s textu
 ## Ověření
 
 Automatické testy ověřují nulovou geometrii a nulové samplování ve vzdáleném pohledu, vznik blízkých modelů, invalidaci po oddálení, vliv hustoty/typu/velikosti na textury, extrakci kamery z projektivní matice, filtrování budov, pořadí vrstev, cache a úklid. Původní testy ověřují polygonové otvory, vyloučení vody/cest/budov, DEM, GL stav a worker. Shadery byly navíc skutečně přeloženy a slinkovány v OpenGL ES 3 kontextu EGL. Výkon na konkrétním telefonu ani vizuální přechody za jízdy tím nejsou změřené.
+
+## 1.14.1 — nový základ velikosti
+
+Nových 100 % odpovídá původním 50 %. Výška i odvozená šířka všech vegetačních modelů a velikost jejich stopy v dosavadní textuře používají poloviční základ. Při jednorázovém převodu nastavení (`treeSizeVersion=2`) se původních 50 % převede na 100 %; původní výchozí 100 % také přijme nový menší základ. Ostatní vlastní hodnoty se zdvojnásobí, aby zachovaly fyzickou velikost. Rozsah je proto nově 50–300 %. Styl textury se tímto vydáním nemění; šest návrhů je pouze k výběru před další implementací.

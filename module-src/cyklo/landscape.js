@@ -10,7 +10,8 @@ function normalize(s){
  if(s.vegetationDensity==null)s.vegetationDensity={sparse:50,normal:100,dense:150}[s.treeDensity]||100;
  s.vegetationDensity=Math.max(25,Math.min(200,Number(s.vegetationDensity)||100));
  if(!['auto','broadleaved','mixed','needleleaved'].includes(s.forestType))s.forestType='auto';
- s.treeScale=Math.max(50,Math.min(150,Number(s.treeScale)||100));
+ if(s.treeSizeVersion!==2){const old=Number(s.treeScale);s.treeScale=Number.isFinite(old)&&old>0&&old!==100?Math.min(300,old*2):100;s.treeSizeVersion=2}
+ s.treeScale=Math.max(50,Math.min(300,Number(s.treeScale)||100));
  if(!['off','subtle','rich'].includes(s.undergrowth))s.undergrowth='subtle';
  if(!['original','subtle','illustrated'].includes(s.surfaceStyle))s.surfaceStyle='subtle';
  if(!['auto','economy','high'].includes(s.vegetationQuality))s.vegetationQuality='auto';return s;
@@ -63,7 +64,7 @@ function sample(center,forests,excluded,roads,route,options={}){
   if(plant.kind!=='shrub'&&options.undergrowth!=='off'&&seed<(options.undergrowth==='rich'?.3:.14)){
    const edge=8/cos;if(!contains([p[0]+edge,p[1]],woods)||!contains([p[0]-edge,p[1]],woods)||!contains([p[0],p[1]+edge],woods)||!contains([p[0],p[1]-edge],woods)){plant.kind='shrub';plant.height=1.2+seed*5}
   }
-  out.push({position,...plant,height:plant.height*(options.scale||100)/100,seed,distance,band:inner===0?0:inner===350?1:2,lod:quality==='economy'||distance>220?'far':'near'});
+  out.push({position,...plant,height:plant.height*(options.scale||100)/200,seed,distance,band:inner===0?0:inner===350?1:2,lod:quality==='economy'||distance>220?'far':'near'});
  }}
  // Reserve a share for distant rings, so a larger radius does not merely refill the near cap.
  const groups=[0,1,2].map(b=>out.filter(t=>t.band===b).sort((a,b)=>a.seed-b.seed||a.distance-b.distance)),selected=[],rest=[];
@@ -93,7 +94,7 @@ function mesh(trees,origin,elevation){
 // Small original procedural patterns, generated once; no external texture downloads.
 function pattern(kind,options={}){const width=64,data=new Uint8Array(width*width*4),base={grass:[125,153,82],scrub:[86,116,57],field:[174,151,91],forest:[69,94,45],building:[155,151,142]}[kind]||[69,94,45];
  const density=Math.max(25,Math.min(200,Number(options.vegetationDensity)||100))/200,plants=[];
- if(kind==='forest'||kind==='scrub')for(let y=0;y<4;y++)for(let x=0;x<4;x++){const seed=hash(x+17,y+41);if(hash(x+991,y-772)>density)continue;const plant=kind==='scrub'?{kind:'shrub'}:vegetation(options.position||[14,50],options.altitude??null,{},options.type||options.forestType||'auto',hash(x+51,y+99));plants.push({x:(x+.15+seed*.7)*16,y:(y+.15+hash(y,x)*.7)*16,r:(plant.kind==='needleleaved'?5:7)*(Number(options.treeScale)||100)/100,color:palette(plant.kind,seed)})}
+ if(kind==='forest'||kind==='scrub')for(let y=0;y<4;y++)for(let x=0;x<4;x++){const seed=hash(x+17,y+41);if(hash(x+991,y-772)>density)continue;const plant=kind==='scrub'?{kind:'shrub'}:vegetation(options.position||[14,50],options.altitude??null,{},options.type||options.forestType||'auto',hash(x+51,y+99));plants.push({x:(x+.15+seed*.7)*16,y:(y+.15+hash(y,x)*.7)*16,r:(plant.kind==='needleleaved'?5:7)*(Number(options.treeScale)||100)/200,color:palette(plant.kind,seed)})}
  for(let y=0;y<width;y++)for(let x=0;x<width;x++){let color=base.map(v=>v+(hash(x,y)-.5)*10+(kind==='field'?(x%8<2?-17:4):kind==='grass'?Math.sin(x*2+y)*4:0));for(const p of plants){const dx=((x-p.x+96)%64)-32,dy=((y-p.y+96)%64)-32,d=Math.hypot(dx,dy);if(d<p.r){const shade=.78+.22*Math.sqrt(Math.max(0,1-d*d/(p.r*p.r)))+.06*(-dx+dy)/p.r;color=p.color.map(v=>v*255*shade)}}const i=(y*width+x)*4;for(let c=0;c<3;c++)data[i+c]=Math.max(0,Math.min(255,color[c]));data[i+3]=255}return {width,height:width,data}}
 function localMatrix(matrix,origin){const scale=origin.meterInMercatorCoordinateUnits(),out=new Float32Array(16);for(let i=0;i<4;i++){out[i]=matrix[i]*scale;out[4+i]=-matrix[4+i]*scale;out[8+i]=matrix[8+i]*scale;out[12+i]=matrix[i]*origin.x+matrix[4+i]*origin.y+matrix[8+i]*(origin.z||0)+matrix[12+i]}return out}
 function compile(gl,type,text){const s=gl.createShader(type);gl.shaderSource(s,text);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){gl.deleteShader(s);throw Error('Shader stromů se nepodařilo přeložit')}return s}

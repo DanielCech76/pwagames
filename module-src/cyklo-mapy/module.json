@@ -2,7 +2,7 @@
   "id": "cyklo-mapy",
   "sourceFrom": "cyklo",
   "edition": "mapy",
-  "version": "1.14.0",
+  "version": "1.14.1",
   "apiVersion": 1,
   "minCoreVersion": "2.1.1",
   "maxCoreMajor": 2,
