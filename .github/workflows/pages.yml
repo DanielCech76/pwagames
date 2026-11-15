@@ -52,6 +52,7 @@ jobs:
           node tests/cyklo-terrain.test.cjs
           node tests/cyklo-reroute.test.cjs
           node tests/cyklo-road-match.test.cjs
+          node tests/cyklo-track-match.test.cjs
           node tests/azulejo-module.test.cjs
       - uses: actions/configure-pages@v5
         with:

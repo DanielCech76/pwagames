@@ -1,0 +1,24 @@
+const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict');const c={};vm.createContext(c);for(const f of ['road-matcher.js','track-matcher.js','ride-store.js'])vm.runInContext(fs.readFileSync('module-src/cyklo/'+f,'utf8'),c);const {TrackMatcher,geometry,display}=c.CykloTrack;
+const line=(key,coordinates,grade='0:')=>({key,coordinates,grade}),road=line('bend',[[0,0],[.001,0],[.001,.001]]);let t=1700000000000,seq=0;const fix=(lon,lat=0,heading=90,segment=1)=>({lon,lat,heading,speed:5,accuracy:8,t:t+=3000,seq:++seq,segment});const add=(m,p,lines=[road])=>m.add(p,lines,{tolerance:25});
+let m=new TrackMatcher(),a=fix(.0007,.00008),b=fix(.00095,.00008);add(m,a);assert.equal(a.match,undefined,'wait for a sequence before snapping');const revised=add(m,b);assert(a.match&&b.match,'confirmation revises preceding fix');assert(revised.includes(a));assert.equal(a.lat,.00008,'original latitude untouched');assert.equal(display(b).lat,0);
+let d=fix(.00108,.0002,0);add(m,d);assert(d.match);let g=geometry([a,b,d]);assert(g.features[0].geometry.coordinates.some(p=>p[0]===.001&&p[1]===0),'track includes the actual corner');assert.equal(geometry([a,b,d],false).features[0].geometry.coordinates[0][1],a.lat);
+const raw=c.CykloStore.gpx({name:'Ride'},[a,b,d]),corrected=c.CykloStore.gpx({name:'Ride'},[a,b,d],true);assert(raw.includes('lat="0.00008"'));assert(corrected.includes('lat="0" lon="0.001"'));assert(corrected.includes('interpolované'));assert.equal(JSON.parse(JSON.stringify(d)).match.lon,d.match.lon,'correction serializes with raw point');
+// Crossing is not a road connection, even when the next road is closer and heading-compatible.
+const east=line('east',[[0,0],[.002,0]]),bridge=line('bridge',[[.001,-.001],[.001,.001]],'1:bridge');m=new TrackMatcher();a=fix(.0006,.00004);b=fix(.0008,.00004);add(m,a,[east,bridge]);add(m,b,[east,bridge]);d=fix(.001,.00008);add(m,d,[east,bridge]);assert(d.match&&d.match.lat===0);const jump=fix(.001,.0002,0);add(m,jump,[east,bridge]);assert(!jump.match,'cannot jump onto bridge at crossing');
+// Real junction and bridge entrance at a shared endpoint remain traversable.
+const north=line('north',[[.002,0],[.002,.001]],'1:bridge');m=new TrackMatcher();a=fix(.0015);b=fix(.0018);d=fix(.002,.00015,0);for(const p of [a,b,d])add(m,p,[east,north]);assert(d.match);assert(geometry([a,b,d]).features[0].geometry.coordinates.some(p=>p[0]===.002&&p[1]===0));
+// Nearby parallel roads stay unresolved until the GPS sequence distinguishes them.
+const parallel=line('parallel',[[0,.0001],[.002,.0001]]);m=new TrackMatcher();a=fix(.0003,.00005);b=fix(.0005,.00005);add(m,a,[east,parallel]);add(m,b,[east,parallel]);assert(!b.match,'ambiguous parallel roads remain raw');
+// Gaps and pauses do not receive invented connecting geometry.
+m=new TrackMatcher();a=fix(.0003);b=fix(.0005);add(m,a,[east]);add(m,b,[east]);t+=20000;d=fix(.001);add(m,d,[east]);assert(!d.match);const paused=fix(.0011,0,90,2);add(m,paused,[east]);assert.equal(geometry([a,b,paused]).features.length,1,'single point after pause is not joined');
+// Stored old rides without corrections continue to render unchanged.
+const old=[{lon:0,lat:0,segment:0},{lon:.001,lat:.001,segment:0}];assert.equal(JSON.stringify(geometry(old)),JSON.stringify(geometry(old,false)));
+// Corrections and revised previous points survive checkpoints without replacing raw data.
+(async()=>{const rows=new Map(),storage={get:async k=>rows.get(k),entries:async()=>[...rows].map(([key,value])=>({key,value})),batch:async items=>{for(const i of items)rows.set(i.key,structuredClone(i.value))}},store=new c.CykloStore.RideStore(storage),engine={export:()=>({id:'test'})};m=new TrackMatcher();a=fix(.0003,.00004);b=fix(.0005,.00004);await store.save(engine,add(m,a,[east]));await store.save(engine,add(m,b,[east]));const result=await store.load('test');assert.equal(result.points.length,2);assert(result.points[0].match);assert.equal(result.points[0].lat,.00004);console.log('PASS track reconstruction: sequence confidence, ambiguity, bends, bridges, gaps, raw preservation, GPX and revised checkpoints')})();
+// Marker and trace consume the exact same saved decision, including after recording stops.
+vm.runInContext(fs.readFileSync('module-src/cyklo/map-controller.js','utf8'),c);
+const map=Object.create(c.CyclingMap.prototype);map.settings={trackDisplay:'matched'};map.render=()=>{};map.fitAll=()=>{};map.loaded=false;
+const stored={lon:.001,lat:.0001,t:123,segment:0,match:{version:1,lon:.001,lat:0,heading:90,offset:11}};
+map.set([stored],{lon:stored.lon,lat:stored.lat,t:123});assert.equal(map.position.lat,0,'use correction from stored point even when marker fix lacks metadata');
+map.settings.trackDisplay='raw';map.set([stored],stored);assert.equal(map.position.lat,.0001);
+map.settings.trackDisplay='both';map.set([stored],stored,true);assert.equal(map.position.lat,0,'history shares the stored corrected position');

@@ -40,3 +40,5 @@ header button,nav button{box-shadow:none}
 @media(max-height:730px){#simProfile{height:90px}#simulationPanel .elevation-card{padding-top:5px}#simulationPanel>.detail-actions button{min-height:36px}#app.simulating #instruments{display:none}}
 @media(orientation:landscape) and (max-height:600px){#simulationPanel{max-height:180px}#simProfile{height:90px}}
 @media(prefers-reduced-motion:reduce){button{transition:none}}
+
+.position-diagnostic{position:absolute;left:10px;top:115px;max-width:calc(100% - 85px);background:#09222deb;color:#fff;padding:7px 10px;border-radius:10px;font:11px/1.5 system-ui;pointer-events:none;z-index:3;white-space:pre-line}
