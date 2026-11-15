@@ -52,6 +52,8 @@ Otevři http://localhost:8000. Pro telefon použij HTTPS hosting. Service worker
 
 ## Zdrojové soubory a vydávání
 
+Před vydáním ověř také možnost odeslat commit z aktuálního pracovního prostředí. Přístup přes propojení GitHub v ChatGPT a přihlášení místní příkazové řádky jsou oddělené; úspěšné stažení repozitáře samo nepotvrzuje možnost zápisu.
+
 - `core/`: rozhraní, navigace, úložiště a obecný správce balíčků.
 - `module-src/<id>/`: samostatný zdroj modulu s `module.json`.
 - `scripts/module-bridge.js`: společný protokol důvěryhodného modulu v1.
