@@ -1,0 +1,11 @@
+{
+  "scope": "Synthetic Mesa llvmpipe forest pass; not Android FPS",
+  "baseline": {
+    "softwarePassMedianMs": 1.2457080010790378,
+    "paintedFraction": 0.03253936767578125
+  },
+  "optimized": {
+    "softwarePassMedianMs": 2.1445599995786324,
+    "paintedFraction": 0.9431991577148438
+  }
+}

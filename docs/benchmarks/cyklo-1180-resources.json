@@ -1,0 +1,21 @@
+{
+  "scope": "Synthetic resource counts; no Android frame-time guarantee",
+  "baseline": {
+    "preparationMs": 73.07159800000001,
+    "preparedElements": 4000,
+    "preparedImpliedCrowns": 4000,
+    "visibleRecords": 406,
+    "estimatedVisibleCrowns": 406,
+    "submittedVertices": 14184,
+    "estimatedDEMQueries": 12000
+  },
+  "optimized": {
+    "preparationMs": 86.000664,
+    "preparedElements": 262,
+    "preparedImpliedCrowns": 75328,
+    "visibleRecords": 250,
+    "estimatedVisibleCrowns": 72448,
+    "submittedVertices": 3000,
+    "estimatedDEMQueries": 1302
+  }
+}
