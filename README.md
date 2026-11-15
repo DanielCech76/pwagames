@@ -132,3 +132,7 @@ Optional Mapa / Realistická / Krajina 3D modes in both editions; Mapy.com aeria
 ## CYKLO 1.10.0
 
 Denser configurable vegetation, broadleaf/mixed/conifer crowns, regional elevation estimates, low edge shrubs, procedural grass/scrub/field textures and a local geometry worker with distance LOD. Automatic classification remains an estimate where tile properties are absent; Copernicus is not connected. See [landscape details](docs/cyklo-landscape.md).
+
+## CYKLO 1.11.0
+
+Independent map search via a compact magnifier, place markers and saved-place actions without starting GPS or changing a plan. Vegetation range now supports 100m–2km with distance bands and bounded far coverage. Both editions share this release.

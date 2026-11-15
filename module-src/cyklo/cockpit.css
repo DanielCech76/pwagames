@@ -218,3 +218,9 @@
 #app #zoomBubble[aria-pressed=false] .control-icon{opacity:.75}
 .map-arrow{width:28px;height:28px;display:grid;place-items:center;font-size:0;line-height:0;color:#f5810b;-webkit-text-stroke:0;text-shadow:none;filter:drop-shadow(0 2px 3px #173b2866)}
 .map-arrow svg{width:28px;height:28px;display:block;fill:currentColor;stroke:white;stroke-width:2;stroke-linejoin:round}
+
+/* Independent place search shares compact map chrome and its hide policy. */
+:root[data-style] #app #mapSearch{position:absolute;top:56px;left:12px;z-index:8;width:34px;height:34px;min-width:34px;min-height:34px;padding:6px;display:grid;place-items:center;border:1px solid var(--accent);border-radius:10px;background:var(--card);color:var(--ink);box-shadow:none}
+#app.controls-hidden #mapSearch{visibility:hidden;opacity:0;pointer-events:none}
+.search-place-marker{width:28px;height:36px;color:#ffad32;filter:drop-shadow(0 2px 3px #00182099)}
+.search-place-marker svg{width:100%;height:100%;fill:var(--card,#08202c);stroke:currentColor;stroke-width:2}

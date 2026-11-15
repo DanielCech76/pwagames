@@ -93,3 +93,7 @@ See [landscape verification](cyklo-landscape.md): three selectable modes, aerial
 ## 1.10.0
 
 Vegetation/type/density/LOD/texture/worker tests and all existing regressions pass. Mobile settings checked at 320/390px. Real GPU vegetation rendering remains unverified in the cloud browser; see [implementation and limits](cyklo-landscape.md).
+
+## 1.11.0
+
+All regressions pass. Tested 100m–2km vegetation bands/budgets, standalone search isolation, route assignment compatibility and place marker lifecycle. Live Photon search Praha, selection, save and saved-place listing passed. Mobile 2km selection passed at 320/390px. GPU rendering remains unavailable in the test browser.

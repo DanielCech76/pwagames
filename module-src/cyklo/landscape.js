@@ -4,7 +4,7 @@
 const R=6378137,rad=Math.PI/180,FOREST_SOURCE='cyklo-vegetation',MASK='cyklo-vegetation-mask',TREES='cyklo-vegetation-3d';
 function normalize(s){
  if(!['map','realistic','forest'].includes(s.sceneMode))s.sceneMode='map';
- s.treeRadius=[200,350,500].includes(Number(s.treeRadius))?Number(s.treeRadius):350;
+ s.treeRadius=[100,200,350,500,1000,2000].includes(Number(s.treeRadius))?Number(s.treeRadius):350;
  if(s.vegetationDensity==null)s.vegetationDensity={sparse:50,normal:100,dense:150}[s.treeDensity]||100;
  s.vegetationDensity=Math.max(25,Math.min(200,Number(s.vegetationDensity)||100));
  if(!['auto','broadleaved','mixed','needleleaved'].includes(s.forestType))s.forestType='auto';
@@ -39,11 +39,12 @@ function polygons(features){const result=[];let vertices=0;for(const f of featur
 function contains(p,polys){return polys.some(a=>p[0]>=a.b[0]&&p[0]<=a.b[2]&&p[1]>=a.b[1]&&p[1]<=a.b[3]&&inPolygon(p,a.r))}
 function segments(features,route,center,extent){const lines=[route||[]];for(const f of features.slice(0,350)){const g=f.geometry;if(g?.type==='LineString')lines.push(g.coordinates);else if(g?.type==='MultiLineString')lines.push(...g.coordinates)}const result=[];for(const line of lines){for(let i=1;i<line.length;i++){if(result.length>=5000)return result;const a=project(line[i-1]),b=project(line[i]);if(center&&(Math.max(a[0],b[0])<center[0]-extent||Math.min(a[0],b[0])>center[0]+extent||Math.max(a[1],b[1])<center[1]-extent||Math.min(a[1],b[1])>center[1]+extent))continue;result.push([a,b])}}return result}
 function sample(center,forests,excluded,roads,route,options={}){
- const radius=options.radius||350,density=Math.max(25,Math.min(200,Number(options.amount)||({sparse:50,normal:100,dense:150}[options.density]||100))),quality=options.quality||'auto',cap=quality==='high'?6000:quality==='economy'?1000:3000;
- const cos=Math.max(.09,Math.cos(Math.round(center[1]*10)/10*rad)),step=8/cos,c=project(center),extent=radius/cos,woods=polygons(forests),avoid=polygons(excluded),ways=segments(roads,route,c,extent+20/cos),out=[];
+ const radius=Math.max(100,Math.min(2000,Number(options.radius)||350)),density=Math.max(25,Math.min(200,Number(options.amount)||({sparse:50,normal:100,dense:150}[options.density]||100))),quality=options.quality||'auto',cap=quality==='high'?6000:quality==='economy'?1000:3000;
+ const cos=Math.max(.09,Math.cos(Math.round(center[1]*10)/10*rad)),c=project(center),extent=radius/cos,woods=polygons(forests),avoid=polygons(excluded),ways=segments(roads,route,c,extent+20/cos),out=[];
+ for(const [inner,limit,spacing]of [[0,350,8],[350,1000,24],[1000,2000,60]]){if(radius<=inner)continue;const step=spacing/cos,extent=Math.min(radius,limit)/cos;
  for(let iy=Math.floor((c[1]-extent)/step);iy<=Math.ceil((c[1]+extent)/step);iy++)for(let ix=Math.floor((c[0]-extent)/step);ix<=Math.ceil((c[0]+extent)/step);ix++){
   const seed=hash(ix,iy);if(hash(ix+991,iy-772)>density/200)continue;
-  const p=[(ix+.15+seed*.7)*step,(iy+.15+hash(iy,ix)*.7)*step],distance=Math.hypot(p[0]-c[0],p[1]-c[1])*cos;if(distance>radius)continue;
+  const p=[(ix+.15+seed*.7)*step,(iy+.15+hash(iy,ix)*.7)*step],distance=Math.hypot(p[0]-c[0],p[1]-c[1])*cos;if(distance>Math.min(radius,limit)||distance<=inner)continue;
   const wood=woods.find(a=>p[0]>=a.b[0]&&p[0]<=a.b[2]&&p[1]>=a.b[1]&&p[1]<=a.b[3]&&inPolygon(p,a.r));if(!wood||contains(p,avoid))continue;
   if(ways.some(([a,b])=>p[0]>=Math.min(a[0],b[0])-9/cos&&p[0]<=Math.max(a[0],b[0])+9/cos&&p[1]>=Math.min(a[1],b[1])-9/cos&&p[1]<=Math.max(a[1],b[1])+9/cos&&distanceSegment(p,a,b)*cos<9))continue;
   const position=unproject(p),altitude=options.elevation?.(position),plant=vegetation(position,altitude,wood.properties,options.forestType||'auto',hash(ix+51,iy+99));
@@ -51,9 +52,12 @@ function sample(center,forests,excluded,roads,route,options={}){
   if(plant.kind!=='shrub'&&options.undergrowth!=='off'&&seed<(options.undergrowth==='rich'?.3:.14)){
    const edge=8/cos;if(!contains([p[0]+edge,p[1]],woods)||!contains([p[0]-edge,p[1]],woods)||!contains([p[0],p[1]+edge],woods)||!contains([p[0],p[1]-edge],woods)){plant.kind='shrub';plant.height=1.2+seed*5}
   }
-  out.push({position,...plant,height:plant.height*(options.scale||100)/100,seed,distance,lod:quality==='economy'||distance>220?'far':'near'});
- }
- return out.sort((a,b)=>a.distance-b.distance||a.seed-b.seed).slice(0,cap);
+  out.push({position,...plant,height:plant.height*(options.scale||100)/100,seed,distance,band:inner===0?0:inner===350?1:2,lod:quality==='economy'||distance>220?'far':'near'});
+ }}
+ // Reserve a share for distant rings, so a larger radius does not merely refill the near cap.
+ const groups=[0,1,2].map(b=>out.filter(t=>t.band===b).sort((a,b)=>a.seed-b.seed||a.distance-b.distance)),selected=[],rest=[];
+ for(let i=0;i<3;i++){const quota=Math.floor(cap*[.5,.3,.2][i]);selected.push(...groups[i].slice(0,quota));rest.push(...groups[i].slice(quota))}
+ rest.sort((a,b)=>a.distance-b.distance||a.seed-b.seed);selected.push(...rest.slice(0,cap-selected.length));return selected.sort((a,b)=>a.distance-b.distance||a.seed-b.seed);
 }
 function mesh(trees,origin,elevation){
  const c=project(origin),cos=Math.cos(origin[1]*rad),v=new Float32Array(trees.length*228*6);let cursor=0;

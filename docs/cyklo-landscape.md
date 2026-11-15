@@ -50,3 +50,12 @@ Geometrie vzniká v přibaleném landscape-worker.js. Přenos Float32 bufferu ne
 Všechny automatické regrese včetně nových testů typů korun, hustoty, výškového odhadu, priority mapových údajů, omezení regionu, textur, LOD a workeru prošly. Mobilní 320 px i 390 px: posuvník na 200 %, smíšený les a ilustrační povrchy; bez vodorovného přetečení. Skutečný snímek nastavení je screenshots/cyklo110-settings.jpg. Cloudový prohlížeč nemá WebGL, obrazové posouzení nových modelů a výkon na Androidu proto zůstávají k ověření na zařízení.
 
 Tato verze dokončuje první etapu návrhu. Živé klasifikační dlaždice Copernicus, ESA WorldCover a výšky korun ETH nejsou připojeny a aplikace je neprezentuje jako zdroj svých odhadů. Jejich příprava, hosting, aktualizace a datová atribuce tvoří samostatnou druhou etapu. Nevznikla nová placená služba ani registrace do katalogu Mapy.com.
+
+
+# CYKLO 1.11.0 — dosah stromů
+
+Volba Nastavení → Mapa → Dosah stromů nabízí 100/200/350/500 m, 1 km a 2 km; výchozí 350 m a staré uložené hodnoty zůstávají platné. Vzdálenost se počítá od středu mapy a není spojená se zoomovým posuvníkem. Jde o maximální dosah, nikoli závazek stáhnout všechna data mimo viditelnou mapu. Zobrazují se pouze porosty dostupné v načtených mapových a výškových dlaždicích; zoom pod 12 a úsporný režim mají dosavadní omezení.
+
+Generátor používá tři prostorová pásma: do 350 m 8m mřížku, 350–1000 m 24m mřížku, nad 1 km 60m mřížku. Koruny nad 220 m se nadále zjednodušují. Stávající výkonový limit se dělí mezi pásma 50/30/20 %, nevyužité místo se vrací ostatním pásmům. Větší dosah tak skutečně dostane i vzdálené prvky, místo aby celý limit zabralo nejbližší okolí. Rozmístění je deterministické.
+
+Testy kontrolují krajní dosahy, společný limit 3000 prvků automatické kvality, blízké i vzdálené pokrytí a žádné prvky za zvoleným dosahem. Mobilní nastavení 2 km ověřeno na 320/390px bez vodorovného přetečení; skutečný snímek screenshots/cyklo111-settings.jpg. Cloudový prohlížeč stále nemá WebGL, skutečné GPU vykreslení porostů zůstává k ověření na zařízení.

@@ -83,3 +83,14 @@ Horní pruh/LED mají čtyři základní metriky v jedné kompaktní řadě, roz
 - Nejvýše jeden požadavek současně, automatické pokusy s odstupem nejméně 30 s včetně chyb. Ruční Přepočítat zůstává dostupné. Nový výpočet začíná aktuální GPS a zachovává neprojeté body, cíl a profil kola. Původní plán v seznamu se nepřepisuje. Návrat na trasu, ukončení navigace, pozadí, změna parametrů nebo vypnutí automatiky ruší zastaralý automatický požadavek; jeho opožděný výsledek navigaci neobnoví. Výpadek služby ponechá původní trasu.
 - Importované GPX bez plánovacích bodů nemá automatickou změnu linie; dostane upozornění na odchylku. Údaje tolerancí se ukládají průběžně, platný rozpracovaný údaj nepřepíše jiná volba.
 - Neprovádí se změna schématu historie/plánů ani migrace GPS bodů. Nové předvolby se normalizují a uchovávají spolu s dosavadními.
+
+
+## 1.11.0 — samostatné hledání z mapy
+
+Kompaktní SVG lupa vlevo nahoře pod přepínači mapy otevírá sdílený dialog hledání bez založení trasy. Skrývá se se sekundárním ovládáním a dotyk ji znovu zpřístupní; centrování vpravo nahoře zůstává trvale dostupné. Hledání používá dosavadní Photon/OpenStreetMap v Open edici nebo Mapy.com v Mapy edici s vlastním klíčem. Zadaný dotaz se odešle službě až po potvrzení formuláře. GPS a záznam se automaticky nezapínají.
+
+Výběr výsledku přepne na Mapu, pozastaví sledování kamery bez vypnutí GPS, zaměří výsledek a vytvoří samostatnou značku. Název a souřadnice jsou v dialogu s akcemi Start zde / Průjezdní bod / Cíl zde / Uložit místo. Pouhé hledání ani výběr nemění rozpracovaný plán nebo běžící navigaci. Teprve při přiřazení k trase se použije existující workflow editoru. Uložená místa jsou dostupná i při příštím samostatném hledání. Značka zůstává po zavření dialogu a při obnovení mapy; obnovení značky nesmí převzít GPS sledování. Značka se uvolní při zničení mapy. V náhradním schématu je vybrané místo označeno barevným bodem.
+
+Režim přiřazení do trasy a režim samostatného hledání jsou explicitně oddělené indexem bodu. Otevření a zavření dialogu zneplatňuje staré odpovědi; opožděné čtení uložených míst se také ignoruje. Automatické regrese ověřují hledání s existujícím i neexistujícím plánem, neměnnost plánu a počtů GPS volání, uložení místa a původní přiřazování výsledku do trasy.
+
+Živé UI ověření: dotaz Praha vrátil výsledky Photon, výběr Prague, Czechia otevřel akce a Uložit místo zpřístupnilo místo při dalším hledání. Žádná skutečná GPS poloha nebo API klíč nebyly použity.
