@@ -89,3 +89,7 @@ All 23 regression files pass, including GPS toggle on/off, GPS off pausing/persi
 ## 1.9.0
 
 See [landscape verification](cyklo-landscape.md): three selectable modes, aerial source selection and labels, forest geometry/resource tests and mobile settings QA. Real GPU rendering is not verified in the cloud browser (WebGL unavailable).
+
+## 1.10.0
+
+Vegetation/type/density/LOD/texture/worker tests and all existing regressions pass. Mobile settings checked at 320/390px. Real GPU vegetation rendering remains unverified in the cloud browser; see [implementation and limits](cyklo-landscape.md).

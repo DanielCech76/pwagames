@@ -128,3 +128,7 @@ Mountain-button terrain toggle with crossed flat-state icon, horizontally center
 ## CYKLO 1.9.0
 
 Optional Mapa / Realistická / Krajina 3D modes in both editions; Mapy.com aerial tiles with labels, existing DEM terrain, bounded approximate forest meshes and configurable radius/density. See [landscape modes and verification limits](docs/cyklo-landscape.md).
+
+## CYKLO 1.10.0
+
+Denser configurable vegetation, broadleaf/mixed/conifer crowns, regional elevation estimates, low edge shrubs, procedural grass/scrub/field textures and a local geometry worker with distance LOD. Automatic classification remains an estimate where tile properties are absent; Copernicus is not connected. See [landscape details](docs/cyklo-landscape.md).
