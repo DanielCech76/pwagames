@@ -1,0 +1,171 @@
+{
+  "format": 1,
+  "id": "cyklo",
+  "version": "1.12.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.1.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "CYKLO Open",
+  "description": "GPS i bez jízdy, 2D/3D mapa, cyklistický plánovač, uložené trasy, simulace a sledování trasy.",
+  "icon": "🚲",
+  "theme": "mint",
+  "permissions": [
+    "Poloha (na pokyn)",
+    "Online mapy, BRouter a Photon",
+    "Udržení obrazovky (pokud podporováno)",
+    "Online výškové dlaždice Mapterhorn (terén/vrstevnice)",
+    "Online lesní plochy OpenFreeMap a volitelné letecké Mapy.com"
+  ],
+  "fullscreen": false,
+  "largeData": true,
+  "edition": "open",
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "appearance.css",
+      "size": 29839,
+      "sha256": "952703021685137e234693840f9003002b0528c62985ed0739b334890de0a8d5"
+    },
+    {
+      "path": "appearance.js",
+      "size": 6978,
+      "sha256": "8ceae2bd7c53f8d5b291abb219589b7639ff27bf0c93a89208c36b6a2085c35b"
+    },
+    {
+      "path": "bridge.js",
+      "size": 2360,
+      "sha256": "891609a1bf50d92233282ffa3911c30650a01c3c38f6abf9ffa800c2f954260d"
+    },
+    {
+      "path": "camera.js",
+      "size": 1902,
+      "sha256": "6bbd21f5c699f52c129072c91c743a249358e8e38111bb79895697c50f7e4dc0"
+    },
+    {
+      "path": "cockpit.css",
+      "size": 28932,
+      "sha256": "7a584fb88f2a90d2a542e829effd93f634eb49295e851814e1b6bf94f4b2c605"
+    },
+    {
+      "path": "controls.js",
+      "size": 2196,
+      "sha256": "c25f1bf989fc7f18fbbb5cac7f81c70ce203e0e907cd1ce01306276e5d265394"
+    },
+    {
+      "path": "edition.js",
+      "size": 33,
+      "sha256": "f56d6e59b9e8dcc46cf2473454e26c499653107bdb2aa6647e16352deb4eb743"
+    },
+    {
+      "path": "elevation-profile.js",
+      "size": 8071,
+      "sha256": "a210f9f87b6ba80aa13548f42d1744a2b22a46e09e1973dc23ed177560c5d113"
+    },
+    {
+      "path": "features.js",
+      "size": 2135,
+      "sha256": "0d64b3316848065e5683ac34c0a9a977e52e9053e91df782e0b2dbae743afb73"
+    },
+    {
+      "path": "game.js",
+      "size": 38073,
+      "sha256": "f4dc3f6c96d8525240c6653184b1703739a06012ba18ceb52fffa16beeec76ba"
+    },
+    {
+      "path": "icons.js",
+      "size": 2776,
+      "sha256": "ceb67efdb7c438e7428add131832cd918e9e4e0663941a699e5cabd6ad238800"
+    },
+    {
+      "path": "index.html",
+      "size": 30717,
+      "sha256": "5292d00f6a6591c4b9b3b23e764b25236534fe1600aa5fd665561e5bc9e9da4d"
+    },
+    {
+      "path": "landscape-worker.js",
+      "size": 334,
+      "sha256": "4c9b2af016aaf5d935200b1219ba13d260cf061f3c0f3b635d4b53d56bb19ed7"
+    },
+    {
+      "path": "landscape.js",
+      "size": 21219,
+      "sha256": "9b1fdc6c481a492706e0ee31c3a9633796d35b59eb85e0a46bf6c19f8a0260a2"
+    },
+    {
+      "path": "map-controller.js",
+      "size": 17834,
+      "sha256": "c7d32e55542fdb5236a920bc659f48704d109784d90b567e2e578733a2ea6cf4"
+    },
+    {
+      "path": "module-data.js",
+      "size": 2541,
+      "sha256": "c262c018874e1fdba92690f7701b35b0c664e4c8623e0e6db189d73e42759be0"
+    },
+    {
+      "path": "navigation.js",
+      "size": 9075,
+      "sha256": "55eeabe71c05655cf4af6acb0be86fdaada186ae6da79ba70c09a1800de1313a"
+    },
+    {
+      "path": "planner-ui.js",
+      "size": 24457,
+      "sha256": "936ba99a094fb753b530c99773cfe7080077ff35d00904981afd82eb890088ae"
+    },
+    {
+      "path": "ride-engine.js",
+      "size": 6251,
+      "sha256": "c435a7f3fb1bd66929b2dde82c35f8fdd6025aaab251fb3a63cfd130a2e9add0"
+    },
+    {
+      "path": "ride-store.js",
+      "size": 2326,
+      "sha256": "eb84f154e6d67342b2e36a6c7bae4370915b389ed6c723001fe7fd76f087ffea"
+    },
+    {
+      "path": "road-matcher.js",
+      "size": 4389,
+      "sha256": "951ac4f09873800b3d02c63ff4aafca47de97474f2269727787c86b2952ee846"
+    },
+    {
+      "path": "style.css",
+      "size": 14435,
+      "sha256": "3a1c0e171d150df34772b0603a49db6f493fbc4d53ba98144c4e6824c332af6e"
+    },
+    {
+      "path": "terrain.js",
+      "size": 5406,
+      "sha256": "21867347814dff0cab5a210f13ca5450cf9bfcb96395e6b88fde2ca6d8c809d1"
+    },
+    {
+      "path": "vendor/LICENSE-maplibre-contour.txt",
+      "size": 3481,
+      "sha256": "b4a3261f4af65db24e6a2ca23093ac25619e6fe0b5ca5ec75fb09a49817b5c8d"
+    },
+    {
+      "path": "vendor/LICENSE-maplibre.txt",
+      "size": 5984,
+      "sha256": "ee5fc05a0677eaf69601d2c7db0d9ecd6cc27c3abc1d0733bc9ed34707cf8ef2"
+    },
+    {
+      "path": "vendor/maplibre-contour.js",
+      "size": 31240,
+      "sha256": "055e45d0a76aaeaaf5a96765b8ce524abba3272456be75e715081e235ebd1262"
+    },
+    {
+      "path": "vendor/maplibre-gl.css",
+      "size": 69449,
+      "sha256": "1dae8925ee5906e442f0fd7028dded2884381b9acd7a780e5270025e09fc7c5e"
+    },
+    {
+      "path": "vendor/maplibre-gl.js",
+      "size": 1014818,
+      "sha256": "29f5c00792a339ae89dc3e10271c3ccd8ae6ec9be9440f3e2e401686b8ca7e5d"
+    },
+    {
+      "path": "vendor/mapy-logo.svg",
+      "size": 71683,
+      "sha256": "a26cbd8715150e221047dae26c6f16d65c215325915d306a99fc6c9ee76d1b69"
+    }
+  ]
+}
