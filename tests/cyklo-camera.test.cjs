@@ -6,3 +6,5 @@ console.log('PASS camera: lookahead, logarithmic slider, heading wrap; projected
 let compactOptions;global.CykloAppearance={};const smallMap={getContainer:()=>({clientWidth:390,clientHeight:195}),jumpTo:o=>compactOptions=o,unproject:()=>({lat:50,lng:14})};c.fitCamera(smallMap,{lat:50,lon:14},0,0,250,1000);assert(compactOptions.padding.top>0);assert.equal(compactOptions.padding.bottom,0);assert(compactOptions.padding.right>0,'vertical zoom must leave room on the right');delete global.CykloAppearance;
 
 const noProjection={getContainer:()=>({clientWidth:390,clientHeight:300}),jumpTo(){},unproject:()=>null};assert.equal(c.fitCamera(noProjection,{lat:50,lon:14},0,60,250,1000),null,'unavailable terrain projection must not crash GPS render');
+
+for(const min of [25,50,100])for(const max of [2000,20000,50000])for(const t of [0,.2,.5,.9,1]){const C=require("../module-src/cyklo/camera.js");assert(Math.abs(C.toSlider(C.fromSlider(t,max,min),max,min)-t)<1e-10)}

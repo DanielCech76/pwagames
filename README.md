@@ -112,3 +112,7 @@ PNG a SVG export zůstává zachován; samostatné HTML se z modulu neexportuje,
 Kontrola čitelnosti rozlišuje celý obraz a izolovanou oblast QR. Nízké krytí a výrazný ornament mohou skenování znemožnit; před tiskem ověř konkrétní výstup telefonem.
 
 Podrobnosti integrace a ověření: `docs/azulejo-module.md`.
+
+## CYKLO 1.6.0
+
+Approved A cockpit, full-screen grouped settings, independent color palettes, expanded manual zoom with whole-route fit, 150/200 km/h gauges, header-only ride actions, automatic Jízda selection and corrected control hiding. See [cockpit specification and verification](docs/cyklo-cockpit.md). Both Open and Mapy.com editions share the release.
