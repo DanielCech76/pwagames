@@ -80,3 +80,21 @@ Regrese v `tests/cyklo-canopy.test.cjs` injektují chybu shaderu, načítání a
 Stav „Stromy čekají na výškový podklad“ mohl přetrvávat při `isSourceLoaded('cyklo-relief-dem') === false`, ačkoli místní dotazy již vracely výšku. Globální bariéra je odstraněna; aktivní terén je stále nutný, jednotlivé neznámé výšky se vynechávají. Počet a druhy ve stavu odpovídají skutečně dostupným výškám. Pokud žádný vzorek výšku nemá, geometrie se vyprázdní a cache klíč zneplatní. Každá událost relevantního výškového/lesního zdroje zvýší revizi i bez pole `tile`, aby neúplná geometrie nezůstala v cache.
 
 Test `cyklo-landscape-lod.test.cjs` pokrývá celkově nenačtený zdroj s dostupnými výškami, nulovou a částečnou dostupnost a obnovu po události bez `tile`. Mobilní GPU není tímto testem simulováno; případné další chyby zobrazí diagnostika z 1.15.2.
+
+
+## 1.16.0 — instancování, obrysy, cache a měření
+
+Runtime používá `Canopy.instances`: 9 floatů (anchor XYZ, width/height, druh/seed/shade/group), 36 B na strom. Sdílená šablona obsahuje dva trojúhelníkové vějíře s 36 vrcholy celkem; konzervativní obrysy mají maximálně osm bodů pro každý druh, detail a čelní/horní pohled. `build-canopy-shapes.py` generuje obrysy z nezměněných PNG včetně dvou texelů rezervy pro filtrování. Přibývá tedy vrcholových výpočtů oproti dvěma obdélníkům, ale mizí opakovaná data a část průhledné rasterizované plochy (průměrná plocha obrysů je o 18 % menší než UV obdélníky). Není to příslib 18% rychlejšího GPU.
+
+Instanční VAO a atlasové konstanty jsou stabilní. Po změně kamery nebo dat se provede konzervativní test šesti rovin frusta a přenese se jen viditelný výběr. Běžný nezměněný snímek buffer neaktualizuje. Obalová koule zahrnuje kmen, všechny kalibrované paty i širší skupiny korun; strom se nevyřazuje pouze podle paty. Nulová váha čelní/horní plochy přesune její vrcholy mimo clip prostor. Dither odmítá fragment před texture fetch. LOD prahy a umělecké atlasy zůstávají původní.
+
+Cache buněk je založena na původní deterministické světové mřížce a uchovává pouze geografickou přípustnost a okraj lesa. Druh a výška se nadále vyhodnocují s aktuálními nastaveními a výškami. Události vektorového zdroje ruší snapshot polygonů a cache buněk; změna plánované trasy ruší pouze ověření buněk. DEM události ruší výšky. Převýšení, zapnutí terénu a změna zdroje se účastní klíče cache výšek. Cache jsou omezené na 50 000 položek; neznámé výšky se do příští DEM události pamatují, stále se nevykreslují na nule. Geometrie se dále sestavuje jako celek, ale převody polygonů, ověření buněk a dotazy na výšky se znovu nedělají pro každý již známý strom.
+
+`VegetationTimer` používá volitelné `EXT_disjoint_timer_query_webgl2` přibližně jednou za 30 kreslení. Nikdy nečte nedostupný výsledek, nevnořuje se do cizího query a maže neplatné disjoint výsledky i prostředky po odstranění vrstvy. CPU příprava nezahrnuje asynchronní výpočet skutečných 3D modelů ve workeru; GPU údaj se týká korun, nikoli celé mapy. EMA intervalu render callbacků ignoruje mezery nad 250 ms a není důkazem samostatného GPU času.
+
+Kontroly:
+- `tests/cyklo-performance.test.cjs`: shoda umístění a průjezdných koridorů s cache, invalidace tras/DEM/lesních dat, menší záznamy, zachování přesahujících korun při cullingu, prázdný worker a neblokující GPU query. Součást stávajícího CI vstupu `cyklo-landscape.test.cjs`.
+- `python scripts/check-canopy-instancing.py`: skutečné porovnání starých a nových výstupů na Mesa EGL/GLES3, všechny druhy/LOD a horní pohled, husté perspektivní scény, hloubka a různé azimuty. Povolený limit je <1 % významně změněných pixelů popředí, ztracené siluety samostatně omezené v izolovaných pohledech. Nenahrazuje Android GPU test.
+- `node scripts/benchmark-canopy.cjs`: reprodukovatelný kontrolovaný CPU test proti 1.15.3 (vyžaduje historický commit v gitu). Stejné vzorky jsou před měřením porovnány; 15 běhů po zahřátí, mediány. Výsledky uložené v `docs/benchmarks/cyklo-1160-cpu.json` nejsou měřením FPS celého telefonu.
+
+Mipmapy atlasu a agresivnější slučování vzdálených stromů nejsou v tomto vydání zapnuté; tato sada zachovává existující obraz a dosah. Výtvarné změny ani snižování hustoty se nepoužívají jako zdroj deklarovaných CPU úspor.

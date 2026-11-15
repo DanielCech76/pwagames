@@ -160,3 +160,14 @@ Jde o diagnostické vydání pro obě edice, nikoli o potvrzenou opravu příči
 Při načítání DEM už vegetace nečeká na `isSourceLoaded` celého výškového zdroje. Stromy se vytvoří pro jednotlivé body, kde `queryTerrainElevation` vrací konečnou výšku; ostatní počkají na další událost zdroje. Události výškových dat nově invalidují geometrii i bez pole `tile`. Stav rozlišuje čekání na místní výšky a částečně zobrazený porost; počty zahrnují pouze prvky se známou výškou. Stromy bez výšky se neposazují na nulu.
 
 Regresní test ověřuje vykreslení při globálně nedokončeném zdroji, úplně chybějící i částečné místní výšky a doplnění po načtení DEM bez pohybu mapy. Vzhled, tři přepínače a původní diagnostika zůstávají. Oprava řeší prokázanou blokující podmínku; výsledek na telefonu je nutné ověřit.
+
+
+## CYKLO 1.16.0 — výkon vegetace při zachování vzhledu
+
+Pseudo 3D stromy a orientované koruny nyní používají WebGL2 instancování. Záznam stromu má 36 B místo 528 B rozbalené geometrie (14,67× méně); obě plochy sdílejí statickou šablonu. Konzervativní osmiúhelníkové obrysy omezují průhledné rohy, aniž by měnily původní obrázky. Plochy s nulovou viditelností se oříznou ve vertex shaderu a fragmenty mimo přechodovou masku se odmítnou před načtením textury. Konzervativní frustum test vyřazuje instance mimo obraz včetně bezpečné rezervy na přesah korun. Rozmístění, hustota, výška, dosah, druhy a všechny tři nezávislé přepínače zůstávají zachované.
+
+Cache světových buněk uchovává ověření lesa, vody, budov, cest a okrajů; cache místních výšek sdílí výsledky mezi výběrem druhů, ukotvením a stínováním. Příchod DEM invaliduje výšky, příjem lesních dat připravené polygony i buňky, změna trasy průjezdný koridor a změna terénního zdroje či převýšení výšky. Obě mapové cache mají limit 50 000 položek a zanikají s vrstvou. Při vypnutých skutečných 3D modelech se nespouští prázdná úloha workeru. Neměnné atributy a atlasové uniformy se nastavují jednou; stojící kamera znovu neposílá instance.
+
+V nastavení pod stavem vegetace je měření: CPU příprava, CPU odeslání, GPU korun (pokud telefon podporuje časovací rozšíření), viditelné/celkové instance a průměrovaný interval snímků při pohybu. GPU dotazy jsou asynchronní, řídce vzorkované, bez čekání a výsledky při disjoint události se zahazují. Interval snímků není vydáván za GPU čas ani FPS benchmark.
+
+Ověření: 31 regresních sad, úplný build a integrita balíčků. Volitelný skutečný Mesa EGL test porovnává staré obdélníky a nové instance v 42 kombinacích druhů/LOD/pohledů a čtyřech hustých perspektivních scénách s hloubkovým bufferem; každé porovnání má méně než 1 % významně změněných pixelů popředí. Lokální CPU mikrobenchmark pro 3 000 stromů je uložen v `docs/benchmarks/cyklo-1160-cpu.json`; opakovaný výběr s teplou cache vyšel přibližně 19.7× a příprava instancí přibližně 23.4× rychleji. To není důkaz 10× vyššího FPS celé mapy na Androidu. Plynulost a kompatibilita cílového telefonu zůstávají k ověření.

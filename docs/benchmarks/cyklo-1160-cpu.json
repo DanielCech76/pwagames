@@ -1,0 +1,16 @@
+{
+  "scope": "CPU microbenchmark on this machine; not mobile FPS",
+  "trees": 3000,
+  "sampling": {
+    "baselineMedianMs": 216.33808499999986,
+    "warmCacheMedianMs": 10.969320000000153,
+    "speedup": 19.72210538119016
+  },
+  "geometry": {
+    "expandedMedianMs": 8.497428000000582,
+    "instanceMedianMs": 0.3638890000001993,
+    "speedup": 23.351703404048838,
+    "expandedBytes": 1584000,
+    "instanceBytes": 108000
+  }
+}

@@ -1,0 +1,28 @@
+const assert=require('node:assert/strict'),C=require('../module-src/cyklo/canopy.js'),L=require('../module-src/cyklo/landscape.js');
+const tree={position:[14,50],height:12,kind:'broadleaved',seed:.5};
+const records=C.instances([tree,{...tree,kind:'needleleaved'},{...tree,kind:'shrub'}],[14,50],[0,null,235],[.6,.9,1.1]);
+assert.equal(records.length,18);assert.equal(records[2],0);assert.equal(records[7],Math.fround(.6));assert.equal(records[11],235);assert.equal(records[14],2);
+assert.equal(C.geometry([tree],[14,50],[0]).byteLength/C.instances([tree],[14,50],[0]).byteLength,528/36);
+assert.equal(C.instances(Array(10).fill(tree),[14,50],Array(10).fill(0),[],true).length,18);
+assert.equal(C.template.length,72);assert.deepEqual(C.outlines,require('../module-src/cyklo/assets/tree-outlines.json'));
+// Offscreen anchors may still have visible crowns: cull conservative bounds, not points.
+const matrix=[1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1];
+const data=new Float32Array([0,0,0,1,1,0,.5,1,0,100,0,0,1,1,0,.5,1,0,1.5,0,0,1,1,0,.5,1,0]);
+const culled=C.visible(data,matrix);assert.equal(culled.length,18);assert.equal(culled[9],1.5,'visible crown survives an offscreen anchor');assert.deepEqual(Array.from(data.slice(0,9)),Array.from(culled.slice(0,9)));
+for(let i=0;i<300;i++){const x=(i%17)-8,y=(i%11)-5,z=(i%7)-3,h=.1+i%4,w=.1+i%3;const row=new Float32Array([x,y,z,w,h,0,.5,1,0]);const vertexInside=(Math.abs(x-w*.5)<=1||Math.abs(x+w*.5)<=1)&&Math.abs(y)<=1&&(Math.abs(z)<=1||Math.abs(z+h)<=1);if(vertexInside)assert.equal(C.visible(row,matrix).length,9)}
+// Cached footprint validation keeps the exact deterministic output across moves/density changes.
+const forest={properties:{class:'wood'},geometry:{type:'Polygon',coordinates:[[[13.97,49.97],[14.03,49.97],[14.03,50.03],[13.97,50.03],[13.97,49.97]]]}};
+const cache=new Map(),roads=[{geometry:{type:'LineString',coordinates:[[13.97,50],[14.03,50]]}}];
+for(const [center,amount]of [[[14,50],25],[[14.0001,50.0001],160],[[14.0002,50.0001],200]]){const opts={radius:350,amount,undergrowth:'subtle'};assert.deepEqual(L.sample(center,[forest],[],roads,[],{...opts,cache}),L.sample(center,[forest],[],roads,[],opts))}assert(cache.size>0&&cache.size<50000);
+assert.deepEqual(L.sample([14,50],[forest],[],[],[],{radius:350,amount:160,cache}),L.sample([14,50],[forest],[],[],[],{radius:350,amount:160}),'removed or re-clipped roads cannot leave cached clearance');
+// Terrain/source/route invalidation; repeated builds reuse point heights and polygon validation.
+let heightQueries=0,featureQueries=0,altitude=235,route=[],status='';const layers=new Map(),sources=new Map(),images=new Map();
+const map={on(){},off(){},getCenter:()=>({lng:14,lat:50}),getZoom:()=>19,getPitch:()=>45,getBearing:()=>0,getContainer:()=>({clientHeight:700}),getTerrain:()=>({source:'cyklo-relief-dem'}),queryTerrainElevation(){heightQueries++;return altitude},querySourceFeatures(id,{sourceLayer}){featureQueries++;return sourceLayer==='landcover'?[forest]:[]},getStyle:()=>({layers:[]}),getSource:id=>sources.get(id),addSource:(id,v)=>sources.set(id,v),removeSource:id=>sources.delete(id),getLayer:id=>layers.get(id),addLayer:l=>layers.set(l.id,l),removeLayer:id=>layers.delete(id),hasImage:id=>images.has(id),addImage:(id,v)=>images.set(id,v),updateImage:(id,v)=>images.set(id,v),removeImage:id=>images.delete(id),setPaintProperty(){},triggerRepaint(){}};
+const f=new L.Forest(map,L.normalize({sceneMode:'forest',mapMode:'3d',terrainEnabled:true,landscapeDetailDistance:1000}),t=>status=t,()=>route);f.apply();f.build();assert(f.count>0);const firstHeights=heightQueries,firstFeatures=featureQueries;f.buildKey='';f.build();assert(heightQueries-firstHeights<10,'reuse thousands of elevation lookups');assert.equal(featureQueries,firstFeatures);assert(f.performanceData.buildMs>=0);let constructed=0;global.Worker=class{constructor(){constructed++}};f.buildKey='';f.build();assert.equal(constructed,0,'pseudo-only scenes must not start a model worker');delete global.Worker;
+altitude=300;f.onData({sourceId:'cyklo-relief-dem'});f.build();assert(f.canopyVertices[2]===300,'DEM change replaces cached elevation');assert(heightQueries>firstHeights+10);assert.equal(featureQueries,firstFeatures,'terrain update does not refetch vector features');
+route=[[13.97,50],[14.03,50]];f.buildKey='';f.build();assert.equal(f.cachedRoute,JSON.stringify(route));f.onData({sourceId:'cyklo-vegetation'});assert.equal(f.cellCache.size,0);f.build();assert(featureQueries>firstFeatures);f.destroy();assert.equal(f.cellCache.size,0);assert.equal(f.heightCache.size,0);
+// Nonblocking GPU queries: never read a pending result or report a disjoint sample.
+let available=false,disjoint=false,reads=0,deleted=0,ended=0;const stats={},ext={TIME_ELAPSED_EXT:1,GPU_DISJOINT_EXT:2};
+const gl={QUERY_RESULT_AVAILABLE:3,QUERY_RESULT:4,CURRENT_QUERY:5,getExtension:()=>ext,getQueryParameter(q,key){if(key===3)return available;assert(available);reads++;return 2e6},getParameter:()=>disjoint,getQuery:()=>null,createQuery:()=>({}),beginQuery(){},endQuery(){ended++},deleteQuery(){deleted++}};
+const timer=new L.VegetationTimer(gl,stats);const start=timer.begin();assert(start);timer.end(start);assert(!timer.begin());assert.equal(reads,0);available=true;timer.begin();assert.equal(stats.gpuMs,2);assert.equal(reads,1);timer.frames=0;timer.begin();disjoint=true;timer.end(true);timer.begin();assert.equal(stats.gpuMs,undefined);timer.destroy();assert(deleted>=2&&ended>=2);
+console.log('PASS vegetation performance: 14.67x smaller instance records, safe culling, deterministic cell cache, height/route/source invalidation and asynchronous disjoint GPU timing');
