@@ -49,3 +49,20 @@ Zůstávají limity počtu vzorků, vyloučení vody/budov/cest a worker původn
 - `python scripts/check-canopy-gpu.py`: skutečný surfaceless OpenGL ES 3 kontext Mesa; překlad/link shaderů, vykreslení každého ze tří detailů a pohledu přímo shora a ořez za dosahem. Software renderer llvmpipe není měřením výkonu Androidu.
 - Build a kontrola neměnných balíčků plus všechny existující regresní sady. Obě edice se sestavují ze stejného zdroje jako 1.15.0; předchozí distribuční balíčky zůstávají beze změn.
 - Lokální Chromium nelze v tomto prostředí spustit kvůli zákazu vytváření socketů. Vizuální kontrola byla provedena na skutečném EGL výstupu jednotlivých korun a atlasu, nikoli na živé mapě. Přechody za jízdy, plná mapa s DEM, mobilní ergonomie a výkon zůstávají k ověření na telefonu. PWA záznam na pozadí se touto verzí nemění.
+
+## 1.15.1 — oprava svislé orientace a výtvarné shody
+
+Verze 1.15.0 používala sférické billboardy a jednoduché procedurální koruny. To nebyla shoda s původními výtvarnými návrhy: naklánění celé plochy podle výšky kamery vytvářelo dojem šikmých nebo plovoucích stromů. Tato oprava nahrazuje obě části:
+
+- Svislá osa každého stromu je pevná světová osa Z. Otáčí se pouze podle azimutu kamery. Pata kmene je ukotvená v DEM; sklon svahu mění světlost, nikoli svislou orientaci.
+- Atlas `assets/tree-crowns-v2.png` obsahuje skutečné průhledné malované a faceted low-poly stromy odvozené z uživatelem přiložených původních návrhů. Devět polí představuje tři typy porostu ve třech úrovních detailu. Listnáče mají nepravidelné shluky listí a větve; smrky vrstvené větve místo geometrických kuželů.
+- Každé pole má vlastní UV výřez a kalibrovanou patu kmene. Přechod detailu tak zachovává polohu a výšku stromu i při rozdílných okrajích původního obrázku.
+- Pohled shora má samostatné vodorovné koruny z atlasu `assets/tree-crowns-top-v2.png`, bez kmene a bez jeho naklápění. V blízkosti svislého pohledu se koruna překryje se svislým stromem pomocí stejné uspořádané masky. Ostatní perspektivy zachovávají svislou plochu.
+- Oba atlasy mají 1254 × 1254 RGBA a jsou kompletně součástí offline balíčku. Načtou se jednou při vytvoření vrstvy; do načtení je textura průhledná. Pozdní callback z odstraněné vrstvy nic nezmění. Obnovují se oba texture units, unpack alignment, flip-Y a premultiplication. Po vypnutí nebo zničení vrstvy se oba atlasy uvolní.
+- Skutečné 3D modely a tři nezávislé přepínače zůstávají zachované; oprava nemění historii, nastavení jízdy ani datové schéma. Předchozí balíček 1.15.0 zůstává neměnný.
+
+### Kontrola opravy
+
+Automatická regrese dekóduje skutečný PNG atlas, kontroluje průhledné pozadí, typy a detaily, UV meze, kalibraci paty, přepínání vrstev, načtení obrázků a obnovu obou texture units. Volitelný EGL test nově používá skutečné PNG obrázky a přes transform feedback čte výstup světových souřadnic přímo z vertex shaderu: pro různé azimuty, výšky kamery a úrovně detailu ověřuje shodné X/Y paty a vrcholu a patu v DEM. Kontroluje i vykreslení všech tří detailů, pohled shora a dosah. Skript vyžaduje Mesa EGL/GLES3 a Pillow.
+
+Výtvarné atlasy byly připraveny podle přiložených malovaných a low-poly návrhů s požadavkem na průhlednost, čelní svislé stromy, tři shodné typy a tři úrovně detailu; doplňkový atlas používá odpovídající koruny z ptačí perspektivy. Nejde již o procedurální náhradní kresbu z 1.15.0. Skutečný vzhled na živé mapě a výkon na Androidu stále vyžadují ověření na cílovém zařízení.

@@ -142,3 +142,7 @@ Independent map search via a compact magnifier, place markers and saved-place ac
 ## CYKLO 1.15.0
 
 Tři nezávislé vrstvy vegetace: původní 3D modely, pseudo 3D koruny ke kameře a orientované shluky korun. Tři vzdálenostní detaily, stínování podle sklonu terénu a zachování vzdálené plošné textury. Výchozí jsou pseudo 3D koruny a shluky; skutečné 3D lze zapnout pro porovnání. Nových 100 % nadále odpovídá původním 50 %. Obě edice používají stejné změny. Podrobnosti a hranice ověření: [vrstvy vegetace](docs/cyklo-landscape-lod.md#1150--nezávislé-vrstvy-a-koruny-ke-kameře).
+
+## CYKLO 1.15.1
+
+Oprava stromů podle původních návrhů: skutečné průhledné malované/low-poly textury, svislé kmeny otáčené pouze kolem světové svislé osy a stabilní pata na terénu. Pohled shora používá samostatné koruny. Nahrazuje procedurální náhradní vzhled a naklápění billboardů z 1.15.0. Obě edice; původní přepínače zůstávají zachované. [Podrobnosti opravy](docs/cyklo-landscape-lod.md#1151--oprava-svislé-orientace-a-výtvarné-shody).
