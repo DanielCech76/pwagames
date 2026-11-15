@@ -7,3 +7,9 @@ CYKLO používá bridge v3 (interní volba sestavení bridgeVersion=3). Oznámen
 Tím zůstává zachované hardwarové Zpět, přechody plánovače a původní most pro ostatní moduly. Starší vydané balíčky se nemění. CYKLO 1.13.2 vyžaduje jádro 2.1.1, protože oprava historie je na obou stranách protokolu.
 
 Test tests/cyklo-dialog-history.test.cjs propojuje skutečný message handler jádra, bridge v3 a CyclePlanner; simuluje oddělené fronty MutationObserver, nativního close a postMessage. Ověřuje zobrazení místa bez znovuotevření oken, cílové souřadnice, vypnutí GPS follow, hardwarové Zpět a skutečně vnořené dialogy. Proměnná REPRO_OLD_CORE použije starý handler z origin/main pouze pro lokální reprodukci před publikací.
+
+## CYKLO 1.13.3: dokončení přesunu kamery
+
+Po změně obrazovky následuje resize a render. Původní focus používal easeTo s animací 300 ms, zatímco render volal setPitch i při nezměněném sklonu. Vendored MapLibre implementuje setPitch přes jumpTo a jumpTo začíná stop(), což ruší rozběhnutý přesun. Proto mohl dialog zmizet, ale mapa zůstat u původní polohy.
+
+Focus nyní uchovává požadavek do načtení a zobrazení mapy, zastaví předchozí animaci, přeměří mapu a nastaví cílový střed/zoom atomicky pomocí jumpTo. Marker-only repaint požadavek neruší. Render nastavuje sklon jen při skutečném rozdílu. Vyhledání drží follow=false; nové GPS body tak místo nepřepíšou. Nový test cyklo-place-camera.test.cjs ověřuje skutečný cílový střed modelu kamery po resize/render, čekání na styl, skrytou mapu a GPS aktualizaci. Stejný test na publikovaném zdroji 1.13.2 selže. Jádro zůstává 2.1.1.

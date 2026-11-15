@@ -1,0 +1,12 @@
+const vm=require('node:vm'),fs=require('node:fs'),assert=require('node:assert/strict');
+const el={clientWidth:360,clientHeight:500},context={document:{getElementById:()=>({}),createElement:()=>({setAttribute(){}})},maplibregl:{Marker:class{setLngLat(){return this}addTo(){return this}}},CykloCamera:{fitCamera(){throw Error('GPS must not recenter searched place')}}};vm.createContext(context);vm.runInContext(fs.readFileSync('module-src/cyklo/map-controller.js','utf8'),context);
+function map(){const view=Object.create(context.CyclingMap.prototype);Object.assign(view,{loaded:true,points:[],follow:true,settings:{edition:'open',mapMode:'3d',pitch:45},drawFallback(){}});view.map={center:[14,50],pitch:45,stops:0,pending:null,getContainer:()=>el,getPitch(){return this.pitch},getSource:()=>({setData(){}}),stop(){this.stops++;this.pending=null},resize(){},easeTo(v){this.pending=v},jumpTo(v){this.stop();this.center=v.center},setPitch(v){this.stop();this.pitch=v},completeAnimation(){if(this.pending?.center)this.center=this.pending.center;this.pending=null}};return view}
+const place={lat:49.35253,lon:16.64715,name:'Blansko, Nádraží'};
+let m=map();m.showPlace(place,true);m.resize();m.render();m.map.completeAnimation();assert.equal(JSON.stringify(m.map.center),'[16.64715,49.35253]','camera must reach destination even when resize/render interrupts animation');assert.equal(m.follow,false);const stops=m.map.stops;m.render();assert.equal(m.map.stops,stops,'unchanged pitch must not cancel camera movement');
+// Incoming GPS fixes never take the camera back until explicit recenter.
+m.set([],{lat:50,lon:14,t:1});assert.equal(JSON.stringify(m.map.center),'[16.64715,49.35253]');
+// Search before map style loads, including a marker-only repaint, must retain focus intent.
+m=map();m.loaded=false;m.showPlace(place,true);m.showPlace(place,false);m.loaded=true;m.render();assert.equal(JSON.stringify(m.map.center),'[16.64715,49.35253]');
+// Screen transitions may leave the map hidden until the next layout frame.
+m=map();el.clientWidth=0;m.showPlace(place,true);assert(m.pendingFocus);assert.equal(JSON.stringify(m.map.center),'[14,50]');el.clientWidth=360;m.resize();assert.equal(JSON.stringify(m.map.center),'[16.64715,49.35253]');assert.equal(m.pendingFocus,null);
+console.log('PASS place camera: actual center, resize cancellation, hidden screen, delayed style load, marker repaint and GPS follow');
