@@ -124,3 +124,7 @@ Unified SVG controls, icon-only GPS toggle and ride header, persistent top-right
 ## CYKLO 1.8.0
 
 Mountain-button terrain toggle with crossed flat-state icon, horizontally centered position at the lower-third anchor of the unobscured map, closest view 10 m, and tourist cartography defaults (Mapy.com Outdoor / OpenFreeMap tourist colors).
+
+## CYKLO 1.9.0
+
+Optional Mapa / Realistická / Krajina 3D modes in both editions; Mapy.com aerial tiles with labels, existing DEM terrain, bounded approximate forest meshes and configurable radius/density. See [landscape modes and verification limits](docs/cyklo-landscape.md).

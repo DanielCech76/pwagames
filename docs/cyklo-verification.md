@@ -85,3 +85,7 @@ All 23 regression files pass, including GPS toggle on/off, GPS off pausing/persi
 ## 1.8.0
 
 23 test files pass. Added relief toggle, 10 m endpoint and minimum AUTO, visible-map lower-third anchor, floating-panel occlusion, reversible tourist fill colors and raster-provider isolation checks. Browser QA confirms controls and the new fallback anchor; no WebGL is available in the cloud browser. See [details](cyklo-cockpit.md).
+
+## 1.9.0
+
+See [landscape verification](cyklo-landscape.md): three selectable modes, aerial source selection and labels, forest geometry/resource tests and mobile settings QA. Real GPU rendering is not verified in the cloud browser (WebGL unavailable).

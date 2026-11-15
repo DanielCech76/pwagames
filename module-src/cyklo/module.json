@@ -1,6 +1,6 @@
 {
   "id": "cyklo",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "apiVersion": 1,
   "minCoreVersion": "2.1.0",
   "maxCoreMajor": 2,
@@ -13,7 +13,8 @@
     "Poloha (na pokyn)",
     "Online mapy, BRouter a Photon",
     "Udržení obrazovky (pokud podporováno)",
-    "Online výškové dlaždice Mapterhorn (terén/vrstevnice)"
+    "Online výškové dlaždice Mapterhorn (terén/vrstevnice)",
+    "Online lesní plochy OpenFreeMap a volitelné letecké Mapy.com"
   ],
   "fullscreen": false,
   "largeData": true,

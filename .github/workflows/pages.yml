@@ -48,6 +48,7 @@ jobs:
           node tests/cyklo-elevation.test.cjs
           node tests/cyklo-appearance.test.cjs
           node tests/cyklo-controls.test.cjs
+          node tests/cyklo-landscape.test.cjs
           node tests/cyklo-terrain.test.cjs
           node tests/cyklo-reroute.test.cjs
           node tests/azulejo-module.test.cjs

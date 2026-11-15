@@ -24,7 +24,7 @@
     },
     {
       "id": "cyklo",
-      "version": "1.8.0",
+      "version": "1.9.0",
       "apiVersion": 1,
       "minCoreVersion": "2.1.0",
       "maxCoreMajor": 2,
@@ -37,19 +37,20 @@
         "Poloha (na pokyn)",
         "Online mapy, BRouter a Photon",
         "Udržení obrazovky (pokud podporováno)",
-        "Online výškové dlaždice Mapterhorn (terén/vrstevnice)"
+        "Online výškové dlaždice Mapterhorn (terén/vrstevnice)",
+        "Online lesní plochy OpenFreeMap a volitelné letecké Mapy.com"
       ],
       "fullscreen": false,
       "largeData": true,
       "edition": "open",
-      "manifest": "modules/cyklo/1.8.0/manifest.json",
-      "manifestSha256": "340781aebfc3da00443b43768656516fa51ebcb79419366c43dff950b94921a0",
-      "size": 1422222
+      "manifest": "modules/cyklo/1.9.0/manifest.json",
+      "manifestSha256": "ac8c3931af684349686b481cd8639f9c81bd0aa8ef44119cb7a8e48e11b2c9e9",
+      "size": 1439044
     },
     {
       "id": "cyklo-mapy",
       "edition": "mapy",
-      "version": "1.8.0",
+      "version": "1.9.0",
       "apiVersion": 1,
       "minCoreVersion": "2.1.0",
       "maxCoreMajor": 2,
@@ -61,13 +62,14 @@
       "permissions": [
         "Poloha (na pokyn)",
         "Online služby Mapy.com (vlastní klíč)",
-        "Online výškové dlaždice Mapterhorn (terén/vrstevnice)"
+        "Online výškové dlaždice Mapterhorn (terén/vrstevnice)",
+        "Online lesní plochy OpenFreeMap a volitelné letecké Mapy.com"
       ],
       "fullscreen": false,
       "largeData": true,
-      "manifest": "modules/cyklo-mapy/1.8.0/manifest.json",
-      "manifestSha256": "5963f6ead174e5a4dd805451e3b53ab554ba86eb31a698deb7378f5a28ad64a6",
-      "size": 1422227
+      "manifest": "modules/cyklo-mapy/1.9.0/manifest.json",
+      "manifestSha256": "b0b223fe25a62590ff7e781910e1394126406054b195be75dd1b15203868fece",
+      "size": 1439049
     },
     {
       "id": "phone-lab",
