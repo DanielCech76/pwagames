@@ -182,3 +182,14 @@ Pseudo 3D koruny používají konzervativní odhad překrytí v obrazové mří�
 Geografický výběr probíhá v lokálním workeru; metadata a výsledky se přenášejí s generačními ID. Běží nejvýše jeden job a čeká pouze nejnovější požadavek. Líné geometrie MapLibre se před předáním převádějí na prostá data v krátkých dávkách a při nezměněném zdroji se znovu neposílají. DEM dotazy a stínování běží na UI vlákně v dávkách s přibližně 6ms rozpočtem; předchozí scéna zůstává do dokončení. Bez workeru je výběr kooperativně dávkovaný. Jednotlivé synchronní mapové API volání nelze přerušit, takže 6 ms není pevný limit každého snímku.
 
 Ověřeno: 32 regresních sad, úplný build a neměnné balíčky. Mesa EGL porovnání zahrnuje dosavadních 46 pohledů/scén a dalších 21 kontrol jednoduchého batche proti původnímu LOD 2. Testy pokrývají 4× limity, dosah 4 km, jednorázovou změnu nastavení, hysterézi při posunu lokálního počátku, výběr 12vrcholového batche, koalescenci workeru a odmítnutí opožděných výsledků. Mobilní plynulost a výsledný vzhled s větší oblastí zůstávají k ověření na telefonu.
+
+
+## CYKLO 1.18.0 — husté vzdálené porosty
+
+Detail pseudo 3D stromů se vybírá podle velikosti na obrazovce: nad 60 px malované koruny, 20–60 px střední detail, pod 20 px jednoduché koruny. Rozšíření dosahu už nezvyšuje detail malých stromů. Blízké stromy zůstávají jednotlivé a svislé.
+
+Vzdálený les používá skutečné skupinové podklady se 4/9/16 korunami, opakované v blocích 32–256 m. Bloky se podle projekce dělí; rozpočet upřednostňuje viditelnou plochu a rezervu za okrajem. Ověřuje se celá plocha bloku vůči cestám, vodě, budovám a okrajům lesa. Na zakřiveném terénu se bloky dále dělí, na svahu sledují místní rovinu. Jemný souvislý podklad vyplňuje vzdálené mezery ve stávajícím průchodu povrchů.
+
+Koruny mají jednu mipmapovanou texturu s izolovanými vrstvami, bez prosakování sousedních obrázků. Běžný pixel vyžaduje jeden vzorek. Nastavení pseudo 3D a orientovaných korun nadále fungují nezávisle; skutečné 3D modely používají dosavadní renderer.
+
+Validace: 33 regresních sad, build/offline balíčky, 67 původních GPU porovnání a nový skutečný GLES3 test. Reprodukovatelné výsledky jsou v `docs/benchmarks/cyklo-1180-*.json`. Syntetická scéna snížila počet vrcholů z 14 184 na 3 000 a odhad dotazů na terén z 12 000 na 1 302. Počty korun ve skupinách jsou vizuální odhad, nikoli počet samostatných stromů. Studená geografická příprava ani software GPU průchod nejsou rychlejší; vykreslují podstatně větší část obrazu. Stejný nebo nižší celkový čas na Androidu tedy zatím není prokázán, stejně jako dřívější cíl 10× FPS.

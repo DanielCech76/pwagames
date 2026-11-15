@@ -111,3 +111,16 @@ Nový `vegetation-worker.js` provádí geografickou část bez DOM a bez DEM API
 Metriky rozlišují součet CPU práce hlavního vlákna, worker čas a celkovou dobu přípravy na pozadí. Limity API zůstávají: querySourceFeatures, getter jedné velké geometrie nebo jediný queryTerrainElevation jsou synchronní a nelze je přerušit uprostřed. Skutečné 3D modely mají přesnější předalokaci podle druhu/LOD, místo 228 vrcholů pro každý vzdálený strom; jejich renderer zůstává jinak zachovaný.
 
 Validace: `cyklo-visibility.test.cjs` je součástí stávajícího CI vstupu. Kontroluje rozpočty, 4km prstenec, migraci bez změny hustoty/velikosti, tři detailní přední vrstvy, plynulý přechod a odkrytí, původní souřadnicový klíč, worker reuse/coalescing/cancellation a fallback generátor. `check-canopy-instancing.py` nyní ověřuje i 21 výsledků 12vrcholového batche proti původnímu poslednímu LOD. Zůstává nutná kontrola výkonu a vzhledu na skutečném telefonu; není deklarováno 10× FPS při 4× stromů.
+
+
+## 1.18.0 — husté vzdálené porosty
+
+Detail pseudo 3D stromů se vybírá podle velikosti na obrazovce: nad 60 px malované koruny, 20–60 px střední detail, pod 20 px jednoduché koruny. Rozšíření dosahu už nezvyšuje detail malých stromů. Blízké stromy zůstávají jednotlivé a svislé.
+
+Vzdálený les používá skutečné skupinové podklady se 4/9/16 korunami, opakované v blocích 32–256 m. Bloky se podle projekce dělí; rozpočet upřednostňuje viditelnou plochu a rezervu za okrajem. Ověřuje se celá plocha bloku vůči cestám, vodě, budovám a okrajům lesa. Na zakřiveném terénu se bloky dále dělí, na svahu sledují místní rovinu. Jemný souvislý podklad vyplňuje vzdálené mezery ve stávajícím průchodu povrchů.
+
+Koruny mají jednu mipmapovanou texturu s izolovanými vrstvami, bez prosakování sousedních obrázků. Běžný pixel vyžaduje jeden vzorek. Nastavení pseudo 3D a orientovaných korun nadále fungují nezávisle; skutečné 3D modely používají dosavadní renderer.
+
+Validace: 33 regresních sad, build/offline balíčky, 67 původních GPU porovnání a nový skutečný GLES3 test. Reprodukovatelné výsledky jsou v `docs/benchmarks/cyklo-1180-*.json`. Syntetická scéna snížila počet vrcholů z 14 184 na 3 000 a odhad dotazů na terén z 12 000 na 1 302. Počty korun ve skupinách jsou vizuální odhad, nikoli počet samostatných stromů. Studená geografická příprava ani software GPU průchod nejsou rychlejší; vykreslují podstatně větší část obrazu. Stejný nebo nižší celkový čas na Androidu tedy zatím není prokázán, stejně jako dřívější cíl 10× FPS.
+
+Technické limity: hierarchie se dělí při 96 px a slučuje pod 72 px. Rozpočet vychází z CSS plochy viewportu a nastavení kvality, maximálně z dosavadního limitu. 85 % rezervuje viditelnému pohledu, 97 % včetně ochranného okraje; nevyužité místo se doplňuje. Bloky mají 12 vrcholů a 3–5 výškových vzorků, jednotlivé koruny 12/36 vrcholů. Cache geografických bodů a buněk mají omezenou kapacitu. Atlas 36 × 320 × 320 RGBA s mipmapami zabírá přibližně 19,7 MB, více než původní dvojice PNG textur (~12,6 MB). RGB průhledných texelů se před mipmapami doplňuje barvou nejbližší koruny; alfa zůstává zachována. Paměť i fill rate je nutné ověřit na cílovém telefonu.
