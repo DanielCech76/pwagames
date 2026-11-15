@@ -48,6 +48,7 @@ void main(){int index=int(floor(v_lod+.5))*3+int(floor(v_kind+.5));vec4 rect=v_c
 // Shared conservative outline fan; only the nine-float instance changes per tree.
 const outlines=[[[0.30816131,0.0],[0.69164333,0.0],[1.0,0.30835667],[1.0,0.62975384],[0.62975384,1.0],[0.33285035,1.0],[0.0,0.66714965],[0.0,0.30816131]],[[0.48552241,0.0],[0.53697889,0.0],[1.0,0.46302111],[1.0,0.76353276],[0.76353276,1.0],[0.23591488,1.0],[0.0,0.76408512],[0.0,0.48552241]],[[0.32151248,0.0],[0.62645082,0.0],[1.0,0.37354918],[1.0,0.65259774],[0.65259774,1.0],[0.27983169,1.0],[0.0,0.72016831],[0.0,0.32151248]],[[0.2923666,0.0],[0.7094944,0.0],[1.0,0.2905056],[1.0,0.62367424],[0.62367424,1.0],[0.33371212,1.0],[0.0,0.66628788],[0.0,0.2923666]],[[0.48993289,0.0],[0.5212528,0.0],[1.0,0.4787472],[1.0,0.78195503],[0.78195503,1.0],[0.21468927,1.0],[0.0,0.78531073],[0.0,0.48993289]],[[0.33789516,0.0],[0.58495398,0.0],[1.0,0.41504602],[1.0,0.68931573],[0.68931573,1.0],[0.31916767,1.0],[0.0,0.68083233],[0.0,0.33789516]],[[0.33912599,0.0],[0.70077306,0.0],[1.0,0.29922694],[1.0,0.64320854],[0.64320854,1.0],[0.33688985,1.0],[0.0,0.66311015],[0.0,0.33912599]],[[0.49386555,0.0],[0.51613445,0.0],[1.0,0.48386555],[1.0,0.81792717],[0.81792717,1.0],[0.18207283,1.0],[0.0,0.81792717],[0.0,0.49386555]],[[0.33851814,0.0],[0.57999587,0.0],[1.0,0.42000413],[1.0,0.7262557],[0.7262557,1.0],[0.26404713,1.0],[0.0,0.73595287],[0.0,0.33851814]],[[0.24904122,0.0],[0.74677647,0.0],[1.0,0.25322353],[1.0,0.79518792],[0.79518792,1.0],[0.17537443,1.0],[0.0,0.82462557],[0.0,0.24904122]],[[0.32631873,0.0],[0.72031155,0.0],[1.0,0.27968845],[1.0,0.71198895],[0.71198895,1.0],[0.2823666,1.0],[0.0,0.7176334],[0.0,0.32631873]],[[0.24683609,0.0],[0.74084344,0.0],[1.0,0.25915656],[1.0,0.76597193],[0.76597193,1.0],[0.23250452,1.0],[0.0,0.76749548],[0.0,0.24683609]],[[0.14070137,0.0],[0.85783236,0.0],[1.0,0.14216764],[1.0,0.84692693],[0.84692693,1.0],[0.21022727,1.0],[0.0,0.78977273],[0.0,0.14070137]],[[0.17703403,0.0],[0.75234959,0.0],[1.0,0.24765041],[1.0,0.74901386],[0.74901386,1.0],[0.24290835,1.0],[0.0,0.75709165],[0.0,0.17703403]],[[0.17208267,0.0],[0.68554502,0.0],[1.0,0.31445498],[1.0,0.71169483],[0.71169483,1.0],[0.26647115,1.0],[0.0,0.73352885],[0.0,0.17208267]],[[0.16377649,0.0],[0.86432795,0.0],[1.0,0.13567205],[1.0,0.76028171],[0.76028171,1.0],[0.26777291,1.0],[0.0,0.73222709],[0.0,0.16377649]],[[0.21849343,0.0],[0.7206486,0.0],[1.0,0.2793514],[1.0,0.7044335],[0.7044335,1.0],[0.24784483,1.0],[0.0,0.75215517],[0.0,0.21849343]],[[0.28708546,0.0],[0.65251415,0.0],[1.0,0.34748585],[1.0,0.76920139],[0.76920139,1.0],[0.22376643,1.0],[0.0,0.77623357],[0.0,0.28708546]]];
 const template=new Float32Array([0,2].flatMap(cap=>Array.from({length:6},(_,i)=>[0,cap,i+1,cap,i+2,cap]).flat()));
+const lowTemplate=new Float32Array([...template.slice(0,12),...template.slice(36,48)]);
 function instances(trees,origin,heights,shades=[],groups=false){
  const cos=Math.cos(origin[1]*rad),ox=R*origin[0]*rad,oy=R*Math.log(Math.tan(Math.PI/4+origin[1]*rad/2)),data=new Float32Array(trees.length*9);let n=0;
  for(let i=0;i<trees.length;i++){if(groups&&i%5!==0)continue;const t=trees[i],z=heights[i];if(!Number.isFinite(z))continue;const h=t.height;
@@ -59,13 +60,34 @@ function visible(data,matrix,target=new Float32Array(data.length)){
  const planes=[];for(let row=0;row<3;row++)for(const sign of [-1,1]){const p=[matrix[3]+sign*matrix[row],matrix[7]+sign*matrix[4+row],matrix[11]+sign*matrix[8+row],matrix[15]+sign*matrix[12+row]];const n=Math.hypot(p[0],p[1],p[2]);planes.push(p.map(v=>v/(n||1)))}let cursor=0;
  for(let i=0;i<data.length;i+=9){const x=data[i],y=data[i+1],z=data[i+2]+data[i+4]*.5,r=Math.max(data[i+3],data[i+4])*1.8+.05;if(planes.some(p=>p[0]*x+p[1]*y+p[2]*z+p[3]<-r))continue;target.set(data.subarray(i,i+9),cursor);cursor+=9}return target.subarray(0,cursor)
 }
+// Screen overlap estimates detail only: it never removes a potentially visible tree.
+// Three foreground layers stay detailed; transparent foliage is not treated as solid occlusion.
+function overlapDetail(data,matrix,state,now,weights=new Float32Array(data.length/9),origin=null){
+ const cos=origin?Math.cos(origin[1]*rad):1,ox=origin?R*origin[0]*rad:0,oy=origin?R*Math.log(Math.tan(Math.PI/4+origin[1]*rad/2)):0;const cells=new Uint16Array(32*32),items=[];let transitioning=false,low=0;
+ for(let i=0;i<data.length;i+=9){const x=data[i],y=data[i+1],z=data[i+2],w=data[i+3],h=data[i+4];let minX=1,minY=1,maxX=-1,maxY=-1,depth=0,unsafe=false;
+  for(const dx of [-w*.5,w*.5])for(const dy of [-w*.5,w*.5])for(const dz of [h*.25,h]){const a=x+dx,b=y+dy,c=z+dz,W=matrix[3]*a+matrix[7]*b+matrix[11]*c+matrix[15];if(W<=.001){unsafe=true;continue}const X=(matrix[0]*a+matrix[4]*b+matrix[8]*c+matrix[12])/W,Y=(matrix[1]*a+matrix[5]*b+matrix[9]*c+matrix[13])/W;minX=Math.min(minX,X);maxX=Math.max(maxX,X);minY=Math.min(minY,Y);maxY=Math.max(maxY,Y);depth+=(matrix[2]*a+matrix[6]*b+matrix[10]*c+matrix[14])/W}
+  const key=(origin?Math.round(ox+x/cos):x.toFixed(2))+':'+(origin?Math.round(oy+y/cos):y.toFixed(2))+':'+z.toFixed(2)+':'+data[i+8];items.push({i,key,unsafe,depth,minX:Math.max(0,Math.min(31,Math.floor((minX+1)*16))),maxX:Math.max(0,Math.min(31,Math.floor((maxX+1)*16))),minY:Math.max(0,Math.min(31,Math.floor((minY+1)*16))),maxY:Math.max(0,Math.min(31,Math.floor((maxY+1)*16)))});
+ }
+ items.sort((a,b)=>a.depth-b.depth||a.i-b.i);
+ for(const item of items){let covered=0,total=0;for(let y=item.minY;y<=item.maxY;y++)for(let x=item.minX;x<=item.maxX;x++){if(cells[y*32+x]>=3)covered++;total++}const hidden=!item.unsafe&&total>0&&covered/total>=.8;let previous=state.get(item.key);if(!previous){previous={since:now};state.set(item.key,previous)}if(!hidden)previous.since=now;const weight=hidden?Math.max(0,Math.min(1,(now-previous.since-120)/240)):0;weights[item.i/9]=weight;if(weight>0)low++;if(hidden&&weight<1)transitioning=true;
+  // Wider group cards do not count as extra physical foreground trees.
+  if(!item.unsafe&&data[item.i+8]<.5)for(let y=item.minY;y<=item.maxY;y++)for(let x=item.minX;x<=item.maxX;x++)cells[y*32+x]++;
+ }if(state.size>30000)state.clear();return {weights:weights.subarray(0,data.length/9),transitioning,low}
+}
 const outlineGLSL='const vec2 outline[144]=vec2[144]('+outlines.flat().map(p=>'vec2('+p.map(v=>Number(v).toFixed(8)).join(',')+')').join(',')+');\n';
 const instanceVertex=vertex
- .replace('layout(location=1) in vec2 a_uv;','layout(location=1) in vec2 a_corner;')
- .replace('void main(){',outlineGLSL+'void main(){')
- .replace('bool cap=a_info.w>1.5;','bool cap=a_corner.y>1.5;')
- .replace('vec2 horizontal=direction.xy;', 'vec2 a_uv=outline[((cap?9:0)+int(lod)*3+species)*8+int(a_corner.x+.5)];\n vec2 horizontal=direction.xy;')
+ .replace('layout(location=1) in vec2 a_uv;','layout(location=1) in vec2 a_corner;\nlayout(location=4) in float a_overlap;\nout float v_overlap;')
+ .replace('void main(){',outlineGLSL+'const vec2 rectangle[8]=vec2[8](vec2(0.,0.),vec2(1.,0.),vec2(1.,1.),vec2(0.,1.),vec2(0.,1.),vec2(0.,1.),vec2(0.,1.),vec2(0.,1.));\nvoid main(){')
+ .replace('bool cap=a_info.w>1.5;','float blend=a_overlap;v_overlap=blend;bool cap=a_corner.y>1.5;')
+ .replace('vec2 root=u_roots[int(lod)*3+species];','vec2 root=mix(u_roots[int(lod)*3+species],u_roots[6+species],blend);')
+ .replace('vec2 horizontal=direction.xy;', 'vec2 a_uv=blend>0.?rectangle[int(a_corner.x+.5)]:outline[((cap?9:0)+(blend>=1.?2:int(lod))*3+species)*8+int(a_corner.x+.5)];\n vec2 horizontal=direction.xy;')
  .replace('if(group<.5)v_fade*=1.-smoothstep(.75,1.,clipRatio);','if(group<.5)v_fade*=1.-smoothstep(.75,1.,clipRatio);\n if(v_fade<=0.)gl_Position=vec4(2.,2.,2.,1.);');
 
-root.CykloCanopy={visible,outlines,template,instances,instanceVertex,rects,roots,topRects,topAsset:'./assets/tree-crowns-top-v2.png',asset:'./assets/tree-crowns-v2.png',geometry,vertex,fragment};if(typeof module!=='undefined')module.exports=root.CykloCanopy;
+
+const instanceFragment=fragment
+ .replace('in float v_cap;', 'in float v_overlap; in float v_cap;')
+ .replace('int index=int(floor(v_lod+.5))*3+int(floor(v_kind+.5));','int index=(v_overlap>=1.?6:int(floor(v_lod+.5))*3)+int(floor(v_kind+.5));')
+ .replace('if(tex.a<.45)discard;', 'if(v_overlap>0.&&v_overlap<1.){int lowIndex=6+int(floor(v_kind+.5));vec4 lowRect=v_cap>.5?u_topRects[lowIndex]:u_rects[lowIndex];vec2 lowUV=lowRect.xy+clamp(v_uv,vec2(.002),vec2(.998))*lowRect.zw;vec4 lowTex=v_cap>.5?texture(u_topAtlas,lowUV):texture(u_atlas,lowUV);tex=mix(tex,lowTex,v_overlap);}if(tex.a<.45)discard;');
+
+root.CykloCanopy={lowTemplate,overlapDetail,instanceFragment,visible,outlines,template,instances,instanceVertex,rects,roots,topRects,topAsset:'./assets/tree-crowns-top-v2.png',asset:'./assets/tree-crowns-v2.png',geometry,vertex,fragment};if(typeof module!=='undefined')module.exports=root.CykloCanopy;
 })(globalThis);

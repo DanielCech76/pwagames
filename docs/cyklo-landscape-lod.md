@@ -98,3 +98,16 @@ Kontroly:
 - `node scripts/benchmark-canopy.cjs`: reprodukovatelný kontrolovaný CPU test proti 1.15.3 (vyžaduje historický commit v gitu). Stejné vzorky jsou před měřením porovnány; 15 běhů po zahřátí, mediány. Výsledky uložené v `docs/benchmarks/cyklo-1160-cpu.json` nejsou měřením FPS celého telefonu.
 
 Mipmapy atlasu a agresivnější slučování vzdálených stromů nejsou v tomto vydání zapnuté; tato sada zachovává existující obraz a dosah. Výtvarné změny ani snižování hustoty se nepoužívají jako zdroj deklarovaných CPU úspor.
+
+
+## 1.17.0 — širší pokrytí se 4× celkovým rozpočtem
+
+Potvrzený požadavek je 4× celkový počet, nikoli 4× hustota navíc. Economy/Auto/High mají limity 4 000/12 000/24 000. Původní rozteče světové mřížky 8/24/60 m a hustota zůstávají; prstenec 60m vzorků pokračuje do 4 km a sdílí vzdálenou kvótu. Uložené radius/detail-distance hodnoty se jednorázově zdvojnásobí s limitem 4 km. Volby 400 a 700 m umožňují přesné zdvojnásobení starších hodnot; stromová výška ani treeScale se nemigrují.
+
+Adaptivní detail je levný odhad překrytí korun v mřížce 32×32, ne důkaz skutečné neprůhledné okluze. Zpracování od předních korun zachová první tři vrstvy, skupiny nezvyšují počet fyzických vrstev. Při ≥80% překrytí následuje 120ms prodleva a 240ms prolnutí do LOD 2; znovu odkrytá koruna se okamžitě vrací k obvyklému vzdálenostnímu detailu. Světové klíče uchovávají hysterézi přes změny lokálního počátku. Přechod používá bezpečný obdélník, aby nové obrysy neořízly míchané textury. Hotové jednoduché koruny se balí za detailní a kreslí ve druhém instancovaném batche s 12 vrcholy. Nemění to počet fyzických stromů. Zjednodušené koruny stále zachovávají průhledné pozadí a ukotvení v DEM. Plně skryté stromy se neodstraňují na základě neprůhledného bbox předpokladu.
+
+Nový `vegetation-worker.js` provádí geografickou část bez DOM a bez DEM API. Hlavní vlákno dávkuje materializaci getterů MapLibre a lokální výškové dotazy. Další požadavky při obsazeném workeru se koaleskují na poslední, nikoli řadí do neomezené fronty. Nezměněné geografické zdroje a připravené polygony se využívají znovu. Změny zdroje a trasy invalidují příslušnou cache. Timeout/chyba workeru přepne na kooperativní generátor s 6ms rozpočtem; Obnovit vegetaci může worker zkusit znovu. Vypnutí vrstvy či clear/destroy zneplatní generace a ukončí worker. Starý dokončený výsledek nikdy neobnoví odstraněné stromy.
+
+Metriky rozlišují součet CPU práce hlavního vlákna, worker čas a celkovou dobu přípravy na pozadí. Limity API zůstávají: querySourceFeatures, getter jedné velké geometrie nebo jediný queryTerrainElevation jsou synchronní a nelze je přerušit uprostřed. Skutečné 3D modely mají přesnější předalokaci podle druhu/LOD, místo 228 vrcholů pro každý vzdálený strom; jejich renderer zůstává jinak zachovaný.
+
+Validace: `cyklo-visibility.test.cjs` je součástí stávajícího CI vstupu. Kontroluje rozpočty, 4km prstenec, migraci bez změny hustoty/velikosti, tři detailní přední vrstvy, plynulý přechod a odkrytí, původní souřadnicový klíč, worker reuse/coalescing/cancellation a fallback generátor. `check-canopy-instancing.py` nyní ověřuje i 21 výsledků 12vrcholového batche proti původnímu poslednímu LOD. Zůstává nutná kontrola výkonu a vzhledu na skutečném telefonu; není deklarováno 10× FPS při 4× stromů.

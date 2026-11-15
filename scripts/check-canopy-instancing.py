@@ -5,9 +5,10 @@ import runpy,json,subprocess,ctypes as c
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 g=runpy.run_path(str(ROOT/'scripts/check-canopy-gpu.py'));globals().update({k:v for k,v in g.items() if not k.startswith('__')})
-optimized=json.loads(subprocess.check_output(['node','-e',"const C=require('./module-src/cyklo/canopy.js');console.log(JSON.stringify({vertex:C.instanceVertex,template:Array.from(C.template)}))"],cwd=ROOT))
+optimized=json.loads(subprocess.check_output(['node','-e',"const C=require('./module-src/cyklo/canopy.js');console.log(JSON.stringify({vertex:C.instanceVertex,fragment:C.instanceFragment,template:Array.from(C.template)}))"],cwd=ROOT))
 sh=createShader(0x8B31);txt=c.c_char_p(optimized['vertex'].encode());source(sh,1,c.byref(txt),None);compile(sh);ok=I();getiv(sh,0x8B81,c.byref(ok));buf=c.create_string_buffer(8192);log(sh,8192,None,buf);assert ok.value,buf.value
-instanced=proc('glCreateProgram',U,[])();attach(instanced,sh);attach(instanced,compiled[1]);proc('glLinkProgram',None,[U])(instanced);proc('glGetProgramiv',None,[U,U,c.POINTER(I)])(instanced,0x8B82,c.byref(ok));assert ok.value
+fs=createShader(0x8B30);txt=c.c_char_p(optimized['fragment'].encode());source(fs,1,c.byref(txt),None);compile(fs);getiv(fs,0x8B81,c.byref(ok));log(fs,8192,None,buf);assert ok.value,buf.value
+instanced=proc('glCreateProgram',U,[])();attach(instanced,sh);attach(instanced,fs);proc('glLinkProgram',None,[U])(instanced);proc('glGetProgramiv',None,[U,U,c.POINTER(I)])(instanced,0x8B82,c.byref(ok));assert ok.value
 use=proc('glUseProgram',None,[U]);bind=proc('glBindBuffer',None,[U,U]);upload=proc('glBufferData',None,[U,c.c_ssize_t,P,U]);attr=proc('glVertexAttribPointer',None,[U,I,U,U,I,P]);divisor=proc('glVertexAttribDivisor',None,[U,U]);enable=proc('glEnableVertexAttribArray',None,[U]);drawInstanced=proc('glDrawArraysInstanced',None,[U,I,I,I])
 referenceBuffer=gen('glGenBuffers');instanceBuffer=gen('glGenBuffers');templateBuffer=gen('glGenBuffers')
 def data_buffer(buffer,values):
@@ -79,3 +80,25 @@ for eye in [(0,-50,30),(35,-40,32),(-35,30,45),(1,-3,80)]:
  visible=sum(v>0 for v in reference[3::4]);changed=sum(max(abs(reference[i+j]-actual[i+j]) for j in range(4))>8 for i in range(0,len(reference),4));assert visible>1000;assert changed/visible<.01,(eye,changed,visible)
 assert proc('glGetError',U,[])()==0
 print('PASS four dense mixed-species perspective/depth scenes across azimuths: <1% changed foreground pixels')
+
+# Verify the 12-vertex low-detail batch against the original renderer forced to LOD 2.
+forced_vertex=assets['vertex'].replace('bool cap=', 'lod=2.;bool cap=')
+sh=createShader(0x8B31);txt=c.c_char_p(forced_vertex.encode());source(sh,1,c.byref(txt),None);compile(sh);getiv(sh,0x8B81,c.byref(ok));log(sh,8192,None,buf);assert ok.value,buf.value
+low_reference=proc('glCreateProgram',U,[])();attach(low_reference,sh);attach(low_reference,compiled[1]);proc('glLinkProgram',None,[U])(low_reference);proc('glGetProgramiv',None,[U,U,c.POINTER(I)])(low_reference,0x8B82,c.byref(ok));assert ok.value
+low_template=json.loads(subprocess.check_output(['node','-e',"console.log(JSON.stringify(Array.from(require('./module-src/cyklo/canopy.js').lowTemplate)))"],cwd=ROOT));data_buffer(templateBuffer,low_template)
+proc('glDisableVertexAttribArray',None,[U])(4);proc('glVertexAttrib1f',None,[U,F])(4,1.)
+for kind in range(3):
+ vertices=[]
+ for cap in [0,2]:
+  for u,v in [(0,0),(1,0),(1,1),(0,0),(1,1),(0,1)]:vertices.extend([0,0,0,u,v,11.4,12,kind,.5,1,cap])
+ data_buffer(referenceBuffer,vertices);data_buffer(instanceBuffer,[0,0,0,11.4,12,kind,.5,1,0])
+ for eye,matrix in views:
+  uniforms(low_reference,eye,matrix,0);bind(0x8892,referenceBuffer)
+  for index,size,offset in [(0,3,0),(1,2,12),(2,2,20),(3,4,28)]:enable(index);attr(index,size,0x1406,0,44,offset);divisor(index,0)
+  clear(0x4100);draw(4,0,12);reference=pixels()
+  uniforms(instanced,eye,matrix,0);bind(0x8892,instanceBuffer)
+  for index,size,offset in [(0,3,0),(2,2,12),(3,4,20)]:enable(index);attr(index,size,0x1406,0,36,offset);divisor(index,1)
+  bind(0x8892,templateBuffer);enable(1);attr(1,2,0x1406,0,8,0);divisor(1,0);clear(0x4100);drawInstanced(4,0,12,1);actual=pixels()
+  visible=sum(v>0 for v in reference[3::4]);changed=sum(max(abs(reference[i+j]-actual[i+j]) for j in range(4))>8 for i in range(0,len(reference),4));assert changed/max(1,visible)<.01,(kind,eye,changed,visible)
+assert proc('glGetError',U,[])()==0
+print('PASS 21 low-detail batch comparisons: 12 vertices reproduce original LOD 2 within <1% changed foreground pixels')
