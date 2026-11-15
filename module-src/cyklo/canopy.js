@@ -41,8 +41,31 @@ const fragment=`#version 300 es
 precision highp float;
 uniform sampler2D u_atlas; uniform sampler2D u_topAtlas; uniform vec4 u_rects[9]; uniform vec4 u_topRects[9]; in float v_cap; in vec2 v_uv; in float v_lod; in float v_kind; in float v_shade; in float v_fade; out vec4 color;
 void main(){int index=int(floor(v_lod+.5))*3+int(floor(v_kind+.5));vec4 rect=v_cap>.5?u_topRects[index]:u_rects[index];vec2 uv=rect.xy+clamp(v_uv,vec2(.002),vec2(.998))*rect.zw;
- vec4 tex=v_cap>.5?texture(u_topAtlas,uv):texture(u_atlas,uv); float d=fract(dot(mod(floor(gl_FragCoord.xy),vec2(4.)),vec2(.25,.5625)));
+ float d=fract(dot(mod(floor(gl_FragCoord.xy),vec2(4.)),vec2(.25,.5625)));
  if(v_cap>.5)d=1.-d-.0001;
- if(tex.a<.45||v_fade<=d)discard; color=vec4(tex.rgb*v_shade,1.);}`;
-root.CykloCanopy={rects,roots,topRects,topAsset:'./assets/tree-crowns-top-v2.png',asset:'./assets/tree-crowns-v2.png',geometry,vertex,fragment};if(typeof module!=='undefined')module.exports=root.CykloCanopy;
+ if(v_fade<=d)discard; vec4 tex=v_cap>.5?texture(u_topAtlas,uv):texture(u_atlas,uv); if(tex.a<.45)discard; color=vec4(tex.rgb*v_shade,1.);}`;
+
+// Shared conservative outline fan; only the nine-float instance changes per tree.
+const outlines=[[[0.30816131,0.0],[0.69164333,0.0],[1.0,0.30835667],[1.0,0.62975384],[0.62975384,1.0],[0.33285035,1.0],[0.0,0.66714965],[0.0,0.30816131]],[[0.48552241,0.0],[0.53697889,0.0],[1.0,0.46302111],[1.0,0.76353276],[0.76353276,1.0],[0.23591488,1.0],[0.0,0.76408512],[0.0,0.48552241]],[[0.32151248,0.0],[0.62645082,0.0],[1.0,0.37354918],[1.0,0.65259774],[0.65259774,1.0],[0.27983169,1.0],[0.0,0.72016831],[0.0,0.32151248]],[[0.2923666,0.0],[0.7094944,0.0],[1.0,0.2905056],[1.0,0.62367424],[0.62367424,1.0],[0.33371212,1.0],[0.0,0.66628788],[0.0,0.2923666]],[[0.48993289,0.0],[0.5212528,0.0],[1.0,0.4787472],[1.0,0.78195503],[0.78195503,1.0],[0.21468927,1.0],[0.0,0.78531073],[0.0,0.48993289]],[[0.33789516,0.0],[0.58495398,0.0],[1.0,0.41504602],[1.0,0.68931573],[0.68931573,1.0],[0.31916767,1.0],[0.0,0.68083233],[0.0,0.33789516]],[[0.33912599,0.0],[0.70077306,0.0],[1.0,0.29922694],[1.0,0.64320854],[0.64320854,1.0],[0.33688985,1.0],[0.0,0.66311015],[0.0,0.33912599]],[[0.49386555,0.0],[0.51613445,0.0],[1.0,0.48386555],[1.0,0.81792717],[0.81792717,1.0],[0.18207283,1.0],[0.0,0.81792717],[0.0,0.49386555]],[[0.33851814,0.0],[0.57999587,0.0],[1.0,0.42000413],[1.0,0.7262557],[0.7262557,1.0],[0.26404713,1.0],[0.0,0.73595287],[0.0,0.33851814]],[[0.24904122,0.0],[0.74677647,0.0],[1.0,0.25322353],[1.0,0.79518792],[0.79518792,1.0],[0.17537443,1.0],[0.0,0.82462557],[0.0,0.24904122]],[[0.32631873,0.0],[0.72031155,0.0],[1.0,0.27968845],[1.0,0.71198895],[0.71198895,1.0],[0.2823666,1.0],[0.0,0.7176334],[0.0,0.32631873]],[[0.24683609,0.0],[0.74084344,0.0],[1.0,0.25915656],[1.0,0.76597193],[0.76597193,1.0],[0.23250452,1.0],[0.0,0.76749548],[0.0,0.24683609]],[[0.14070137,0.0],[0.85783236,0.0],[1.0,0.14216764],[1.0,0.84692693],[0.84692693,1.0],[0.21022727,1.0],[0.0,0.78977273],[0.0,0.14070137]],[[0.17703403,0.0],[0.75234959,0.0],[1.0,0.24765041],[1.0,0.74901386],[0.74901386,1.0],[0.24290835,1.0],[0.0,0.75709165],[0.0,0.17703403]],[[0.17208267,0.0],[0.68554502,0.0],[1.0,0.31445498],[1.0,0.71169483],[0.71169483,1.0],[0.26647115,1.0],[0.0,0.73352885],[0.0,0.17208267]],[[0.16377649,0.0],[0.86432795,0.0],[1.0,0.13567205],[1.0,0.76028171],[0.76028171,1.0],[0.26777291,1.0],[0.0,0.73222709],[0.0,0.16377649]],[[0.21849343,0.0],[0.7206486,0.0],[1.0,0.2793514],[1.0,0.7044335],[0.7044335,1.0],[0.24784483,1.0],[0.0,0.75215517],[0.0,0.21849343]],[[0.28708546,0.0],[0.65251415,0.0],[1.0,0.34748585],[1.0,0.76920139],[0.76920139,1.0],[0.22376643,1.0],[0.0,0.77623357],[0.0,0.28708546]]];
+const template=new Float32Array([0,2].flatMap(cap=>Array.from({length:6},(_,i)=>[0,cap,i+1,cap,i+2,cap]).flat()));
+function instances(trees,origin,heights,shades=[],groups=false){
+ const cos=Math.cos(origin[1]*rad),ox=R*origin[0]*rad,oy=R*Math.log(Math.tan(Math.PI/4+origin[1]*rad/2)),data=new Float32Array(trees.length*9);let n=0;
+ for(let i=0;i<trees.length;i++){if(groups&&i%5!==0)continue;const t=trees[i],z=heights[i];if(!Number.isFinite(z))continue;const h=t.height;
+ data.set([(R*t.position[0]*rad-ox)*cos,(R*Math.log(Math.tan(Math.PI/4+t.position[1]*rad/2))-oy)*cos,z,h*(t.kind==='needleleaved'?.75:t.kind==='shrub'?1.5:.95)*(groups?2:1),h,t.kind==='needleleaved'?1:t.kind==='shrub'?2:0,t.seed,shades[i]??1,groups?1:0],n);n+=9;
+ }return data.subarray(0,n)
+}
+// Conservative world-space sphere encloses trunk, all LOD roots and both crown planes.
+function visible(data,matrix,target=new Float32Array(data.length)){
+ const planes=[];for(let row=0;row<3;row++)for(const sign of [-1,1]){const p=[matrix[3]+sign*matrix[row],matrix[7]+sign*matrix[4+row],matrix[11]+sign*matrix[8+row],matrix[15]+sign*matrix[12+row]];const n=Math.hypot(p[0],p[1],p[2]);planes.push(p.map(v=>v/(n||1)))}let cursor=0;
+ for(let i=0;i<data.length;i+=9){const x=data[i],y=data[i+1],z=data[i+2]+data[i+4]*.5,r=Math.max(data[i+3],data[i+4])*1.8+.05;if(planes.some(p=>p[0]*x+p[1]*y+p[2]*z+p[3]<-r))continue;target.set(data.subarray(i,i+9),cursor);cursor+=9}return target.subarray(0,cursor)
+}
+const outlineGLSL='const vec2 outline[144]=vec2[144]('+outlines.flat().map(p=>'vec2('+p.map(v=>Number(v).toFixed(8)).join(',')+')').join(',')+');\n';
+const instanceVertex=vertex
+ .replace('layout(location=1) in vec2 a_uv;','layout(location=1) in vec2 a_corner;')
+ .replace('void main(){',outlineGLSL+'void main(){')
+ .replace('bool cap=a_info.w>1.5;','bool cap=a_corner.y>1.5;')
+ .replace('vec2 horizontal=direction.xy;', 'vec2 a_uv=outline[((cap?9:0)+int(lod)*3+species)*8+int(a_corner.x+.5)];\n vec2 horizontal=direction.xy;')
+ .replace('if(group<.5)v_fade*=1.-smoothstep(.75,1.,clipRatio);','if(group<.5)v_fade*=1.-smoothstep(.75,1.,clipRatio);\n if(v_fade<=0.)gl_Position=vec4(2.,2.,2.,1.);');
+
+root.CykloCanopy={visible,outlines,template,instances,instanceVertex,rects,roots,topRects,topAsset:'./assets/tree-crowns-top-v2.png',asset:'./assets/tree-crowns-v2.png',geometry,vertex,fragment};if(typeof module!=='undefined')module.exports=root.CykloCanopy;
 })(globalThis);
