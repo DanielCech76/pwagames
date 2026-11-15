@@ -36,3 +36,20 @@ Play/pause/resume and stop are directly in the header. An unfinished ride uses t
 Recenter is independent of Auto zoom, stays at top-right with a 34×34 px outline button and 12 px map inset, and remains visible/clickable when `controls-hidden` is active. Auto is immediately to its left. The route action menu and statistics hide in focus mode. Basemap attribution stays accessible.
 
 Browser QA: 390×780 and 320×780 with local-only synthetic GPS. Confirmed GPS off during a ride yields a paused ride and an off icon; header play restores a pending ride; header stop saves it; no large recovery/location card; no header overflow at 320 px. With controls hidden, recenter measures `display:grid`, `visibility:visible`, top inset 12 px and accepts a click. Screenshots show real rendered UI with the schematic map fallback (cloud browser lacks WebGL); crops remove only the surrounding QA desktop. Test fixtures are excluded from published files. All 23 test files pass.
+
+
+## 1.8.0 — relief toggle, position anchor and tourist cartography
+
+The left mountain badge is a real terrain-toggle button. A crossed mountain means flat terrain (including 2D or economy mode); the normal mountain means terrain requested in 3D. Switching on enables terrain, selects 3D and leaves economy mode; switching off disables terrain but preserves the chosen perspective. Thus 2D/3D still controls camera pitch independently. The button exposes its state and action via aria-pressed, label and tooltip, and keeps the forward-distance label.
+
+Following/recenter anchors the position at x=W/2 and y=2/3 of the visible map height. The floating instruments are excluded (with an 8 px clearance); when hidden no space is reserved. MapLibre uses symmetric horizontal padding and top padding of one third of the remaining viewport, plus bottom occlusion padding. Every map resize/recenter re-evaluates the geometry. The position marker now uses a center-anchored 28 px SVG rather than a font glyph. The schematic fallback uses the same layout formula.
+
+Closest manual forward view can be 10, 25, 50 or 100 m; 10 m is also available as the minimum AUTO value. MapLibre permits zoom up to 24 to allow overzoom. The limit is a forward viewing distance, not a GPS-accuracy statement. Provider tiles have finite resolution, so additional zoom can enlarge existing content without adding detail.
+
+A one-time 1.8 map-presentation migration selects a 10 m manual lower bound and tourist cartography for the two editions. Later user choices are preserved. The Open edition uses the existing OpenFreeMap Liberty data and locally increases woodland, grassland, park and sand fill contrast; the original Liberty paint can be selected again. Only known cartographic fill layers change, never route lines or buildings. Original color and opacity expressions are restored when switching back. It is called “Turistické barvy”, not a claim to provide Mapy.com's tourist trail markings. The Mapy edition selects its official Outdoor raster map set; the user's existing key and attribution remain unchanged.
+
+Sources verified 2026-11-15:
+- https://developer.mapy.com/rest-api-mapy-cz/function/map-tiles/ — official Tourist Map (outdoor) set.
+- https://github.com/hyperknot/openfreemap-styles/blob/main/styles/liberty/style.json — original woodland/grass/park fills and opacities; updates are runtime paint overrides.
+
+Verification: 23 regression files pass, including 10 m slider endpoints, relief toggle from 2D, state persistence, exact anchor formula for multiple viewport heights and panel insets, occlusion detection, cartographic fill restore and Mapy raster isolation. Browser QA at 390×780 confirms closest view 10 m, crossed/un-crossed mountain, and the fallback marker at the new centered anchor. With a 366×546 map and metrics beginning 484 px below its top, the reserved bottom is 70 px; visible height is 476 px and the intended anchor is (183,317.33) within the map. Actual GPU rendering remains to be checked on a WebGL device; the screenshot uses synthetic GPS and the schematic fallback. QA shims are excluded from release packages.

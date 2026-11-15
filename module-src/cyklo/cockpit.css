@@ -213,3 +213,8 @@
 :root[data-style] #app[data-layout=top] #instruments,:root[data-style] #app[data-layout=bottom] #instruments{height:auto;min-height:100px;flex-basis:auto;margin-top:6px}
 #app #rideMenu #finish,#app #simulationPanel #simPause,#app #simulationPanel #simStop{display:none}
 :root[data-style] #app.simulating #mapPlanTools{display:none}
+/* 1.8 — terrain toggle and center-anchored SVG position marker. */
+:root[data-style] #app #zoomBubble{cursor:pointer;pointer-events:auto;min-height:54px;max-height:54px;line-height:1.1;touch-action:manipulation;z-index:5}
+#app #zoomBubble[aria-pressed=false] .control-icon{opacity:.75}
+.map-arrow{width:28px;height:28px;display:grid;place-items:center;font-size:0;line-height:0;color:#f5810b;-webkit-text-stroke:0;text-shadow:none;filter:drop-shadow(0 2px 3px #173b2866)}
+.map-arrow svg{width:28px;height:28px;display:block;fill:currentColor;stroke:white;stroke-width:2;stroke-linejoin:round}

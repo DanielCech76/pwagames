@@ -120,3 +120,7 @@ Approved A cockpit, full-screen grouped settings, independent color palettes, ex
 ## CYKLO 1.7.0
 
 Unified SVG controls, icon-only GPS toggle and ride header, persistent top-right recenter in focus mode, compact route action menu, and removal of duplicate location/recovery/action panels. GPS off safely pauses recording; GPS on resumes location tracking only. Both cycling editions updated.
+
+## CYKLO 1.8.0
+
+Mountain-button terrain toggle with crossed flat-state icon, horizontally centered position at the lower-third anchor of the unobscured map, closest view 10 m, and tourist cartography defaults (Mapy.com Outdoor / OpenFreeMap tourist colors).

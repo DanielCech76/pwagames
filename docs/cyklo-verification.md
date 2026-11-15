@@ -81,3 +81,7 @@ All 23 test files pass; browser verification at 390×780 and 320×780. See [cock
 ## 1.7.0
 
 All 23 regression files pass, including GPS toggle on/off, GPS off pausing/persisting recording, GPS on not resuming a paused ride, pending fix cancellation, late callback rejection, and unfinished-ride header restore/finish. Browser QA confirms persistent recenter in focus mode, icon-only GPS and header ride controls at 390 and 320 px. See [cockpit](cyklo-cockpit.md).
+
+## 1.8.0
+
+23 test files pass. Added relief toggle, 10 m endpoint and minimum AUTO, visible-map lower-third anchor, floating-panel occlusion, reversible tourist fill colors and raster-provider isolation checks. Browser QA confirms controls and the new fallback anchor; no WebGL is available in the cloud browser. See [details](cyklo-cockpit.md).
