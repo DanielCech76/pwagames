@@ -5,11 +5,11 @@ ROOT=Path(__file__).resolve().parents[1]
 entries=[]
 for source in sorted((ROOT/'module-src').iterdir()):
  if not (source/'module.json').exists():continue
- meta=json.loads((source/'module.json').read_text());shared=meta.pop('sourceFrom',None);id=meta['id'];version=meta['version'];out=ROOT/'modules'/id/version
+ meta=json.loads((source/'module.json').read_text());shared=meta.pop('sourceFrom',None);bridge_version=meta.pop('bridgeVersion',None);id=meta['id'];version=meta['version'];out=ROOT/'modules'/id/version
  with tempfile.TemporaryDirectory() as temp:
   stage=Path(temp)/'package';shutil.copytree(ROOT/'module-src'/shared if shared else source,stage);(stage/'module.json').unlink()
   if meta.get('edition'):(stage/'edition.js').write_text('globalThis.CYKLO_EDITION='+json.dumps(meta['edition'])+';\n')
-  bridge='module-bridge-v2.js' if meta.get('largeData') else 'module-bridge.js'
+  bridge='module-bridge-v3.js' if bridge_version==3 else 'module-bridge-v2.js' if meta.get('largeData') else 'module-bridge.js'
   (stage/'bridge.js').write_bytes((ROOT/'scripts'/bridge).read_bytes())
   if meta.get('largeData'):(stage/'module-data.js').write_bytes((ROOT/'core/module-data.js').read_bytes())
   (stage/'index.html').write_text((stage/'index.html').read_text().replace('<script src="./bridge.js">','<script data-module-id="'+id+'" src="./bridge.js">'))

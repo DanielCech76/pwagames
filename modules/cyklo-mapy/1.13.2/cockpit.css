@@ -1,0 +1,226 @@
+/* 1.6 — approved A at 390×764 CSS pixels. Shape/layout independent of palette. */
+:root[data-style]{--surface:#031520;--card:#071e2d;--card-alt:#0c2839;--edge:#426980;--ink:#effaff;--muted:#a9c4d6;--primary:#9bd6f2;--on-primary:#031520;--accent:#9bd6f2;--selected:#16374a;--header:var(--surface);--header-text:var(--ink);--grid:#36556f;--shadow:0 2px 8px #0003;color-scheme:dark}
+:root[data-theme=blue]{--surface:#031b35;--card:#062744;--card-alt:#0a3555;--edge:#3988c1;--primary:#4dbbff;--accent:#4dbbff;--muted:#a2c7e2;--grid:#315a7b;--selected:#164975}
+:root[data-theme=navy]{--surface:#031520;--card:#071e2d;--card-alt:#0c2839;--edge:#4b8fa3;--primary:#32dce2;--accent:#32dce2;--muted:#a9c4d6;--grid:#36556f;--selected:#16374a}
+:root[data-theme=green]{--surface:#031f17;--card:#082f24;--card-alt:#103b2b;--edge:#397b65;--primary:#70e3a4;--accent:#70e3a4;--muted:#b0d1bb;--grid:#315b46;--selected:#1a543a}
+:root[data-theme=brown]{--surface:#21150f;--card:#302219;--card-alt:#3c2c20;--edge:#81674c;--primary:#d6b088;--accent:#d6b088;--muted:#d2c0a8;--grid:#69513e;--selected:#543b28}
+:root[data-theme=orange]{--surface:#21150d;--card:#322117;--card-alt:#3f2b19;--edge:#a36a39;--primary:#ffa341;--accent:#ffa341;--muted:#dfc2a2;--grid:#775137;--selected:#603a1b}
+:root[data-theme=red]{--surface:#240e18;--card:#351620;--card-alt:#421c2c;--edge:#94445b;--primary:#ff7791;--accent:#ff7791;--muted:#ddb3bd;--grid:#693647;--selected:#60243a}
+/* Legacy light palettes stay selectable and are no longer overridden by visual style. */
+:root[data-theme=forest]{--surface:#faf5e8;--card:#fffbee;--card-alt:#eef1df;--edge:#9eaf91;--ink:#153f29;--muted:#52664a;--primary:#205a37;--accent:#205a37;--on-primary:#fffbee;--selected:#d1e0bd;--grid:#cad4bf;color-scheme:light}
+:root[data-theme=mist]{--surface:#eaf0f7;--card:#f6f9ff;--card-alt:#dbe7f3;--edge:#96b2c7;--ink:#17354e;--muted:#4b6477;--primary:#245475;--accent:#245475;--on-primary:#fff;--selected:#ccdeec;--grid:#bdcddc;color-scheme:light}
+:root[data-theme=night]{--surface:#172129;--card:#25313d;--card-alt:#293b46;--edge:#607786;--ink:#ebf2f5;--muted:#b0c3cc;--primary:#76c9b0;--accent:#76c9b0;--on-primary:#102820;--selected:#314f52;--grid:#465b64}
+:root[data-style] #app{background:var(--surface);color:var(--ink);padding:0;max-width:1100px}
+:root[data-style] #app button,:root[data-style] #app select{font-weight:600;box-shadow:none;text-shadow:none}
+:root[data-style] #app>header{height:48px;min-height:48px;padding:4px 12px;gap:4px;background:var(--surface);border:0;box-shadow:none;color:var(--ink);z-index:15}
+:root[data-style] #app header h1{font-size:18px;letter-spacing:.4px;color:var(--ink);gap:5px;flex:1;white-space:nowrap}
+:root[data-style] #app header h1 svg{width:29px;height:24px}
+:root[data-style] #app header button{background:transparent;color:var(--ink);border:0;box-shadow:none;width:36px;min-width:36px;min-height:36px;height:36px;border-radius:8px;font-size:22px;flex:none}
+:root[data-style] #app header #quickPause{border:1px solid var(--accent);width:34px;min-width:34px;height:34px;min-height:34px;margin:0 3px}
+#app #quickPause::before{height:15px;width:12px;background:linear-gradient(to right,currentColor 0 4px,transparent 4px 8px,currentColor 8px 12px)}
+#app #quickPause[data-paused=true]::before{width:0;height:0;background:none;border-left:11px solid currentColor;border-top:7px solid transparent;border-bottom:7px solid transparent}
+:root[data-style] #app #editionBadge{display:none}
+:root[data-style] #app #gpsState{font-size:9px;color:var(--muted);max-width:65px;line-height:1.2;position:relative;padding-left:9px}
+#app #gpsState::before{content:'';position:absolute;left:0;top:4px;width:5px;height:5px;border-radius:50%;background:var(--primary)}
+:root[data-style] #app #status{min-height:0;background:var(--card-alt);color:var(--muted);font-size:10px;padding:3px 12px;border:0}
+#app #rideView{overflow:hidden;position:relative}
+:root[data-style] #app[data-layout=led] #linearSpeed{display:flex;flex-direction:column;gap:0;align-items:stretch;min-height:108px;height:108px;margin:0 12px 8px;padding:0 16px 8px;width:calc(100% - 24px);border:0;border-radius:0;background:var(--surface);color:var(--ink);box-shadow:none;position:relative}
+:root[data-style] #app[data-layout=led] #ledDigital{display:flex;align-items:center;justify-content:center;order:0;min-width:0;height:78px;padding:0;border:0;filter:none;color:var(--ink);gap:8px}
+#app[data-layout=led] #ledDigital svg{height:62px;width:auto;max-width:230px;overflow:visible;transform:skew(-7deg)}
+#app[data-layout=led] #ledDigital small{font-size:17px;align-self:flex-end;margin-bottom:12px;color:var(--ink)}
+#app[data-layout=led] #linearSpeed .linear-visual{order:1;flex:0 0 auto;width:100%;padding:6px 0 0}
+:root[data-style] #app[data-layout=led] #linearSpeedQuality{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+:root[data-style] #app[data-layout=led] .speed-scale{display:none}
+:root[data-style] #app[data-layout=led] #speedMeter{height:10px;box-shadow:none;background:none;border-radius:0;opacity:1}
+#app[data-layout=led] #ledSegments{height:10px;gap:3px;transform:skew(-12deg)}
+#app[data-layout=led] .led-cell{border-radius:2px;background:var(--grid);box-shadow:none}
+#app[data-layout=led] .led-cell.lit[data-zone=low]{background:#4cf64b;box-shadow:none}
+#app[data-layout=led] .led-cell.lit[data-zone=green]{background:#9cf249;box-shadow:none}
+#app[data-layout=led] .led-cell.lit[data-zone=mid]{background:#ffcc42;box-shadow:none}
+#app[data-layout=led] .led-cell.lit[data-zone=high]{background:#ff6159;box-shadow:none}
+:root[data-style] #app[data-layout=bar] #linearSpeed{background:var(--card);border:1px solid var(--edge);color:var(--ink);box-shadow:none;min-height:70px}
+:root[data-style] #app #linearSpeedValue{color:var(--ink)}
+:root[data-style] #app #navigationBar{min-height:46px;height:auto;max-height:76px;padding:7px 12px;gap:12px;margin:0 12px 10px;width:calc(100% - 24px);background:var(--card);color:var(--ink);border:1px solid var(--accent);border-radius:12px;box-shadow:none;z-index:8}
+#app #navManeuver{width:27px;height:27px;flex-basis:27px;stroke-width:3.5}
+#app #navDistance{font-size:22px;min-width:55px;letter-spacing:-.5px}
+#app #navigationInstruction{font-size:15px;font-weight:600;line-height:1.2}
+#app #navigationProgress{font-size:9px;color:var(--muted);margin:2px 0 0}
+#app #navigationBar .nav-menu{display:none}
+:root[data-style] #app[data-layout] #mapArea{margin:0 12px;width:calc(100% - 24px);min-height:140px;flex:1 1 auto;border-radius:12px;overflow:hidden;isolation:isolate}
+:root[data-style] #app .map-top{top:12px;left:12px;right:auto;gap:0}
+#app .map-top #navPanelToggle,#app #recenter{display:none}
+:root[data-style] #app .map-top .segmented{border:1px solid var(--accent);border-radius:10px;background:var(--card);overflow:hidden;gap:0;box-shadow:none;backdrop-filter:none}
+:root[data-style] #app .map-top button{width:43px;min-width:43px;height:32px;min-height:32px;max-height:32px;padding:0;display:grid;place-items:center;font-size:13px;color:var(--ink);border:0;border-radius:0;background:transparent;box-shadow:none}
+:root[data-style] #app .map-top .segmented button.active{background:var(--accent);color:var(--on-primary);border-radius:7px;box-shadow:none}
+#app .map-top #headingMode svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7}
+:root[data-style] #app #mapTools{top:12px;right:12px;gap:0}
+:root[data-style] #app #mapTools #autoZoom{height:34px;min-height:34px;min-width:80px;padding:0 10px;display:flex;gap:6px;align-items:center;justify-content:center;background:var(--card);color:var(--ink);border:1px solid var(--accent);border-radius:10px;box-shadow:none;font-size:13px;backdrop-filter:none}
+#app #autoZoom svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8}
+:root[data-style] #app #mapTools #autoZoom.active{background:var(--card);color:var(--ink)}
+:root[data-style] #app #zoomControl{right:12px;top:50%;transform:translateY(-50%);padding:4px 3px;gap:4px;width:var(--rail-width,40px);height:var(--rail-height,164px);background:var(--card);border:1px solid var(--accent);border-radius:22px;box-shadow:0 2px 6px #0003;backdrop-filter:none;overflow:visible}
+:root[data-style] #app #zoomControl button{color:var(--ink);border:0;background:transparent;box-shadow:none;font-size:25px;font-weight:400}
+#app #zoomControl button::after{content:'';position:absolute;width:44px;height:44px}
+#app #zoomControl .slider-wrap{width:100%;position:relative;flex:1;min-height:15px}
+#app[data-layout] #zoomSlider{width:100%;height:100%;position:absolute;inset:0}
+#app[data-layout] #zoomSlider::-webkit-slider-runnable-track{width:2px;background:var(--edge)}
+#app[data-layout] #zoomSlider::-webkit-slider-thumb{border:1px solid var(--accent);background:var(--ink);box-shadow:none;margin-left:calc((2px - var(--thumb-diameter,12px))/2)}
+#app[data-layout] #zoomSlider::-moz-range-track{width:2px;background:var(--edge)}
+#app[data-layout] #zoomSlider::-moz-range-thumb{background:var(--ink);border:1px solid var(--accent);box-shadow:none}
+:root[data-style] #app #zoomBubble{position:absolute;top:48%;left:12px;right:auto;min-width:54px;padding:8px 5px;background:var(--card);color:var(--ink);border:1px solid var(--accent);border-radius:22px;font-size:11px;box-shadow:none;z-index:3;text-align:center}
+/* The distance badge belongs to the map, never the rail (the latter may be narrow). */
+:root[data-style] #app #fitRoute{position:absolute;right:12px;bottom:66px;width:36px;min-width:36px;height:36px;min-height:36px;padding:6px;border:1px solid var(--accent);border-radius:10px;background:var(--card);color:var(--ink);z-index:4}
+#app #fitRoute svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7}
+:root[data-style] #app #mapMessage{left:8px;right:58px;max-width:calc(100% - 66px);bottom:63px;top:auto;background:color-mix(in srgb,var(--card) 88%,transparent);color:var(--muted);padding:2px 5px;font-size:8px;max-height:15px;box-shadow:none}
+:root[data-style] #app #instruments{position:relative;order:5;margin:-57px 20px 8px;padding:6px 8px;width:calc(100% - 40px);height:49px;min-height:49px;border:1px solid var(--accent);border-radius:12px;background:color-mix(in srgb,var(--card) 95%,transparent);box-shadow:none;color:var(--ink);z-index:5;flex:0 0 49px}
+#app[data-layout] #metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;width:100%;text-align:center}
+#app[data-layout] #metrics>div{border-right:1px solid var(--edge)}#app #metrics>div:nth-child(4){border:0}
+#app[data-layout] #metrics small{font-size:8px;color:var(--muted);white-space:nowrap}
+#app[data-layout] #metrics strong{font-size:14px;color:var(--ink);letter-spacing:-.3px}
+#app[data-layout] #metrics .extra{display:none}
+#app[data-layout=top] #instruments,#app[data-layout=bottom] #instruments{position:static;margin:6px 12px;width:calc(100% - 24px);height:auto;min-height:100px;flex-basis:auto}
+:root[data-style] #app>nav{height:62px;min-height:62px;padding:4px;margin:0 12px 8px;width:calc(100% - 24px);border:1px solid var(--accent);border-radius:12px;background:var(--card);box-shadow:none;backdrop-filter:none;gap:4px}
+:root[data-style] #app>nav button{height:50px;min-height:50px;color:var(--ink);background:transparent;border-radius:10px;border:1px solid transparent;padding:2px;gap:2px;font-size:11px}
+:root[data-style] #app>nav button svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.7}
+:root[data-style] #app>nav button.active{color:var(--accent);border:1px solid var(--accent);background:var(--card-alt);box-shadow:none}
+:root[data-style] #app>nav button span{font-size:11px}
+#app .ride-menu{position:relative;flex:none}
+#app .ride-menu>summary{width:30px;height:36px;display:grid;place-items:center;font-size:24px;list-style:none;cursor:pointer;border-radius:8px}
+#app summary::-webkit-details-marker{display:none}
+#app .ride-menu-body{position:absolute;right:-35px;top:42px;width:200px;padding:6px;background:var(--card);color:var(--ink);border:1px solid var(--edge);border-radius:12px;box-shadow:var(--shadow);display:grid;gap:4px;z-index:30}
+:root[data-style] #app .ride-menu-body button{width:100%;height:44px;min-height:44px;border-radius:8px;text-align:left;font-size:13px;padding:8px 10px;border:0;color:var(--ink);background:var(--card-alt)}
+#app #headerNavStop{color:#ff987d}
+#app.controls-hidden #fitRoute,#app.controls-hidden #zoomBubble{opacity:0;visibility:hidden;pointer-events:none}
+:root[data-style] #app #revealControls{width:40px;height:28px;min-height:28px;padding:0;font-size:23px;left:50%;right:auto;bottom:7px;transform:translateX(-50%);background:color-mix(in srgb,var(--card) 85%,transparent);color:var(--ink);border:1px solid var(--edge);border-radius:9px;box-shadow:none}
+:root[data-style] #app.controls-hidden #mapArea{min-height:140px;margin-bottom:8px}
+:root[data-style] #app.controls-hidden #instruments{display:none}
+#app:not(.map-expanded) #locationPanel{display:none}
+#app #locationPanel{padding:6px 12px;background:var(--card);color:var(--ink)}
+#app #simulationPanel{max-height:210px;overflow:auto;background:var(--surface);color:var(--ink);margin:5px 12px;border-radius:12px;border-color:var(--edge);padding:4px 8px;order:6}
+#app #simulationPanel button,#app #simulationPanel select{min-height:36px;background:var(--card);color:var(--ink);border-color:var(--edge)}
+#app .elevation-card,#app .ride-card{background:var(--card);color:var(--ink);border-color:var(--edge);box-shadow:none}
+#app #simProfile{height:80px}
+#app .danger,#app #planDelete{color:#e78173}
+/* Full-page settings. Accordions only expand within this scroll area. */
+#app.settings-open>header,#app.settings-open>#status,#app.settings-open>nav{display:none}
+#settings{flex:1;min-height:0;display:flex;flex-direction:column;background:var(--surface);color:var(--ink);overflow:hidden}
+.settings-heading{height:64px;min-height:64px;padding:8px 12px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--edge)}
+.settings-heading h2{font-size:21px;font-weight:650;flex:1;margin:0}
+#app .settings-heading button{width:36px;height:40px;min-height:40px;padding:0;border:0;background:none;color:var(--ink);font-size:25px}
+#settingsSaved{font-size:11px;color:var(--accent)}
+.settings-scroll{flex:1;min-height:0;overflow:auto;padding:14px 12px 24px;overscroll-behavior:contain}
+.settings-section{border:1px solid var(--accent);border-radius:12px;margin:0 0 12px;background:var(--card);overflow:hidden}
+.settings-section>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 14px}
+.settings-section>summary>svg{width:29px;height:29px;fill:none;stroke:var(--accent);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.settings-section>summary>span{flex:1;min-width:0}.settings-section strong{font-size:19px;font-weight:650;display:block}.settings-section small{display:block;font-size:10px;color:var(--muted);margin-top:3px}
+.settings-section>summary>.chevron{width:17px;height:17px;stroke:var(--ink);transition:transform .15s}.settings-section[open]>summary>.chevron{transform:rotate(180deg)}
+.settings-body{padding:0 14px 10px}
+.settings-body label{min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0;border-top:1px solid var(--edge);font-size:13px;font-weight:550}
+#app .settings-body select,#app .settings-body input:not([type=checkbox]):not([type=range]){border:1px solid var(--edge);background:var(--surface);color:var(--ink);border-radius:7px;padding:5px 7px;font:inherit;min-height:30px;max-width:58%;width:auto;min-width:80px}
+#app .settings-body input[type=number]{width:85px}
+#app .settings-body input[type=range]{max-width:45%;min-width:80px;accent-color:var(--accent)}
+#app .settings-body input[type=checkbox]{appearance:none;-webkit-appearance:none;position:relative;width:38px;height:22px;border-radius:12px;background:var(--grid);margin:0;border:1px solid var(--edge);flex:none;cursor:pointer}
+#app .settings-body input[type=checkbox]::before{content:'';position:absolute;left:2px;top:2px;width:16px;height:16px;background:var(--ink);border-radius:50%;transition:transform .15s}
+#app .settings-body input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent)}
+#app .settings-body input[type=checkbox]:checked::before{transform:translateX(16px);background:var(--surface)}
+#app .settings-body input:disabled{opacity:.4}
+#app .settings-body button{min-height:32px;border:1px solid var(--edge);background:var(--surface);color:var(--ink);border-radius:7px;font-size:12px;padding:5px 8px}
+#app .settings-body .hint{font-size:10px;color:var(--muted);line-height:1.5;margin:5px 0}
+#app .settings-body h3{font-size:14px;margin:14px 0 7px}
+#app .setting-help{border-top:1px solid var(--edge)}
+#app .setting-help>summary{cursor:pointer;font-size:11px;color:var(--muted);padding:8px 0;list-style:none;display:flex;justify-content:space-between;gap:10px}
+.setting-help>summary>span{border:1px solid var(--muted);border-radius:50%;width:15px;height:15px;text-align:center;font-size:10px}
+#app #themeSwatches{display:flex;gap:8px;padding:5px 0 10px;justify-content:flex-end}
+#app #themeSwatches button{min-width:26px;width:26px;min-height:26px;height:26px;border-radius:6px;background:var(--swatch);border:2px solid transparent;padding:0}
+#app #themeSwatches button[aria-pressed=true]{outline:2px solid var(--ink);outline-offset:2px}
+#app #buildingHint,#app #terrainStatus{font-size:10px;min-height:0}
+@media(max-width:350px){:root[data-style] #app>header{padding:4px 8px;gap:1px}:root[data-style] #app header h1{font-size:15px;gap:3px}:root[data-style] #app header h1 svg{width:24px}:root[data-style] #app header #gpsState{max-width:48px;font-size:8px}:root[data-style] #app #navigationBar{gap:8px;padding:7px 9px}#app #navigationInstruction{font-size:12px}#app #navDistance{font-size:19px;min-width:48px}.settings-body{padding:0 10px 10px}.settings-body label{font-size:12px}#app[data-layout] #metrics strong{font-size:12px}}
+@media(max-height:600px){:root[data-style] #app[data-layout=led] #linearSpeed{height:82px;min-height:82px}#app[data-layout=led] #ledDigital{height:54px}#app[data-layout=led] #ledDigital svg{height:44px}#app[data-layout=led] #ledDigital small{font-size:13px;margin-bottom:7px}:root[data-style] #app #navigationBar{margin-bottom:5px}#app #simulationPanel{max-height:140px}}
+/* Containing block and hit areas must not inherit the legacy full-rail slider geometry. */
+:root[data-style] #app[data-layout] #zoomControl .slider-wrap{position:relative;width:100%;min-height:15px;flex:1 1 0;align-items:stretch}
+:root[data-style] #app[data-layout] #zoomSlider{position:absolute;inset:0;width:100%;height:100%;margin:0}
+:root[data-style] #app #recenter{display:none!important}
+:root[data-style] #app #settingsOpen svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round;display:block;margin:auto}
+#app #settings{position:fixed;inset:0;margin:0 auto;border:0;padding:0;border-radius:0;width:100%;max-width:1100px;height:100dvh;max-height:none;z-index:40;color:var(--ink);background:var(--surface);box-shadow:none}
+#app #settings::backdrop{background:var(--surface)}
+:root[data-style=glass] #app #navigationBar,:root[data-style=glass] #app .map-top .segmented,:root[data-style=glass] #app #zoomControl,:root[data-style=glass] #app #mapTools #autoZoom,:root[data-style=glass] #app>nav{box-shadow:inset 0 1px 0 color-mix(in srgb,var(--ink) 18%,transparent),0 2px 8px #0002;background:color-mix(in srgb,var(--card) 92%,transparent);backdrop-filter:blur(10px)}
+:root[data-style] #app[data-layout] #zoomSlider::-webkit-slider-runnable-track{width:2px;background:var(--edge);border-radius:2px}
+:root[data-style] #app[data-layout] #zoomSlider::-webkit-slider-thumb{width:var(--thumb-diameter,12px);height:var(--thumb-diameter,12px);border:1px solid var(--accent);background:var(--ink);border-radius:50%;box-shadow:none;margin-left:calc((2px - var(--thumb-diameter,12px))/2)}
+:root[data-style] #app[data-layout] #zoomSlider::-moz-range-track{width:2px;background:var(--edge)}
+:root[data-style] #app[data-layout] #zoomSlider::-moz-range-thumb{width:var(--thumb-diameter,12px);height:var(--thumb-diameter,12px);border:1px solid var(--accent);background:var(--ink);border-radius:50%;box-shadow:none}
+:root[data-style] #app.simulating #fitRoute{bottom:8px}
+:root[data-style] #app.simulating #mapMessage{bottom:8px;right:58px}
+/* Keep basemap credits accessible above the floating metric dock. */
+#app #rideMenu #start,#app #rideMenu #pause{display:none}
+:root[data-style] #app .maplibregl-ctrl-bottom-right{bottom:62px;right:5px;z-index:6}
+:root[data-style] #app #fitRoute{bottom:100px}
+:root[data-style] #app.simulating #fitRoute{bottom:38px}
+:root[data-style] #app.simulating .maplibregl-ctrl-bottom-right{bottom:3px}
+:root[data-style] #app #mapyLogo{bottom:64px;left:8px}
+:root[data-style] #app.controls-hidden .maplibregl-ctrl-bottom-right{bottom:3px}
+:root[data-style] #app.controls-hidden #mapyLogo{bottom:4px}
+/* 1.7 — A/B icon controls and a persistent, independent position target. */
+.control-icon{display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;width:22px;height:22px;flex:none}
+#app button .control-icon{margin:auto}#app #quickPause::before{display:none!important}
+:root[data-style] #app>header{gap:3px;padding:4px 10px}
+:root[data-style] #app header #gpsState{display:grid;place-items:center;width:30px;min-width:30px;max-width:30px;height:34px;min-height:34px;padding:3px;color:var(--muted);font-size:0;border:0;background:none}
+#app #gpsState::before{display:none}
+#app #gpsState[data-state=valid]{color:#6de996}
+#app #gpsState[data-state=searching]{color:#f4c858}
+#app #gpsState[data-state=weak],#app #gpsState[data-state=lost],#app #gpsState[data-state=denied]{color:#ff9978}
+#app #gpsState[data-state=searching] .control-icon{animation:gps-search 1.2s ease-in-out infinite}
+@keyframes gps-search{50%{opacity:.35}}
+:root[data-style] #app header #rideStop{display:grid;place-items:center;min-width:30px;width:30px;height:34px;min-height:34px;color:var(--ink)}
+#app #quickPause[data-recovery=true]{border-color:#f4c858;color:#f4c858}
+#app #rideMenu>summary{width:26px;height:34px}#app #rideMenu>summary .control-icon{width:19px;height:19px}
+:root[data-style] #app #recenter{display:grid!important;place-items:center!important;position:absolute;right:12px;top:12px;left:auto;bottom:auto;width:34px!important;height:34px!important;min-width:34px!important;max-width:34px!important;min-height:34px!important;max-height:34px!important;flex:0 0 34px;border:1px solid var(--accent);border-radius:10px;background:var(--card);color:var(--ink);padding:5px;box-shadow:none;z-index:8;opacity:1;visibility:visible;pointer-events:auto}
+:root[data-style] #app.controls-hidden #recenter{display:grid!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
+:root[data-style] #app #mapTools{right:56px;top:12px}
+:root[data-style] #app #mapTools #autoZoom{width:54px;min-width:54px;padding:0 4px;gap:3px;font-size:11px}
+#app #autoZoom .control-icon{width:15px;height:15px;margin:0}
+:root[data-style] #app #zoomControl{z-index:4}
+#app #zoomControl button .control-icon{width:20px;height:20px}
+:root[data-style] #app #zoomBubble{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;top:50%;transform:translateY(-50%);left:8px;right:auto;min-width:54px;width:54px;height:54px;border-radius:50%;padding:4px;font-size:11px;font-weight:700}
+#app #zoomBubble .control-icon{width:25px;height:23px;stroke-width:1.7}
+#app #mapPlanTools{position:absolute;right:12px;bottom:100px;display:flex;flex-direction:column;gap:5px;z-index:5}
+:root[data-style] #app #mapPlanTools button{width:36px;min-width:36px;height:36px;min-height:36px;padding:6px;border:1px solid var(--accent);border-radius:10px;background:var(--card);color:var(--ink)}
+:root[data-style] #app #fitRoute{bottom:142px}
+#app.controls-hidden #mapPlanTools{visibility:hidden;opacity:0;pointer-events:none}
+/* GPS and route actions have moved to icons; legacy nodes remain inert for compatibility. */
+:root[data-style] #app #locationPanel,:root[data-style] #app #recovery{display:none!important}
+:root[data-style] #app[data-layout].map-expanded:not(.simulating) #instruments{display:flex;min-height:49px}
+:root[data-style] #app[data-layout].map-expanded #metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+:root[data-style] #app[data-layout].map-expanded #metrics>div:nth-child(-n+4){display:block}
+:root[data-style] #app[data-layout].controls-hidden #instruments{display:none}
+#app.simulating #mapPlanTools{display:none}
+:root[data-style] #app.simulating #fitRoute{bottom:8px;left:12px;right:auto}
+@media(max-width:350px){:root[data-style] #app>header{gap:1px;padding:4px 7px}:root[data-style] #app header h1{font-size:16px;gap:3px;min-width:0}:root[data-style] #app header #back,:root[data-style] #app header #settingsOpen{width:30px;min-width:30px}:root[data-style] #app header #quickPause{width:30px;min-width:30px;margin:0 1px}:root[data-style] #app header h1 svg{width:24px}.control-icon{width:21px;height:21px}}
+@media(prefers-reduced-motion:reduce){#app #gpsState[data-state=searching] .control-icon{animation:none}}
+:root[data-style] #app header #gpsState[data-state=valid]{color:#6de996}
+:root[data-style] #app header #gpsState[data-state=searching]{color:#f4c858}
+:root[data-style] #app header #gpsState[data-state=weak],:root[data-style] #app header #gpsState[data-state=lost],:root[data-style] #app header #gpsState[data-state=denied]{color:#ff9978}
+:root[data-style] #app[data-layout].map-expanded:not(.simulating) #locationPanel~#instruments{display:flex;min-height:49px}
+:root[data-style] #app[data-layout].map-expanded.controls-hidden #locationPanel~#instruments{display:none}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+:root[data-style] #app #mapPlanTools{display:block;bottom:100px}
+#app #mapPlanTools>summary{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--accent);border-radius:10px;background:var(--card);color:var(--ink);cursor:pointer;list-style:none}
+#app #mapPlanTools .map-actions-body{position:absolute;right:0;bottom:42px;width:180px;display:flex;flex-direction:column;gap:4px;padding:6px;border:1px solid var(--edge);border-radius:10px;background:var(--card);box-shadow:var(--shadow)}
+:root[data-style] #app #mapPlanTools .map-actions-body button{position:static!important;inset:auto!important;width:100%;max-width:none;min-width:0;height:40px;min-height:40px;display:flex;align-items:center;gap:9px;padding:6px 8px;border:0;border-radius:7px;background:var(--card-alt);color:var(--ink);font-size:12px;text-align:left}
+#app #mapPlanTools .map-actions-body button .control-icon{width:19px;height:19px;margin:0}
+:root[data-style] #app #instruments{height:54px;min-height:54px;flex-basis:54px;margin-top:-62px}
+#app[data-layout] #metrics small{display:block;height:18px;margin:0 0 1px;font-size:0}
+#app #metrics small>.control-icon{width:17px;height:17px;margin:auto;color:var(--muted)}
+#app[data-layout] #metrics strong{font-size:15px}
+:root[data-style] #app[data-layout=top] #instruments,:root[data-style] #app[data-layout=bottom] #instruments{height:auto;min-height:100px;flex-basis:auto;margin-top:6px}
+#app #rideMenu #finish,#app #simulationPanel #simPause,#app #simulationPanel #simStop{display:none}
+:root[data-style] #app.simulating #mapPlanTools{display:none}
+/* 1.8 — terrain toggle and center-anchored SVG position marker. */
+:root[data-style] #app #zoomBubble{cursor:pointer;pointer-events:auto;min-height:54px;max-height:54px;line-height:1.1;touch-action:manipulation;z-index:5}
+#app #zoomBubble[aria-pressed=false] .control-icon{opacity:.75}
+.map-arrow{width:28px;height:28px;display:grid;place-items:center;font-size:0;line-height:0;color:#f5810b;-webkit-text-stroke:0;text-shadow:none;filter:drop-shadow(0 2px 3px #173b2866)}
+.map-arrow svg{width:28px;height:28px;display:block;fill:currentColor;stroke:white;stroke-width:2;stroke-linejoin:round}
+
+/* Independent place search shares compact map chrome and its hide policy. */
+:root[data-style] #app #mapSearch{position:absolute;top:56px;left:12px;z-index:8;width:34px;height:34px;min-width:34px;min-height:34px;padding:6px;display:grid;place-items:center;border:1px solid var(--accent);border-radius:10px;background:var(--card);color:var(--ink);box-shadow:none}
+#app.controls-hidden #mapSearch{visibility:hidden;opacity:0;pointer-events:none}
+.search-place-marker{width:28px;height:36px;color:#ffad32;filter:drop-shadow(0 2px 3px #00182099)}
+.search-place-marker svg{width:100%;height:100%;fill:var(--card,#08202c);stroke:currentColor;stroke-width:2}

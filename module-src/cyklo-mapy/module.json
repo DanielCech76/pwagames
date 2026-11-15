@@ -2,9 +2,9 @@
   "id": "cyklo-mapy",
   "sourceFrom": "cyklo",
   "edition": "mapy",
-  "version": "1.13.1",
+  "version": "1.13.2",
   "apiVersion": 1,
-  "minCoreVersion": "2.1.0",
+  "minCoreVersion": "2.1.1",
   "maxCoreMajor": 2,
   "dataSchema": 1,
   "name": "CYKLO Mapy.com",
@@ -18,5 +18,6 @@
     "Online lesní plochy OpenFreeMap a volitelné letecké Mapy.com"
   ],
   "fullscreen": false,
-  "largeData": true
+  "largeData": true,
+  "bridgeVersion": 3
 }
