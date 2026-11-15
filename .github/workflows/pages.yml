@@ -51,6 +51,7 @@ jobs:
           node tests/cyklo-appearance.test.cjs
           node tests/cyklo-controls.test.cjs
           node tests/cyklo-landscape.test.cjs
+          node tests/cyklo-landscape-lod.test.cjs
           node tests/cyklo-terrain.test.cjs
           node tests/cyklo-reroute.test.cjs
           node tests/cyklo-road-match.test.cjs
