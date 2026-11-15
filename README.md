@@ -116,3 +116,7 @@ Podrobnosti integrace a ověření: `docs/azulejo-module.md`.
 ## CYKLO 1.6.0
 
 Approved A cockpit, full-screen grouped settings, independent color palettes, expanded manual zoom with whole-route fit, 150/200 km/h gauges, header-only ride actions, automatic Jízda selection and corrected control hiding. See [cockpit specification and verification](docs/cyklo-cockpit.md). Both Open and Mapy.com editions share the release.
+
+## CYKLO 1.7.0
+
+Unified SVG controls, icon-only GPS toggle and ride header, persistent top-right recenter in focus mode, compact route action menu, and removal of duplicate location/recovery/action panels. GPS off safely pauses recording; GPS on resumes location tracking only. Both cycling editions updated.

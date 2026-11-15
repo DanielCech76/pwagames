@@ -158,3 +158,58 @@
 :root[data-style] #app #mapyLogo{bottom:64px;left:8px}
 :root[data-style] #app.controls-hidden .maplibregl-ctrl-bottom-right{bottom:3px}
 :root[data-style] #app.controls-hidden #mapyLogo{bottom:4px}
+/* 1.7 — A/B icon controls and a persistent, independent position target. */
+.control-icon{display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;width:22px;height:22px;flex:none}
+#app button .control-icon{margin:auto}#app #quickPause::before{display:none!important}
+:root[data-style] #app>header{gap:3px;padding:4px 10px}
+:root[data-style] #app header #gpsState{display:grid;place-items:center;width:30px;min-width:30px;max-width:30px;height:34px;min-height:34px;padding:3px;color:var(--muted);font-size:0;border:0;background:none}
+#app #gpsState::before{display:none}
+#app #gpsState[data-state=valid]{color:#6de996}
+#app #gpsState[data-state=searching]{color:#f4c858}
+#app #gpsState[data-state=weak],#app #gpsState[data-state=lost],#app #gpsState[data-state=denied]{color:#ff9978}
+#app #gpsState[data-state=searching] .control-icon{animation:gps-search 1.2s ease-in-out infinite}
+@keyframes gps-search{50%{opacity:.35}}
+:root[data-style] #app header #rideStop{display:grid;place-items:center;min-width:30px;width:30px;height:34px;min-height:34px;color:var(--ink)}
+#app #quickPause[data-recovery=true]{border-color:#f4c858;color:#f4c858}
+#app #rideMenu>summary{width:26px;height:34px}#app #rideMenu>summary .control-icon{width:19px;height:19px}
+:root[data-style] #app #recenter{display:grid!important;place-items:center!important;position:absolute;right:12px;top:12px;left:auto;bottom:auto;width:34px!important;height:34px!important;min-width:34px!important;max-width:34px!important;min-height:34px!important;max-height:34px!important;flex:0 0 34px;border:1px solid var(--accent);border-radius:10px;background:var(--card);color:var(--ink);padding:5px;box-shadow:none;z-index:8;opacity:1;visibility:visible;pointer-events:auto}
+:root[data-style] #app.controls-hidden #recenter{display:grid!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important}
+:root[data-style] #app #mapTools{right:56px;top:12px}
+:root[data-style] #app #mapTools #autoZoom{width:54px;min-width:54px;padding:0 4px;gap:3px;font-size:11px}
+#app #autoZoom .control-icon{width:15px;height:15px;margin:0}
+:root[data-style] #app #zoomControl{z-index:4}
+#app #zoomControl button .control-icon{width:20px;height:20px}
+:root[data-style] #app #zoomBubble{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;top:50%;transform:translateY(-50%);left:8px;right:auto;min-width:54px;width:54px;height:54px;border-radius:50%;padding:4px;font-size:11px;font-weight:700}
+#app #zoomBubble .control-icon{width:25px;height:23px;stroke-width:1.7}
+#app #mapPlanTools{position:absolute;right:12px;bottom:100px;display:flex;flex-direction:column;gap:5px;z-index:5}
+:root[data-style] #app #mapPlanTools button{width:36px;min-width:36px;height:36px;min-height:36px;padding:6px;border:1px solid var(--accent);border-radius:10px;background:var(--card);color:var(--ink)}
+:root[data-style] #app #fitRoute{bottom:142px}
+#app.controls-hidden #mapPlanTools{visibility:hidden;opacity:0;pointer-events:none}
+/* GPS and route actions have moved to icons; legacy nodes remain inert for compatibility. */
+:root[data-style] #app #locationPanel,:root[data-style] #app #recovery{display:none!important}
+:root[data-style] #app[data-layout].map-expanded:not(.simulating) #instruments{display:flex;min-height:49px}
+:root[data-style] #app[data-layout].map-expanded #metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+:root[data-style] #app[data-layout].map-expanded #metrics>div:nth-child(-n+4){display:block}
+:root[data-style] #app[data-layout].controls-hidden #instruments{display:none}
+#app.simulating #mapPlanTools{display:none}
+:root[data-style] #app.simulating #fitRoute{bottom:8px;left:12px;right:auto}
+@media(max-width:350px){:root[data-style] #app>header{gap:1px;padding:4px 7px}:root[data-style] #app header h1{font-size:16px;gap:3px;min-width:0}:root[data-style] #app header #back,:root[data-style] #app header #settingsOpen{width:30px;min-width:30px}:root[data-style] #app header #quickPause{width:30px;min-width:30px;margin:0 1px}:root[data-style] #app header h1 svg{width:24px}.control-icon{width:21px;height:21px}}
+@media(prefers-reduced-motion:reduce){#app #gpsState[data-state=searching] .control-icon{animation:none}}
+:root[data-style] #app header #gpsState[data-state=valid]{color:#6de996}
+:root[data-style] #app header #gpsState[data-state=searching]{color:#f4c858}
+:root[data-style] #app header #gpsState[data-state=weak],:root[data-style] #app header #gpsState[data-state=lost],:root[data-style] #app header #gpsState[data-state=denied]{color:#ff9978}
+:root[data-style] #app[data-layout].map-expanded:not(.simulating) #locationPanel~#instruments{display:flex;min-height:49px}
+:root[data-style] #app[data-layout].map-expanded.controls-hidden #locationPanel~#instruments{display:none}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+:root[data-style] #app #mapPlanTools{display:block;bottom:100px}
+#app #mapPlanTools>summary{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--accent);border-radius:10px;background:var(--card);color:var(--ink);cursor:pointer;list-style:none}
+#app #mapPlanTools .map-actions-body{position:absolute;right:0;bottom:42px;width:180px;display:flex;flex-direction:column;gap:4px;padding:6px;border:1px solid var(--edge);border-radius:10px;background:var(--card);box-shadow:var(--shadow)}
+:root[data-style] #app #mapPlanTools .map-actions-body button{position:static!important;inset:auto!important;width:100%;max-width:none;min-width:0;height:40px;min-height:40px;display:flex;align-items:center;gap:9px;padding:6px 8px;border:0;border-radius:7px;background:var(--card-alt);color:var(--ink);font-size:12px;text-align:left}
+#app #mapPlanTools .map-actions-body button .control-icon{width:19px;height:19px;margin:0}
+:root[data-style] #app #instruments{height:54px;min-height:54px;flex-basis:54px;margin-top:-62px}
+#app[data-layout] #metrics small{display:block;height:18px;margin:0 0 1px;font-size:0}
+#app #metrics small>.control-icon{width:17px;height:17px;margin:auto;color:var(--muted)}
+#app[data-layout] #metrics strong{font-size:15px}
+:root[data-style] #app[data-layout=top] #instruments,:root[data-style] #app[data-layout=bottom] #instruments{height:auto;min-height:100px;flex-basis:auto;margin-top:6px}
+#app #rideMenu #finish,#app #simulationPanel #simPause,#app #simulationPanel #simStop{display:none}
+:root[data-style] #app.simulating #mapPlanTools{display:none}

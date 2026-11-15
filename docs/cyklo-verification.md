@@ -77,3 +77,7 @@ WebGL není v tomto cloudovém prohlížeči dostupné. Skutečné 3D vykreslen�
 ## 1.6.0
 
 All 23 test files pass; browser verification at 390×780 and 320×780. See [cockpit verification](cyklo-cockpit.md) for geometry measurements, synthetic GPS scope and renderer limitation.
+
+## 1.7.0
+
+All 23 regression files pass, including GPS toggle on/off, GPS off pausing/persisting recording, GPS on not resuming a paused ride, pending fix cancellation, late callback rejection, and unfinished-ride header restore/finish. Browser QA confirms persistent recenter in focus mode, icon-only GPS and header ride controls at 390 and 320 px. See [cockpit](cyklo-cockpit.md).
