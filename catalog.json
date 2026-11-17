@@ -24,7 +24,7 @@
     },
     {
       "id": "cyklo",
-      "version": "1.20.0",
+      "version": "1.21.0",
       "apiVersion": 1,
       "minCoreVersion": "2.1.2",
       "maxCoreMajor": 2,
@@ -39,20 +39,20 @@
         "Udržení obrazovky (pokud podporováno)",
         "Online výškové dlaždice Mapterhorn (terén/vrstevnice)",
         "Online lesní plochy OpenFreeMap a volitelné letecké Mapy.com",
-        "Kamera a orientace telefonu (na pokyn pro AR)",
+        "Kamera na pokyn pro AR; GPS a orientace při otevření výhledu (lze vypnout)",
         "Podklady AR: katalog názvů GeoNames ze serveru aplikace, výšky Mapterhorn / AWS Terrain Tiles, záložní OpenStreetMap / Overpass (ručně nebo volitelně automaticky při GPS)"
       ],
       "fullscreen": false,
       "largeData": true,
       "edition": "open",
-      "manifest": "modules/cyklo/1.20.0/manifest.json",
-      "manifestSha256": "62a297999afea4ad7cde952e6712a35eef4faf28f9f8a582ac737f90f68a6728",
-      "size": 6919803
+      "manifest": "modules/cyklo/1.21.0/manifest.json",
+      "manifestSha256": "db668f32bd54bd3b252c6769af3450b6bc8ab42f8685c0938d5a049f0288ac97",
+      "size": 6968105
     },
     {
       "id": "cyklo-mapy",
       "edition": "mapy",
-      "version": "1.20.0",
+      "version": "1.21.0",
       "apiVersion": 1,
       "minCoreVersion": "2.1.2",
       "maxCoreMajor": 2,
@@ -66,14 +66,14 @@
         "Online služby Mapy.com (vlastní klíč)",
         "Online výškové dlaždice Mapterhorn (terén/vrstevnice)",
         "Online lesní plochy OpenFreeMap a volitelné letecké Mapy.com",
-        "Kamera a orientace telefonu (na pokyn pro AR)",
+        "Kamera na pokyn pro AR; GPS a orientace při otevření výhledu (lze vypnout)",
         "Podklady AR: katalog názvů GeoNames ze serveru aplikace, výšky Mapterhorn / AWS Terrain Tiles, záložní OpenStreetMap / Overpass (ručně nebo volitelně automaticky při GPS)"
       ],
       "fullscreen": false,
       "largeData": true,
-      "manifest": "modules/cyklo-mapy/1.20.0/manifest.json",
-      "manifestSha256": "9a23f3083f11f281964c9415066525d0c5ec0e35d814bae1cf8355cea427e943",
-      "size": 6919808
+      "manifest": "modules/cyklo-mapy/1.21.0/manifest.json",
+      "manifestSha256": "6c4ddac1a6be14f1072ecc0afd2dbdf4a966054cff01c7c404d48406b5d2e3b7",
+      "size": 6968110
     },
     {
       "id": "letadlo",

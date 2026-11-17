@@ -1,4 +1,4 @@
-# Rozhlédnout se – CYKLO 1.19.3
+# Rozhlédnout se – CYKLO 1.21.0
 
 Režim AR je dostupný tlačítkem **AR** vedle 2D/3D v CYKLO Open i CYKLO Mapy.com. Potřebuje jádro 2.1.2, které předává oprávnění kamery a magnetometru do modulu. Stávající verze modulů zůstávají neměnné.
 
@@ -84,3 +84,22 @@ Popisky mají ikonu typu, vzdálenost a druhý řádek s názvem. Vrcholy, hřeb
 Klepnutí na popisek vybere cíl bez otevření nastavení. Zaměřovač dole vybere nejbližší známý bod ve středu obrazu; vybraný cíl má přednost a šipka na okraji ukazuje stranu při jeho opuštění záběru. Tlačítko zaměření v ručním režimu otočí pohled na cíl, při senzorech vede uživatele šipkou. Samostatné tlačítko zarovná senzory podle známého cíle. Tažením mapy lze bez senzorů měnit směr a náklon.
 
 Ověření zahrnuje projekci a ořezávání, síť pod pozorovatelem, minimální výšku, nezávislé přepínání zařízení, opožděná oprávnění, filtry významnosti i původní testy stahování a offline katalogu. Přesnost kompasu a kamery zůstává k ověření na fyzickém telefonu.
+
+
+## 1.21.0 – detaily popředí, nápověda a samostatné výchozí GPS/senzory
+
+GPS a orientační senzory se při otevření výhledu standardně spouštějí, kamera nikdy. Volby **GPS při otevření** a **Senzory při otevření** lze vypnout a ukládají se pro konkrétní modul. Telefon může vyžádat oprávnění; pokud prohlížeč vyžaduje další přímé gesto pro senzory, uživatel je povolí ikonou telefonu. Zavření, pozadí a opožděné odpovědi zachovávají dosavadní ochrany.
+
+GPS hláška vznikne jen při prvním platném měření nebo obnovení po chybě; průběžné polohy její konec neposouvají. Nastavení nabízí vypnutí běžných oznámení nebo 3/5 sekund, výchozí 3 s. Chyby oprávnění se zobrazí samostatně. Stav GPS zůstává v malém spodním indikátoru.
+
+Otazník přepíná nápovědu s názvy vedle ikon. Stav se ukládá. Ozubené kolo je přístupné i po skrytí ostatního ovládání a otevře nastavení přímo z výhledu. Nová záložka **Detaily popředí** obsahuje předvolby Úsporné/Vyvážené/Podrobné, dosah 0,5–5 km, jemnost sítě, cesty, vodu, lesní plochy, hustotu a dosah jednoduchých stromů, půdorysy/prostorové budovy. Předvolby ovlivňují skutečnou geometrii, nikoli přesnost zdrojového DEM.
+
+**V kamerovém AR se nikdy nevykreslují stromy ani jiné mapové objekty.** Kamera má pouze popisky a ovládání. Nastavení geometrie je v kameře neaktivní a zůstává zachované pro návrat do mapy. Toto pravidlo platí i při předvolbě Podrobné a při zapnutých stromech. Test ověřuje nulový počet geometrických volání v kamerovém režimu.
+
+Detaily využívají skutečné vektorové prvky OpenFreeMap / OpenStreetMap: transportation, water, waterway, landcover a building. Volba stažení okolí stáhne po terénu a názvech také detaily. V záložce lze spustit nebo zrušit stažení detailů samostatně. Výšky budov bez údaje jsou odhadnuté; stromy jsou schematické, umístěné výhradně do lesních polygonů (včetně respektování otvorů). Nejde o zaměření jednotlivých skutečných stromů. Rozmístění je ukotvené k uložené oblasti, ne ke kameře.
+
+Jeden požadavek detailů má nejvýše 16 vektorových dlaždic, 10 s na index i dlaždici, nejvýše 6000 prvků na oblast. Ukládají se 4 oblasti a 32 binárních dlaždic; následné stažení je znovu používá. Dál se vykresluje zjednodušený terén a filtrované popisky. Automatické doplňování detailů je navázané na již existující výslovné zapnutí automatiky a čerstvou GPS, běží jen v mapovém výhledu, má časový odstup a limit pěti neúspěchů. Zrušení pozastaví automatiku do jejího opětovného zapnutí. Chyba detailů neodstraní terén, názvy ani předchozí oblasti. Smazání podkladů odstraní i detaily.
+
+Mapový výhled používá malý WebGL renderer s hloubkovým bufferem pro správné zakrytí geometrie; bez WebGL zůstává zjednodušená Canvas varianta. Nové ar-detail.js a ar-renderer.js jsou součástí úplného offline modulu. Dekodér vektorů je sestavený z připnutých balíčků pbf, vector-tile a earcut; reprodukce: `node scripts/build-look-vendor.mjs`. Licence jsou ve vendor/.
+
+Ověření 17. 11. 2026: živé stažení v testovacím prohlížeči dokončilo 6/6 dlaždic a uložilo 4619 prvků na 100 %. Přímý požadavek z vývojového shellu vrátil HTTP 403, browserové stažení stejného zdroje fungovalo. Prohlížeč měl dostupnou jen Canvas variantu; skutečná kompilace a linkování GPU shaderů i hloubkové zakrytí byly ověřeny pomocí EGL/GLES (`python scripts/check-look-gpu.py`). Testy zahrnují cache, zrušení, limity, skutečné polygony, otvory, předvolby, výchozí zařízení a neprodlužování GPS hlášky. Fyzickou přesnost senzorů je nadále potřeba ověřit na telefonu.
