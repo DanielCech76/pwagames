@@ -1,4 +1,4 @@
-# Rozhlédnout se – CYKLO 1.22.0
+# Rozhlédnout se – CYKLO 1.24.0
 
 Režim AR je dostupný tlačítkem **AR** vedle 2D/3D v CYKLO Open i CYKLO Mapy.com. Potřebuje jádro 2.1.2, které předává oprávnění kamery a magnetometru do modulu. Stávající verze modulů zůstávají neměnné.
 
@@ -7,7 +7,7 @@ Režim AR je dostupný tlačítkem **AR** vedle 2D/3D v CYKLO Open i CYKLO Mapy.
 1. Otevři AR na cyklomapě. GPS a senzory se standardně spustí; oprávnění telefonu je nutné povolit. Lze použít také střed mapy nebo ruční souřadnice.
 2. Krátké klepnutí na ikonu přepíná její funkci, podržení přibližně 0,55 s otevírá související nastavení. Panel zavřeš stejnou ikonou, klepnutím mimo něj nebo podržením jiné ikony.
 3. V Podkladech stáhni terén, názvy a detaily okolí. Upozornění na chybějící podklady otevírá tento panel přímo.
-4. V Terénu můžeš přepnout aktuální výšku na ruční nadhled 1,7 m až 20 km nad terénem. Ruční nadhled je plastický a ovládá se tažením; dosah podrobné mapy je 500 m až 10 km. Tlačítko Podkladů nabízí odhadovaný záběr + 20 % rezervy.
+4. Ikona se svislými šipkami přepíná automatickou výšku telefonu a ruční nadhled 1,7 m až 20 km nad terénem. Ruční výšku nastavíš svislým posuvníkem; tlačítko pod ním vrací automatickou výšku. Směr i náklon řídí senzory v obou režimech. Bez senzorů lze pohled měnit tažením. Automatická výška vždy používá plochou mapu bez prostorových budov, ruční výška umožňuje reliéf a budovy. Dosah blízkých detailů je 500 m až 10 km. Tlačítko Podkladů nabízí odhadovaný záběr + 20 % rezervy.
 5. Kamera se zapne výhradně její ikonou. V kameře se používá skutečná výška telefonu, nikoli ruční nadhled. Vždy viditelná spoušť vytvoří PNG s obrazem a právě viditelnými popisky; šipkou PNG lze poslední snímek stáhnout znovu. Kamera nenahrává zvuk ani neodesílá obraz na server.
 6. Pro přesnější směr zvol známý cíl a zarovnej jej se zaměřovačem. Obecné nastavení nabízí ruční/automatické skrývání ovládání a interval 2–60 s. Během otevřeného nastavení nebo pořizování fotografie se ovládání automaticky neschovává.
 
@@ -140,3 +140,20 @@ Panel Detaily nabízí „Podrobná 3D mapa · online“ a „Zjednodušený ter
 Kamera mapy vychází z absolutní výšky oka, směru, náklonu a stejného vertikálního zorného úhlu jako GeoLook. Terénní upnutí středu je vypnuté, aby knihovna svévolně neměnila nastavenou výšku. Popisky při podrobném zobrazení používají projekci mapy. Přepnutí do kamery podrobnou mapu odstraní; AR kamera nadále používá živé video a popisky, bez stromů a bez mapové geometrie. Zavření výhledu uvolní mapu, reliéf i posluchače. Opraveno také zachování výšky nadhledu při změně nastavení automatického skrytí nebo nápovědy.
 
 Ověření: regresní sada a nový test absolutní pozice kamery, shodného FOV na výšku/šířku, přepínačů reliéfu a budov, vzdálenostního filtru, zálohy u horizontu/limitu zoomu, chyb a odstranění mapy. V testovacím prohlížeči WebGL nelze inicializovat; ověřena automatická záloha, přepínač typu nadhledu a návrat do kamery. Výsledný vzhled podrobné mapy na fyzickém telefonu nebyl přímo ověřen.
+
+
+## 1.24.0 — Senzory, ovládání výšky a blízké vrstevnice
+
+Výška je nezávislá na orientaci. Přepínání automatické/ruční výšky, tažení posuvníku ani přechod mezi terénem a kamerou nevypínají senzory a nemažou kalibraci. Senzory určují směr, náklon i natočení obrazu kolem osy pohledu. Vypnutí senzorů zachová poslední směr pro ruční ovládání. Kamera nadále používá skutečnou výšku telefonu.
+
+Samostatná ikona výšky (svislé šipky s měřítkem) krátkým dotykem přepíná automatickou a ruční výšku. V ručním režimu se vedle pravé lišty otevře úzký svislý logaritmický posuvník 1,7 m–20 km; nahoře je hodnota, pod posuvníkem ikonové tlačítko automatické výšky telefonu. Podržení ikony otevře posuvník bez změny režimu; jeho posunutí aktivuje ruční výšku. Dotyk mimo panel nebo Escape jej zavře. Automatické skrývání ovládání po dobu otevřeného posuvníku neběží. Posuvník podporuje klávesnici a má vertikální orientaci i slovní hodnotu pro čtečky.
+
+Automatická výška vždy vykresluje nulovou mapovou rovinu, bez výškového reliéfu a bez prostorových budov; kamera mapy je o nastavenou výšku telefonu nad touto rovinou. Půdorysy budov ve standardním mapovém podkladu mohou zůstat viditelné. Přepínače reliéfu a prostorových budov jsou v automatické výšce neaktivní. Ruční výška umožňuje plastický reliéf i volitelné budovy; poslední volba budov se zachovává. Nastavení Detaily nyní zobrazuje pouze dosah detailů a budovy; stará nastavení zelené geometrické mapy se v UI nenabízejí.
+
+MapLibre používá stejný vertikální zorný úhel jako GeoLook, výšku oka, směr, náklon i roll. Rozsah náklonu mapy je 0–179° a zoomu do 30, aby pohled k horizontu a blízko země nepřepínal na jiný renderer. Výškové přichytávání středu zůstává vypnuté. Podrobná mapa se používá v obou výškových režimech. Starý zelený terén a čáry ulic se nevykreslují ani při prvním načtení, změně výšky, nedostupnosti dat nebo WebGL. Během načítání je vidět indikátor, při chybě explicitní informace. Mapa se odkryje po prvním vykreslení načtených dlaždic. V ručním reliéfu se čeká na výšku pozorovatele ze staženého DEM nebo z mapy; skutečná nula metrů je platná výška. Selhání vrstevnic ponechá základní mapu, selhání DEM je oznámené a ponechá plochý podklad.
+
+Vrstevnice používají stejný lokálně přibalený generátor a výškový zdroj Mapterhorn jako hlavní cyklomapa. Zobrazují se do výšky nadhledu 3 000 m, při zoomu 12 až 24, v nastaveném dosahu detailů, maximálně 5 km od pozorovatele. Rozestup čar se mění s přiblížením; významné vrstevnice mají výškové popisky. Ve vzdáleném přehledu se vrstvy skryjí. Nastavení hlavní cyklomapy se nemění.
+
+Podrobný podklad nadále potřebuje dostupná online data; stávající stažení AR ukládá DEM, názvy a geometrii/bodové detaily, nikoli kompletní stylovanou MapLibre mapu. Offline uložené výšky a názvy zůstávají použitelné pro kamerové popisky. Odstranění staré záložní scény tuto skutečnost neskrývá.
+
+Ověření: všech 44 kontrol vydání, nové případy skutečného řadiče (senzorové události → kalibrace/vyhlazení → kamera mapy v ruční a automatické výšce), zachování senzorů, nucená rovina a vypnuté budovy, posuvník/automatická výška, roll, pohled nad horizont, zoom u země, blízké vrstevnice, částečné chyby, čekání na skutečné nulté DEM a odstranění mapy. V prohlížeči ověřeny oba konce posuvníku, návrat na automatickou výšku, kompaktní panel a kamera se spouští. Testovací prohlížeč neumožňuje vytvořit WebGL kontext; fyzické senzory a finální vykreslení podrobné mapy/vrstevnic na telefonu nebyly přímo ověřeny.
