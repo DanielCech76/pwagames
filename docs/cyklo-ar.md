@@ -1,15 +1,15 @@
-# Rozhlédnout se – CYKLO 1.21.1
+# Rozhlédnout se – CYKLO 1.22.0
 
 Režim AR je dostupný tlačítkem **AR** vedle 2D/3D v CYKLO Open i CYKLO Mapy.com. Potřebuje jádro 2.1.2, které předává oprávnění kamery a magnetometru do modulu. Stávající verze modulů zůstávají neměnné.
 
 ## První použití
 
-1. Na mapě najdi vyhlídku a otevři AR. Zvol GPS, střed mapy nebo zadej souřadnice pozorovatele. Ruční poloha se při spuštění AR nepřepne automaticky na GPS.
-2. Zadej výšku telefonu nad terénem: například plošina 25 m + telefon 1,7 m = 26,7 m. Pro společnou výškovou referenci se používá model terénu, nikoli nekorigovaná GPS výška WGS84.
-3. Připojený k internetu stiskni **Stáhnout místa a výšky**. Vyber dosah 10, 30 nebo 60 km. Zvolená poloha se odešle Mapterhorn a Overpass. Stahování má průběh a lze je zrušit.
-4. Stiskni **Spustit AR · kamera a senzory** a povol kameru, orientaci a případně GPS. Kamera nemá zvuk, nenahrává se a neodesílá se na server.
-5. Vyber známý vrchol, namiř na něj středový kříž a stiskni **Zarovnat na cíl**. V případě potřeby dolaď svislý zorný úhel výřezu a zopakuj zarovnání.
-6. Přepínač **Kamera / Terén** zachová stejný směr a projekci. Terén je jednoduchý výškový model, bez leteckých textur. Ruční posuvníky umožní prohlížení i bez senzorů.
+1. Otevři AR na cyklomapě. GPS a senzory se standardně spustí; oprávnění telefonu je nutné povolit. Lze použít také střed mapy nebo ruční souřadnice.
+2. Krátké klepnutí na ikonu přepíná její funkci, podržení přibližně 0,55 s otevírá související nastavení. Panel zavřeš stejnou ikonou, klepnutím mimo něj nebo podržením jiné ikony.
+3. V Podkladech stáhni terén, názvy a detaily okolí. Upozornění na chybějící podklady otevírá tento panel přímo.
+4. V Terénu můžeš přepnout aktuální výšku na ruční nadhled 1,7 m až 20 km nad terénem. Ruční nadhled je plastický a ovládá se tažením; dosah podrobné mapy je 500 m až 10 km. Tlačítko Podkladů nabízí odhadovaný záběr + 20 % rezervy.
+5. Kamera se zapne výhradně její ikonou. V kameře se používá skutečná výška telefonu, nikoli ruční nadhled. Vždy viditelná spoušť vytvoří PNG s obrazem a právě viditelnými popisky; šipkou PNG lze poslední snímek stáhnout znovu. Kamera nenahrává zvuk ani neodesílá obraz na server.
+6. Pro přesnější směr zvol známý cíl a zarovnej jej se zaměřovačem. Obecné nastavení nabízí ruční/automatické skrývání ovládání a interval 2–60 s. Během otevřeného nastavení nebo pořizování fotografie se ovládání automaticky neschovává.
 
 ## Data a offline použití
 
@@ -114,3 +114,18 @@ Výběr popisků nově nejdřív zpracuje blízké pásmo podle vzdálenosti, pa
 Stažené vektorové detaily nově dekódují také pojmenované POI, místní názvy a vrcholy. Z těchto a již dostupných pojmenovaných budov, cest či vodních prvků lze vytvořit blízké popisky; nepojmenované objekty nedostávají vymyšlené názvy. Obyčejný katalog měst nadále nepředstavuje úplný seznam blízkých turistických míst. Pro nové názvy je potřeba znovu stáhnout detaily okolí; binární dlaždice se znovu používají z cache.
 
 Doporučené nastavení: kategorie v záložce Popisky, Blízké detaily do 2–5 km a vyšší Hustota; v Detailech popředí zvolit odpovídající dosah a stáhnout okolí. Hlavní místa do 30 km upravují vzdálenější pásmo, nikoli množství dostupných blízkých objektů. Neznámé nebo skutečně zakryté místo tato nastavení nezobrazí.
+
+
+## 1.22.0 – kontextové panely, ruční nadhled a fotografie s popisky
+
+Dlouhé podržení je implementované pointer událostmi s prahem 550 ms, potlačením následného syntetického kliknutí a zrušením při posunu prstu nad 12 px. Nový dotyk vymaže potlačení předchozího gesta, aby i prohlížeč bez syntetického kliknutí zavřel panel prvním následujícím tapnutím. Současně je otevřen pouze jeden panel. Kliknutí mimo něj jej zavře; krátké kliknutí na ikonu, která jej otevřela, neprovede zároveň přepnutí původní funkce.
+
+Ruční nadhled je výška nad místním terénem (AGL), nezmění uloženou skutečnou polohu ani nastavení výšky telefonu. Přepnutí do kamery obnoví původní směr/náklon a skutečnou výšku. Návrat do terénu obnoví ruční nadhled. Pro mapový nadhled se senzory směru nepoužívají; tažení ovládá azimut a náklon. Terén je prostorově stínovaný, ulice a místní názvy pocházejí ze skutečných vektorových dat; nejde o letecké fotografie.
+
+Dosah podrobné mapy lze měnit posuvníkem 500 m až 10 km. Podklady detailů mají nyní limit 64 dlaždic na oblast, cache 64 dlaždic a 12000 uložených prvků na oblast; přetečení limitu je označené jako neúplné. Zachovávají se čtyři oblasti. Terén se vzorkuje z více uložených oblastí, s předností jemnějšího modelu, a názvy se sloučí z uložených oblastí i detailů. Tím lze využít podklady nového záběru i při odlišně umístěném středu oblasti.
+
+Viditelná oblast se konzervativně odhaduje z mřížky paprsků zorného pole a kulového povrchu Země, včetně půdorysné polohy pozorovatele. Přidává se rezerva 20 % a zaokrouhlení nahoru na kilometry. Nejde o přesné promítnutí každého pixelu na detailní terén. Záběr sahající za horizont nebo vyžadující poloměr větší než 60 km se výslovně označí; aplikace jej nevydává za úplně stažený. Tlačítko doplní terén a názvy pro tento odhad a samostatně podrobnou mapu v nastaveném dosahu od polohy kamery. Stávající podklady zůstávají při chybě zachované. V ručním nadhledu se doplňování záběru spouští výslovným tlačítkem.
+
+Fotografie kopíruje stejný cover výřez videa jako živý obraz. Popisky, ikony a spojnice se vykreslí do PNG podle aktuálních viditelných karet; ovládání a nastavení se do snímku nepřidávají. Maximální delší strana je 1920 px. Obrázek se vytváří lokálně, automaticky se nabídne ke stažení a poslední PNG lze uložit znovu viditelnou šipkou. Blob URL se uvolní při novém snímku nebo zavření. Spoušť zůstává v kameře viditelná i při ručně nebo automaticky skrytém ovládání. Stromy se v kamerovém AR nikdy nevykreslují.
+
+Ověření: test záběru ve výšce 1,7 m, 1 km a 20 km, horizont a limity rezervy, kombinace terénních oblastí, návrat k reálné výšce kamery, správný cover ořez a PNG, dlouhé podržení a mobilní gesta, zavírání mimo panel, ochrany automatického skrývání a odstranění listenerů. V prohlížeči byl ověřen nadhled 20 km, návrat do kamery, viditelná spoušť při skrytých ovladačích a skutečně stažený PNG s popisky ze syntetického testovacího obrazu. Fyzická kamera a chování ukládání na Androidu nebyly v cloudovém prohlížeči dostupné k přímému ověření.
