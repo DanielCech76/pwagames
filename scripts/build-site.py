@@ -6,6 +6,6 @@ out=ROOT/'_site'
 if out.exists():shutil.rmtree(out)
 out.mkdir()
 for name in ['index.html','manifest.webmanifest','catalog.json','sw.js']:shutil.copy2(ROOT/name,out/name)
-for name in ['core','icons','modules','flight-data']:shutil.copytree(ROOT/name,out/name)
+for name in ['core','icons','modules','flight-data','ar-place-data']:shutil.copytree(ROOT/name,out/name)
 (out/'.nojekyll').touch()
 print('Static deployment ready:',out)

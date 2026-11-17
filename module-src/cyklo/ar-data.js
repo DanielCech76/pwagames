@@ -1,5 +1,6 @@
 /* Explicit, bounded downloads. A completed pack is committed only by the caller. */
 (function(root){'use strict';const G=root.GeoLook;
+const namesSnapshotBase=root.document?.currentScript?.src?new URL('../../../ar-place-data/v1/',root.document.currentScript.src).href:null;
 function parsePlaces(json,center,radius){if(json.remark)throw Error('Služba míst nedokončila dotaz. Zkus menší dosah nebo později.');const out=[];for(const e of json.elements||[]){const t=e.tags||{},p={lon:e.lon??e.center?.lon,lat:e.lat??e.center?.lat};if(!Number.isFinite(p.lon)||!Number.isFinite(p.lat)||!t.name||G.distance(center,p)>radius)continue;const raw=String(t.ele||'').trim().replace(',','.'),alt=/^-?\d+(\.\d+)?(\s*m)?$/.test(raw)?Number.parseFloat(raw):null;out.push({...p,id:e.type+'/'+e.id,name:String(t['name:cs']||t.name).slice(0,120),alt:Number.isFinite(alt)&&alt>=-500&&alt<=9000?alt:null,type:t.natural==='peak'?'Vrchol':t.place?'Obec':t.historic?'Památka':'Vyhlídka',rank:t.natural==='peak'?1:['city','town'].includes(t.place)?0:2})}return out.sort((a,b)=>a.rank-b.rank||G.distance(center,a)-G.distance(center,b)).slice(0,1500)}
 function cancelled(){return new DOMException('Zrušeno uživatelem','AbortError')}
 function checkAbort(signal){if(signal?.aborted)throw cancelled()}
@@ -8,17 +9,33 @@ async function request(url,options={},signal,ms=30000,label='Server',onBytes){
  const timeoutError=()=>{const e=Error(label+': časový limit '+ms/1000+' s vypršel.');e.name='TimeoutError';e.code='TIMEOUT';return e};
  const deadline=new Promise((_,reject)=>{abort=()=>{settled=true;reject(cancelled());c.abort();reader?.cancel().catch(()=>{})};signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)abort();timer=setTimeout(()=>{timedOut=true;settled=true;reject(timeoutError());c.abort();reader?.cancel().catch(()=>{})},ms)});
  const operation=(async()=>{
-  const {image,...init}=options;checkAbort(signal);const r=await fetch(url,{...init,signal:c.signal,credentials:'omit'});
+  const {image,binary,...init}=options;checkAbort(signal);const r=await fetch(url,{...init,signal:c.signal,credentials:'omit'});
   if(c.signal.aborted){r.body?.cancel().catch(()=>{});throw cancelled()}
   if(!r.ok){const e=Error(label+': server vrátil HTTP '+r.status+'.');e.code='HTTP';throw e}
-  if(image&&r.body?.getReader){reader=r.body.getReader();const chunks=[];let received=0;const total=Number(r.headers.get('Content-Length'))||0;try{for(;;){const next=await reader.read();if(next.done)break;checkAbort(c.signal);chunks.push(next.value);received+=next.value.byteLength;if(!settled)onBytes?.(received,total)}return new Blob(chunks,{type:r.headers.get('Content-Type')||'image/png'})}finally{reader.releaseLock?.()}}
-  return await (image?r.blob():r.json());
+  if((image||binary)&&r.body?.getReader){reader=r.body.getReader();const chunks=[];let received=0;const total=Number(r.headers.get('Content-Length'))||0;try{for(;;){const next=await reader.read();if(next.done)break;checkAbort(c.signal);chunks.push(next.value);received+=next.value.byteLength;if(!settled)onBytes?.(received,total)}return new Blob(chunks,{type:r.headers.get('Content-Type')||'image/png'})}finally{reader.releaseLock?.()}}
+  return await (image||binary?r.blob():r.json());
  })();
  try{return await Promise.race([operation,deadline])}catch(error){
   if(signal?.aborted)throw cancelled();if(timedOut)throw timeoutError();
   if(error.code==='HTTP')throw error;
   const e=Error(label+': '+(error.name==='SyntaxError'?'neplatná odpověď serveru.':'požadavek selhal (síť, přístup nebo CORS).'));e.code='NETWORK';throw e;
  }finally{settled=true;clearTimeout(timer);signal?.removeEventListener('abort',abort)}
+}
+
+function snapshotCells(center,radius){const a=G.offset(center,-radius,-radius),b=G.offset(center,radius,radius),out=[];for(let lat=Math.floor(a.lat);lat<=Math.floor(b.lat);lat++)for(let lon=Math.floor(a.lon);lon<=Math.floor(b.lon);lon++)out.push(lat+'_'+lon);if(out.length>36)throw Error('Příliš velký dosah katalogu názvů.');return out}
+function snapshotPoint(r){if(!Array.isArray(r)||r.length<7||!Number.isInteger(r[0])||r[0]<=0||typeof r[1]!=='string'||!Number.isFinite(r[2])||Math.abs(r[2])>180||!Number.isFinite(r[3])||Math.abs(r[3])>85||!Number.isInteger(r[4])||r[4]<0||r[4]>8)return null;return {id:'geonames/'+r[0],name:r[1].slice(0,120),lon:r[2],lat:r[3],type:['Město','Obec','Vrchol','Jezero','Památka','Místo','Část obce','Průsmyk','Hřeben'][r[4]],alt:Number.isFinite(r[5])&&r[5]>=-500&&r[5]<=9000?r[5]:null,rank:Number.isFinite(r[6])?G.clamp(r[6],0,4):3}}
+async function snapshotJSON(blob,signal){checkAbort(signal);if(blob.size>8000000)throw Error('Katalog názvů je příliš velký.');const head=new Uint8Array(await blob.slice(0,2).arrayBuffer());let data;if(head[0]===31&&head[1]===139){if(!root.DecompressionStream)throw Error('Prohlížeč nepodporuje rozbalení katalogu.');data=await new Response(blob.stream().pipeThrough(new DecompressionStream('gzip'))).json()}else data=JSON.parse(await blob.text());checkAbort(signal);if(data?.format!==1||!Array.isArray(data.rows)||data.rows.length>50000)throw Error('Neplatný katalog názvů.');return data}
+async function snapshotPlaces(center,radius,signal,progress,options={}){
+ const base=options.namesBase||namesSnapshotBase;if(!base)return null;
+ const cache=options.placeCache;let index;try{index=await cache?.get('v1/index')}catch{}checkAbort(signal);
+ if(!index){progress({phase:'names',percent:85,text:'Načítám katalog názvů ze serveru aplikace…',requestTimeout:10000});index=await request(new URL('index.json',base).href,{},signal,10000,'Katalog názvů aplikace');if(index?.format!==1||!index.cells||!index.global)throw Error('Neplatný index názvů.');try{await cache?.put('v1/index',index)}catch{}}
+ if(index?.format!==1||!index.cells||!index.global)throw Error('Neplatný index názvů.');
+ const detail=snapshotCells(center,radius).map(k=>index.cells[k]).filter(Boolean),files=[index.global,...detail],places=new Map();let done=0,cached=0;
+ for(const record of files){checkAbort(signal);if(!/^(cities|-?\d{1,2}_-?\d{1,3})\.json\.gz$/.test(record.file))throw Error('Neplatná cesta katalogu názvů.');let data;try{data=await cache?.get('v1/'+record.file)}catch{}checkAbort(signal);
+  if(data?.format===1&&Array.isArray(data.rows)&&data.rows.length<=50000)cached++;else{progress({phase:'names',percent:85+Math.floor(done/files.length*10),text:'Názvy '+(done+1)+'/'+files.length+' · katalog aplikace',requestTimeout:10000});const blob=await request(new URL(record.file,base).href,{binary:true},signal,10000,'Katalog názvů · '+record.file,(bytes,total)=>progress({phase:'names',percent:85+Math.floor((done+(total?Math.min(.95,bytes/total):0))/files.length*10),text:'Názvy '+(done+1)+'/'+files.length+' · katalog aplikace',tileBytes:bytes,tileTotal:total}));data=await snapshotJSON(blob,signal);try{await cache?.put('v1/'+record.file,data)}catch{}}
+  for(const row of data.rows){const p=snapshotPoint(row);if(p&&G.distance(center,p)<=radius)places.set(p.id,p)}done++;progress({phase:'names',percent:85+Math.floor(done/files.length*10),done,total:files.length,cached,text:'Názvy '+done+'/'+files.length+' · katalog aplikace'});
+ }
+ return {places:[...places.values()].sort((a,b)=>a.rank-b.rank||G.distance(center,a)-G.distance(center,b)).slice(0,1500),source:'GeoNames',scope:detail.length?'regional':'global-cities',snapshot:index.snapshot};
 }
 
 let preferredTerrain=null;
@@ -46,16 +63,20 @@ async function download(center,radius,signal,progress=()=>{},options={}){
  }
  const known=new Map();for(const previous of options.previous||[])for(const p of previous.places||[])if(G.distance(center,p)<=radius)known.set(p.id||p.name,p);pack.places=[...known.values()].slice(0,1500);
  const same=options.previous?.find(p=>valid(p)&&p.namesComplete!==false&&G.distance(center,p.center)+radius<=p.radius+1);
- if(same){pack.places=same.places.filter(p=>G.distance(center,p)<=radius);pack.namesComplete=true}
+ if(same){pack.places=same.places.filter(p=>G.distance(center,p)<=radius);pack.namesComplete=true;pack.namesSource=same.namesSource||'OpenStreetMap';pack.namesScope=same.namesScope;pack.namesSnapshot=same.namesSnapshot}
  // Commit a complete terrain snapshot before starting any independent place request.
  emit('Terén stažený. Ukládám jej pro okamžité použití…',{phase:'terrain-ready',percent:82});
  await options.onTerrain?.({...pack,places:pack.places.map(p=>({...p}))});checkAbort(signal);
  if(same)emit('Názvy míst jsou již uložené.',{phase:'names',percent:95});
  else{
+  let snapshot=null;try{snapshot=await snapshotPlaces(center,radius,signal,e=>emit(e.text,e),options)}catch(e){checkAbort(signal);pack.snapshotError=e.message}
+  if(snapshot){pack.places=snapshot.places;pack.namesComplete=true;pack.namesSource=snapshot.source;pack.namesScope=snapshot.scope;pack.namesSnapshot=snapshot.snapshot}
+ }
+ if(!pack.namesComplete){
   const around=`(around:${radius},${center.lat},${center.lon})`,query=`[out:json][timeout:8][maxsize:8388608];(nwr[natural=peak][name]${around};node[place~"^(city|town|village)$"][name]${around};nwr[tourism=viewpoint][name]${around};nwr[historic~"^(castle|ruins)$"][name]${around};);out center;`,errors=[],endpoints=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
   for(const [i,endpoint]of endpoints.entries()){
    emit('Terén připraven · názvy '+(i+1)+'/'+endpoints.length+' · '+new URL(endpoint).hostname,{phase:'names',percent:85+i*5,requestTimeout:12000});
-   try{const json=await request(endpoint,{method:'POST',body:new URLSearchParams({data:query})},signal,12000,'Názvy míst · '+new URL(endpoint).hostname);pack.places=parsePlaces(json,center,radius);pack.namesComplete=true;break}catch(e){checkAbort(signal);errors.push(e.message)}
+   try{const json=await request(endpoint,{method:'POST',body:new URLSearchParams({data:query})},signal,12000,'Názvy míst · '+new URL(endpoint).hostname);pack.places=parsePlaces(json,center,radius);pack.namesComplete=true;pack.namesSource='OpenStreetMap';break}catch(e){checkAbort(signal);errors.push(e.message)}
   }
   if(!pack.namesComplete)pack.namesError=errors.join(' ');
  }
@@ -65,5 +86,5 @@ async function download(center,radius,signal,progress=()=>{},options={}){
 function covers(pack,p,fraction=1){return valid(pack)&&!!p&&G.distance(pack.center,p)<=pack.radius*fraction&&G.sample(pack,p)!==null}
 function choose(packs,p){return packs.filter(pack=>covers(pack,p)).sort((a,b)=>G.distance(a.center,p)-G.distance(b.center,p)||b.created-a.created)[0]||null}
 function valid(p){return p?.format===1&&Number.isFinite(p.center?.lon)&&Number.isFinite(p.center?.lat)&&Math.abs(p.center.lon)<=180&&Math.abs(p.center.lat)<=75&&Number.isFinite(p.radius)&&p.radius>=5000&&p.radius<=60000&&p.n===129&&Array.isArray(p.grid)&&p.grid.length===p.n*p.n&&p.grid.every(Number.isFinite)&&Array.isArray(p.places)&&p.places.length<=1500}
-root.GeoLookData={download,parsePlaces,valid,request,covers,choose};if(typeof module!=='undefined')module.exports=root.GeoLookData;
+root.GeoLookData={download,parsePlaces,valid,request,covers,choose,snapshotPlaces,snapshotCells,snapshotPoint};if(typeof module!=='undefined')module.exports=root.GeoLookData;
 })(globalThis);

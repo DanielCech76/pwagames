@@ -1,6 +1,6 @@
 {
   "id": "cyklo",
-  "version": "1.19.2",
+  "version": "1.19.3",
   "apiVersion": 1,
   "minCoreVersion": "2.1.2",
   "maxCoreMajor": 2,
@@ -16,7 +16,7 @@
     "Online výškové dlaždice Mapterhorn (terén/vrstevnice)",
     "Online lesní plochy OpenFreeMap a volitelné letecké Mapy.com",
     "Kamera a orientace telefonu (na pokyn pro AR)",
-    "Podklady AR: Mapterhorn, záložní AWS Terrain Tiles a OpenStreetMap / Overpass (ručně nebo volitelně automaticky při GPS)"
+    "Podklady AR: katalog názvů GeoNames ze serveru aplikace, výšky Mapterhorn / AWS Terrain Tiles, záložní OpenStreetMap / Overpass (ručně nebo volitelně automaticky při GPS)"
   ],
   "fullscreen": false,
   "largeData": true,

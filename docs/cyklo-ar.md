@@ -1,4 +1,4 @@
-# Rozhlédnout se – CYKLO 1.19.2
+# Rozhlédnout se – CYKLO 1.19.3
 
 Režim AR je dostupný tlačítkem **AR** vedle 2D/3D v CYKLO Open i CYKLO Mapy.com. Potřebuje jádro 2.1.2, které předává oprávnění kamery a magnetometru do modulu. Stávající verze modulů zůstávají neměnné.
 
@@ -60,3 +60,14 @@ Dotazy na názvy mají nejvýše dva pokusy po 12 s, serverový výpočet nejvý
 Při zavření nebo přechodu na pozadí se ukazatel okamžitě označí jako přerušený, včetně příčiny a informace o uloženém terénu. Tento stav zůstane pravdivý i po opětovném otevření místo starého „běžícího“ 85 %. Čerstvá poslední poloha GPS do 30 s se při návratu zachová; starší se za aktuální nevydává.
 
 Regresní test reprodukuje postup terén → čekání na názvy → pozadí → návrat a opožděnou odpověď staré relace. Ověřuje dostupnost a uložení terénu před odpovědí názvů, odpočet, ukončený ukazatel, zachování čerstvé GPS, odmítnutí staré GPS a hard deadline i pro transport ignorující AbortController.
+
+
+## Oprava 1.19.3 – katalog názvů dostupný přímo s aplikací
+
+Ve standardním průběhu již názvy nepotřebují živý dotaz na Overpass. Aplikace načte verzovaný statický katalog z vlastní adresy `ar-place-data/v1/`. Zdroj GeoNames je uvedený v UI a v `ar-place-data/v1/ATTRIBUTION.md` pod CC BY 4.0; index obsahuje zdrojové URL a SHA-256 oficiálních exportů. Zahrnuje sídla, vrcholy, hřebeny, průsmyky, jezera a vybrané památky pro CZ, AT, SK, DE a PL a větší města ostatních zemí. Nejde o úplný soupis všech turistických bodů celého světa.
+
+Katalog je rozdělen do 149 regionálních buněk po jednom stupni a samostatného základního světového seznamu měst. Soubory jsou gzip komprimované; celkem přibližně 4,3 MB na serveru, telefon při prvním použití načte index, základ měst (přibližně 638 kB) a jen dotčené regionální buňky. Data se filtrují podle skutečné vzdálenosti a limitu 1 500 míst. Dekódování používá vestavěný DecompressionStream v moderním prohlížeči. Při dalším použití se katalog načte z lokálního úložiště; uchovává se nejvýše 24 částí katalogu. Uložené oblasti obsahují přímo vybrané názvy i pro offline režim. Smazání podkladů odstraní také tuto mezipaměť.
+
+Úspěšné načtení katalogu vynechá oba servery Overpass úplně. Overpass zůstává pouze jako záložní cesta při selhání načtení statického katalogu. V balíčku se ukládá zdroj, rozsah a datum snapshotu; názvy z jiného zdroje se nevydávají za OpenStreetMap.
+
+Opakovatelné zpracování zdrojů: `python scripts/build-ar-gazetteer.py --sources /adresar/s/oficialnimi/ZIPy`. Zdroje musí být dodané explicitně; skript sám síť nepoužívá. `node tests/cyklo-ar-catalog.test.cjs` ověřuje všechny komprimované soubory a hashe, skutečné veřejné body v okolí Poděbrad, filtr dosahu, načtení ze stejného hostitele, úplné vynechání Overpass, opakované použití bez sítě a kompletní offline balíček terénu i názvů.
