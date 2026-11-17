@@ -37,6 +37,7 @@ jobs:
           node tests/pong-motion.test.cjs
           node tests/pong-ui.test.cjs
           node tests/star-run.test.cjs
+          node tests/star-run-ui.test.cjs
           node tests/letadlo.test.cjs
           node tests/letadlo-offline.test.mjs
           node tests/letadlo-detail.test.mjs

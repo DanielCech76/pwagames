@@ -1,1 +1,18 @@
-{"id":"star-run","version":"1.0.0","apiVersion":1,"minCoreVersion":"2.1.1","maxCoreMajor":2,"dataSchema":1,"name":"Star Run","description":"Průlet mezi asteroidy, energetické brány a štít. Dotyk i náklon, na výšku i na šířku.","icon":"🚀","theme":"blue","permissions":["Celá obrazovka (na pokyn)","Orientace telefonu (volitelně, na pokyn)","Místní rekordy a nastavení"],"fullscreen":false}
+{
+  "id": "star-run",
+  "version": "1.1.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.1.1",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Star Run",
+  "description": "Krátké levely, barevné brány, jiskry a střelba na odolné asteroidy. Dotyk i náklon.",
+  "icon": "🚀",
+  "theme": "blue",
+  "permissions": [
+    "Celá obrazovka (na pokyn)",
+    "Orientace telefonu (volitelně, na pokyn)",
+    "Místní rekordy a nastavení"
+  ],
+  "fullscreen": false
+}
