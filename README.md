@@ -193,3 +193,7 @@ Vzdálený les používá skutečné skupinové podklady se 4/9/16 korunami, opa
 Koruny mají jednu mipmapovanou texturu s izolovanými vrstvami, bez prosakování sousedních obrázků. Běžný pixel vyžaduje jeden vzorek. Nastavení pseudo 3D a orientovaných korun nadále fungují nezávisle; skutečné 3D modely používají dosavadní renderer.
 
 Validace: 33 regresních sad, build/offline balíčky, 67 původních GPU porovnání a nový skutečný GLES3 test. Reprodukovatelné výsledky jsou v `docs/benchmarks/cyklo-1180-*.json`. Syntetická scéna snížila počet vrcholů z 14 184 na 3 000 a odhad dotazů na terén z 12 000 na 1 302. Počty korun ve skupinách jsou vizuální odhad, nikoli počet samostatných stromů. Studená geografická příprava ani software GPU průchod nejsou rychlejší; vykreslují podstatně větší část obrazu. Stejný nebo nižší celkový čas na Androidu tedy zatím není prokázán, stejně jako dřívější cíl 10× FPS.
+
+## Letadlo 1.0.0 — offline průvodce výhledem
+
+Ve správci modulů obnov katalog a stáhni **Letadlo**. Obsahuje skutečný, zjednodušený terén střední Evropy a Alp, orientační povrch NASA Blue Marble, osm letišť a 37 vybraných míst. Simulace přímé trasy, mapa, letadlo ve 3D a okénko s prostorovým rámem; tažení rozhlíží, posuvník mění vzdálenost hlavy od skla a samostatný zoom zvětšuje krajinu. Živá GPS se spouští pouze tlačítkem; při skrytí se vypne. Vlastní offline regiony a detailní letecké snímky zatím nejsou součástí. 3D vzhled je potřeba ověřit na telefonu: pracovní prohlížeč nepodporuje WebGL. [Funkce, přesnost a testování](docs/letadlo.md).
