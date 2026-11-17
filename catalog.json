@@ -73,13 +73,13 @@
     },
     {
       "id": "letadlo",
-      "version": "1.0.0",
+      "version": "1.2.0",
       "apiVersion": 1,
       "minCoreVersion": "2.1.1",
       "maxCoreMajor": 2,
       "dataSchema": 1,
       "name": "Letadlo",
-      "description": "Offline let nad skutečným terénem Alp, mapa, GPS a prostorový výhled z okénka.",
+      "description": "Offline podklady stahované samostatně podle vybraného letu, GPS, mapa a 3D okénko.",
       "icon": "✈",
       "theme": "blue",
       "permissions": [
@@ -87,9 +87,9 @@
         "Místní nastavení"
       ],
       "fullscreen": false,
-      "manifest": "modules/letadlo/1.0.0/manifest.json",
-      "manifestSha256": "53e821db4a1732fc5eea94d6dbf5189e51a9c0d13bac3bcffc43ee365a61cf05",
-      "size": 1248067
+      "manifest": "modules/letadlo/1.2.0/manifest.json",
+      "manifestSha256": "4bd24de4a609a07bbd7b046e00e19da3a13256751fdcc3505f686b9c02d62730",
+      "size": 737496
     },
     {
       "id": "phone-lab",

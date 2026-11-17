@@ -38,6 +38,7 @@ jobs:
           node tests/pong-ui.test.cjs
           node tests/star-run.test.cjs
           node tests/letadlo.test.cjs
+          node tests/letadlo-offline.test.mjs
           node tests/module-data.test.cjs
           node tests/large-data-integration.test.cjs
           node tests/cyklo-engine.test.cjs
