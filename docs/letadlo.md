@@ -64,3 +64,8 @@ A full-map toggle preserves the selected 2D/3D/window view, zoom, playback and r
 Playback SVGs now toggle the actual hidden attribute: assigning SVGElement.hidden in the previous release did not affect the rendered icons. Runtime browser checks verified that running shows only pause, and paused shows only play. The route slider is expressed as travelled distance, with correct timestamp conversion for recorded flights.
 
 Validation: functional immersive state/back/Escape/zoom tests; regression coverage rejects SVG hidden-property writes; distance/time round trips for recorded flights; browser verification at desktop and a 390x844 iframe viewport, including zoom, play/pause and restoring normal layout. WebGL remains unavailable in the cloud browser; 2D was used for layout verification.
+
+
+### 1.4.1 – Popisky podle přiblížení
+
+Mapa při oddálení upřednostňuje hlavní města a velká centra i dál od letadla. Přiblížení postupně přidává další města a vrcholy, vodní plochy a obce z dostupných detailních podkladů. Počet popisků roste podle přiblížení a plochy obrazovky, překrývající se názvy se vynechávají. 3D pohled vybírá významná místa před nejbližšími obcemi a zachovává kontrolu zakrytí terénem i plynulé promítání každého snímku.

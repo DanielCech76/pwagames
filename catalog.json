@@ -73,7 +73,7 @@
     },
     {
       "id": "letadlo",
-      "version": "1.4.0",
+      "version": "1.4.1",
       "apiVersion": 1,
       "minCoreVersion": "2.1.1",
       "maxCoreMajor": 2,
@@ -88,9 +88,9 @@
         "Stažení detailní mapy a reliéfu na pokyn"
       ],
       "fullscreen": false,
-      "manifest": "modules/letadlo/1.4.0/manifest.json",
-      "manifestSha256": "35bf671cfce6d670c248d6af8144464c9e484b029d88835892c23e05d007d117",
-      "size": 827508
+      "manifest": "modules/letadlo/1.4.1/manifest.json",
+      "manifestSha256": "f7c42ddd92eb8bdeeb4d91a9f18579ba7f5ca18bcc19ca49914503d14e0af065",
+      "size": 828584
     },
     {
       "id": "phone-lab",

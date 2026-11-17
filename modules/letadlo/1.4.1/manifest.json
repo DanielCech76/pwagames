@@ -1,0 +1,122 @@
+{
+  "format": 1,
+  "id": "letadlo",
+  "version": "1.4.1",
+  "apiVersion": 1,
+  "minCoreVersion": "2.1.1",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Letadlo",
+  "description": "Detailní offline krajina: obce, lesy, voda, půdorysy budov, vrstevnice, nastavitelný dosah a import skutečných letů.",
+  "icon": "✈",
+  "theme": "blue",
+  "permissions": [
+    "Poloha až po spuštění živého letu",
+    "Místní nastavení",
+    "Stažení detailní mapy a reliéfu na pokyn"
+  ],
+  "fullscreen": false,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "app.js",
+      "size": 36878,
+      "sha256": "8bd363642471a13983b08b6f30537c2e61e78a4c54908d2e0997b596667d4b59"
+    },
+    {
+      "path": "bridge.js",
+      "size": 1994,
+      "sha256": "274714f9194d58b1c8f24f5d0357981e316ba77242bf47ad9063fd8163aae433"
+    },
+    {
+      "path": "data-worker.js",
+      "size": 6835,
+      "sha256": "dfa254627290f3f233b0b161c743d95cfa4d10fd37365a58b92733e156083fef"
+    },
+    {
+      "path": "detail-geo.js",
+      "size": 2961,
+      "sha256": "7c9fb39f8c0b3409d54c58192e5733935aed7ae38cab97f9bb73fa4e657d2f37"
+    },
+    {
+      "path": "detail-renderer.js",
+      "size": 10647,
+      "sha256": "d5fde60c4bad88b9c4c30a4a94c14dcf1b52c7c7fc73b0c72760463f1bb151e5"
+    },
+    {
+      "path": "engine.js",
+      "size": 2889,
+      "sha256": "9fa0984c525c1e453be62c323fefb9e84cf880acc64d03cfdb5ee826444fd951"
+    },
+    {
+      "path": "index.html",
+      "size": 13283,
+      "sha256": "855fdb47f0298f9247bb245e8b0d6b1aad28b7d8361c73703b3e88ffde5e1e60"
+    },
+    {
+      "path": "offline.js",
+      "size": 3013,
+      "sha256": "65efe11552d8296641e7ea45f935495422d969875edc5935df2a0d8bd8190cc6"
+    },
+    {
+      "path": "style.css",
+      "size": 12836,
+      "sha256": "bf9a30e2cc46856ac1b073139b4ff9f649af2dd866371a7f22162292ad0c21bd"
+    },
+    {
+      "path": "tile-paint.js",
+      "size": 3100,
+      "sha256": "6001a4ff4b70374e12e175bb2f2bfc68b0d07ef07fe6045aa05092ddcfb769ed"
+    },
+    {
+      "path": "tracks.js",
+      "size": 4884,
+      "sha256": "4a79c92105b7cda2d8f3ec6716df2ef19ccd39afcd247a9c7a76bf14da1daed7"
+    },
+    {
+      "path": "vendor/LICENSE-bootstrap-icons.txt",
+      "size": 1093,
+      "sha256": "0fb3e11bd57e896c5a512afd64864d28a37de45d19835016c87ca1ad19ead969"
+    },
+    {
+      "path": "vendor/LICENSE-fflate.txt",
+      "size": 1069,
+      "sha256": "0a1df3a083d0c010560aa342e87959c8c1070e6fd54545741f083f22d0c8b551"
+    },
+    {
+      "path": "vendor/LICENSE-pbf.txt",
+      "size": 1467,
+      "sha256": "fdf1d5279107d760c7df8c6edab1faab2b72ba17528273a8b417b08f1e12ebbe"
+    },
+    {
+      "path": "vendor/LICENSE-pmtiles.txt",
+      "size": 1713,
+      "sha256": "0371c38f338835f7fc13ed71176f3d92144e22c8b736a31cced57adbbeb647b3"
+    },
+    {
+      "path": "vendor/LICENSE-point-geometry.txt",
+      "size": 725,
+      "sha256": "0c0ede0036a425ff8b2d49341ea9aa8eccbeeae1ac4eb59874c9dd8bcf5186d3"
+    },
+    {
+      "path": "vendor/LICENSE-three.txt",
+      "size": 1081,
+      "sha256": "4c40a1ef62450b857c3b2aaf294936304cd552d965fbcd9d32d4c5bcf4ba4454"
+    },
+    {
+      "path": "vendor/LICENSE-vector-tile.txt",
+      "size": 1500,
+      "sha256": "5b09a507df6f21d6c2112c46dcaf2927b9dbd8b580a08b542d8ec2f9191d783d"
+    },
+    {
+      "path": "vendor/maps.js",
+      "size": 28968,
+      "sha256": "45e44cd380d7248f5722cfdcd33a1d5635bb5d6d8827840b5154dff82b686f7c"
+    },
+    {
+      "path": "vendor/three.module.js",
+      "size": 691648,
+      "sha256": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
+    }
+  ]
+}
