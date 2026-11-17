@@ -1,4 +1,4 @@
-# Rozhlédnout se – CYKLO 1.24.1
+# Rozhlédnout se – CYKLO 1.25.0
 
 Režim AR je dostupný tlačítkem **AR** vedle 2D/3D v CYKLO Open i CYKLO Mapy.com. Potřebuje jádro 2.1.2, které předává oprávnění kamery a magnetometru do modulu. Stávající verze modulů zůstávají neměnné.
 
@@ -161,3 +161,22 @@ Ověření: všech 44 kontrol vydání, nové případy skutečného řadiče (s
 ### 1.24.1 — Nativní dlouhé podržení výšky
 
 Nativní kontextové gesto telefonu i pravé tlačítko myši otevírají přímo svislý posuvník výšky, stejně jako časované podržení. Přidán regresní případ, aby toto gesto neotevíralo prázdný obecný panel.
+
+
+## 1.25.0 — Stabilní orientace a vysvětlitelné popisky
+
+Opraveno znaménko bočního natočení při převodu z ENU orientace telefonu na MapLibre roll. Výchozí stabilní horizont mapy ponechává směr a pohled nahoru/dolů, ale potlačuje boční naklánění. Lze jej vypnout v Nastavení výhledu. Slabá, běžná a silná stabilizace používají potlačení drobného chvění a adaptivní vyhlazení; záměrné větší otočení dohánějí rychleji. Jednorázový velký skok kompasu musí přetrvat 150 ms, než se přijme. Mapa a popisky používají shodnou vyhlazenou orientaci. Kamera zachovává natočení živého videa; přepnutí režimu resetuje filtr bez změny kalibrace.
+
+Popisky mají nezávislé skupiny Blízko (v zorném poli a nastaveném blízkém dosahu), Obzor (vzdálenější významné objekty ve směru pohledu) a Za obzorem (zakryté terénem nebo geometricky za horizontem). Výchozí stav je Blízko + Obzor zapnuté, Za obzorem vypnuté. Geometrický horizont vychází ze sférické Země a známých nadmořských výšek; nejde o výpočet atmosférické refrakce. Zakrytí mimo 60 km je bez podrobnějšího DEM neověřené. V ploché mapě zůstávají blízké názvy viditelné i tam, kde by je reálný terén zakrýval. Vzdálené karty používají geografický směr a výšku cíle, nikoliv projekci na nulovou mapovou rovinu; tím lze pojmenovat skutečné vrcholy u obzoru i při plochém podkladu. Zakryté cíle jsou tlumené a mají přerušované šipky; neověřená viditelnost je označená a popsaná.
+
+Posuvník Významné objekty nastavuje maximum 5–100 vzdálených karet (výchozí 32), nezávisle na hustotě blízkých detailů. Dosah je 10–200 km. Vždy platí skutečná kapacita obrazovky, zapnuté typy/skupiny a dostupnost názvů. Karty jsou rozmístěné do více řad a jejich vodicí čáry se kreslí pod kartami, aby nepřekrývaly text. Vybraný či připnutý cíl má přednost a může překonat vypnutou skupinu nebo filtr. Připnutí je samostatná ikona v liště vybraného cíle a ukládá se do nastavení (nejvýše 100 cílů).
+
+Výběr se vyhodnocuje přibližně čtyřikrát za sekundu, samotné souřadnice se mění plynule každý snímek. Nové objekty čekají 250 ms na ustálení, již zobrazené mají 1,2 s zvýšenou prioritu a poté mírnou preferenci. U okrajů platí jiné hranice pro objevení a zmizení a krátké podržení maximálně 650 ms. Svislá změna řady a průhlednost jsou plynulé. Aktualizace polohy či dat už neruší všechny DOM karty a jejich historii. Základní pořadí tvoří význam z katalogu (0 nejvyšší), typ a vzdálenost; prominence a počet obyvatel pomáhají pouze tam, kde jsou skutečně v podkladech uvedené. Nadmořská výška se nevydává za prominenci.
+
+Přehled uvádí počty „V podkladech → odpovídá filtrům → ve směru pohledu → zobrazeno“. V rozbalovací části Proč právě tyto popisky lze u objektu zjistit skupinu, vzdálenost, význam z katalogu, ověření viditelnosti a důvod skrytí (filtr, dosah, směr, ustálení, limit, překryv). Podrobnosti jsou také v popisu přístupnosti a titulku karty.
+
+Doplnit vzdálené názvy načte z katalogu aplikace nejvýše 6 000 bodů do zvoleného dosahu, odděleně od původního DEM balíčku s limitem 1 500 míst. Jde pouze o názvy, ne o stahování terénu do 200 km. Data se uloží pro opětovné použití a mají vlastní zrušení. Chyba nebo zrušení zachová předchozí vzdálený katalog; zavření výhledu zruší probíhající požadavek. Pro velmi rozsáhlé oblasti ve vysokých zeměpisných šířkách platí stávající limit 36 buněk katalogu; při jeho překročení je nutné snížit dosah. Chybějící názvy ani výšky se nevymýšlejí. Smazání stažených podkladů odstraňuje i tento samostatný seznam.
+
+Trvalá nativní ikona „i“ MapLibre je odstraněná. Uvedení mapových zdrojů se zobrazí při prvním skutečném zobrazení mapy alespoň na 5 s, později při zapnuté nápovědě. Zdroje mapových dat a licence jsou vždy dostupné v Nastavení výhledu, včetně odkazů na OSM/ODbL, OpenMapTiles, OpenFreeMap, Mapterhorn a GeoNames. Tento způsob vychází z pravidel https://osmfoundation.org/wiki/Licence/Attribution_Guidelines a https://openfreemap.org/ (attribution). V kameře se zbytečně nezobrazuje mapový kredit. Fotoexport respektuje délku a směr nových šipek, průhlednost a připnutí; všechny šipky jsou vykreslené před kartami a nemohou přepisovat jejich text.
+
+Ověření: 45 kontrol vydání včetně nových testů chvění, průchodu severem, náklonu a roll, kompasového výkyvu, tří skupin, plochých blízkých názvů, ustálení, zachování řad, priority připnutí, vysvětlení, 64 současných vzdálených karet, hystereze okrajů a fotošipek. Test skutečného katalogu ověřuje rozšířený výběr nad 1 500 bodů. V prohlížeči se syntetickým obrazem kamery ověřeny filtry a počty, vysvětlení konkrétního vrcholu, stabilizace, připnutí a stažení PNG s rozloženými kartami. Fyzické senzory a WebGL vykreslení mapy nelze v testovacím prohlížeči přímo ověřit.

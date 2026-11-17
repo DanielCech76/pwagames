@@ -3,7 +3,7 @@
 const STYLE='https://tiles.openfreemap.org/styles/liberty';
 class OverviewMap{
  constructor(container,status,origin){this.container=container;this.status=status;this.ready=false;this.failed=false;this.disposed=false;this.layers=new Map();this.key='';this.paintReady=false;
-  container.replaceChildren?.();this.map=new root.maplibregl.Map({container,style:STYLE,center:origin?[origin.lon,origin.lat]:[0,0],zoom:12,interactive:false,attributionControl:{compact:true},maxPitch:179,maxZoom:30,centerClampedToGround:false,renderWorldCopies:false,canvasContextAttributes:{antialias:true}});
+  container.replaceChildren?.();this.map=new root.maplibregl.Map({container,style:STYLE,center:origin?[origin.lon,origin.lat]:[0,0],zoom:12,interactive:false,attributionControl:false,maxPitch:179,maxZoom:30,centerClampedToGround:false,renderWorldCopies:false,canvasContextAttributes:{antialias:true}});
   this.map.on('load',()=>{if(this.disposed)return;for(const layer of this.map.getStyle().layers||[])if(layer.type==='fill-extrusion')this.layers.set(layer.id,{filter:layer.filter||null,visibility:layer.layout?.visibility||'visible'});
    this.relief=new root.CykloRelief(this.map,{mapMode:'3d',terrainEnabled:false,terrainExaggeration:1,hillshadeEnabled:false,contoursEnabled:false,contourLabels:true,buildings:false,economyMode:false},()=>{});this.map.off?.('moveend',this.relief.onBuildingMove);this.relief.apply();this.map.setCenterClampedToGround(false);this.map.setSky?.({'sky-color':'#79a8bf','horizon-color':'#d8e4df','fog-color':'#d8e4df','fog-ground-blend':.4,'atmosphere-blend':0});this.ready=true;this.key='';});
   this.map.on('render',()=>{if(this.disposed||!this.key)return;if(this.map.areTilesLoaded?.()!==false)this.paintReady=true;});
@@ -12,7 +12,7 @@ class OverviewMap{
  }
  elevation(point){if(!this.ready||this.heightFailed)return null;try{const value=this.map.queryTerrainElevation?.([point.lon,point.lat]);return Number.isFinite(value)?value:null;}catch{return null;}}
  update(origin,pose,w,h,fov,flat,buildings,radius,height=1000,ground=null){if(this.disposed||this.failed||!this.ready)return false;
-  const angles=root.GeoLook.angles(pose.forward),pitch=root.GeoLook.clamp(90+angles.pitch,0,179),level=root.GeoLook.manual(angles.heading,angles.pitch),roll=Math.atan2(root.GeoLook.dot(pose.right,level.up),root.GeoLook.dot(pose.right,level.right))*180/Math.PI;
+  const angles=root.GeoLook.angles(pose.forward),pitch=root.GeoLook.clamp(90+angles.pitch,0,179),level=root.GeoLook.manual(angles.heading,angles.pitch),roll=-Math.atan2(root.GeoLook.dot(pose.right,level.up),root.GeoLook.dot(pose.right,level.right))*180/Math.PI;
   const signature=[origin.lon,origin.lat,origin.alt,angles.heading,angles.pitch,roll,w,h,fov,flat,buildings,radius,height,ground,this.contourFailed,this.heightFailed].join(':');if(signature===this.key)return this.paintReady&&!this.waitingHeight;
   if(w!==this.w||h!==this.h){this.map.resize();this.w=w;this.h=h;this.paintReady=false;}
   this.map.setVerticalFieldOfView(fov);

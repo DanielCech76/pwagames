@@ -24,7 +24,7 @@
     },
     {
       "id": "cyklo",
-      "version": "1.24.1",
+      "version": "1.25.0",
       "apiVersion": 1,
       "minCoreVersion": "2.1.2",
       "maxCoreMajor": 2,
@@ -45,14 +45,14 @@
       "fullscreen": false,
       "largeData": true,
       "edition": "open",
-      "manifest": "modules/cyklo/1.24.1/manifest.json",
-      "manifestSha256": "762b0df594e2b53b0cd8a83a9f208a896b8989bf36adce167db7bf717b1c8aca",
-      "size": 7004226
+      "manifest": "modules/cyklo/1.25.0/manifest.json",
+      "manifestSha256": "36e17ede837c61c597d710c027d88b4e1b0ab540b1446a75633dd7a8d2e5b49a",
+      "size": 7024741
     },
     {
       "id": "cyklo-mapy",
       "edition": "mapy",
-      "version": "1.24.1",
+      "version": "1.25.0",
       "apiVersion": 1,
       "minCoreVersion": "2.1.2",
       "maxCoreMajor": 2,
@@ -71,9 +71,9 @@
       ],
       "fullscreen": false,
       "largeData": true,
-      "manifest": "modules/cyklo-mapy/1.24.1/manifest.json",
-      "manifestSha256": "79549bbb9dba2edc2d05631c935261a340a3e8d1577c4508ddf046daf5a32e2d",
-      "size": 7004231
+      "manifest": "modules/cyklo-mapy/1.25.0/manifest.json",
+      "manifestSha256": "7cb5d8cfca22c3d34cc8c9464349c27e16682dca2513bf5ab179955f00d6c520",
+      "size": 7024746
     },
     {
       "id": "letadlo",
