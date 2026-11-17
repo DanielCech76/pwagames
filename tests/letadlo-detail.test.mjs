@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {settings,plan,candidates,tileCenter,km} from '../module-src/letadlo/detail-geo.js';
-import {parseJSON,at} from '../module-src/letadlo/tracks.js';
+import {parseJSON,at,fractionAtDistance} from '../module-src/letadlo/tracks.js';
 import {paintVector,contours} from '../module-src/letadlo/tile-paint.js';
 const s=settings();assert.equal(s.nearKm,30);assert.equal(s.midKm,200);assert.equal(settings({nearKm:999,nearZoom:42}).nearKm,80);assert.equal(settings({nearZoom:42}).nearZoom,12);
 const a={lon:11.344,lat:47.2602},b={lon:13.0043,lat:47.7933};const p=plan([a,b],s),reverse=plan([b,a],s);assert.equal(new Set(p.tiles.map(t=>JSON.stringify(t))).size,p.tiles.length);assert.ok(p.tiles.some(t=>t.z===8));assert.ok(p.tiles.some(t=>t.z===12));assert.ok(p.dem.every(t=>t.z<=10));assert.ok(reverse.tiles.length>0);
@@ -31,3 +31,5 @@ assert.ok(shader.fragmentShader.includes('if(fd>fn)discard'));
 assert.ok(shader.vertexShader.includes('flightLocal=transformed'));
 renderer.dispose();
 console.log('PASS terrain coverage masks and injection into actual Three.js Lambert shaders');
+
+for(const f of [0,.1,.4,.8,1]){const t=fractionAtDistance(track,f);assert.ok(Math.abs(at(track,t).distance-track.distance*f)<1e-5,'route slider follows distance for timed traces')}

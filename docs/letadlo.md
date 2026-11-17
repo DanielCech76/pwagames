@@ -56,3 +56,11 @@ Manual vendor rebuild (no map data downloaded): node node_modules/esbuild/bin/es
 
 ## 1.3.1 — smooth labels and explicit simulation playback
 Place selection and terrain occlusion refresh separately from per-frame projection. Label buttons are reused and move using fractional CSS translate3d coordinates on every rendered frame, including looking around while paused. Map redraws follow frame changes without the old 80 ms throttle. Simulations open paused at the existing preview position; only Play starts their timeline. Playback uses vendored Bootstrap Icons 1.13.1 play-fill/pause-fill SVGs (MIT), with accessible names and no visible button text or external font request. Live GPS retains explicit activation. Regression checks cover frozen startup time, play/pause, changing projections with stable nodes, immediate offscreen hiding and cached expensive occlusion.
+
+
+## 1.4.0 — full-map variant A
+A full-map toggle preserves the selected 2D/3D/window view, zoom, playback and route position. The map fills the app viewport; a translucent telemetry ribbon includes play/pause, a corner control restores normal layout, vertical +/- zoom sits on the right, and route distance/progress is overlaid at the bottom. Large toolbars, title, help and diagnostic overlays are hidden; attribution remains. GPS keeps relevant position warnings and hides the simulation timeline. A nonvisual session dialog participates in the existing host back protocol, and Escape/corner/back restore normal layout. Controls are shared rather than duplicated.
+
+Playback SVGs now toggle the actual hidden attribute: assigning SVGElement.hidden in the previous release did not affect the rendered icons. Runtime browser checks verified that running shows only pause, and paused shows only play. The route slider is expressed as travelled distance, with correct timestamp conversion for recorded flights.
+
+Validation: functional immersive state/back/Escape/zoom tests; regression coverage rejects SVG hidden-property writes; distance/time round trips for recorded flights; browser verification at desktop and a 390x844 iframe viewport, including zoom, play/pause and restoring normal layout. WebGL remains unavailable in the cloud browser; 2D was used for layout verification.
