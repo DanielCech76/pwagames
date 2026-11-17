@@ -1,8 +1,8 @@
 {
   "id": "cyklo",
-  "version": "1.18.0",
+  "version": "1.19.0",
   "apiVersion": 1,
-  "minCoreVersion": "2.1.1",
+  "minCoreVersion": "2.1.2",
   "maxCoreMajor": 2,
   "dataSchema": 1,
   "name": "CYKLO Open",
@@ -14,7 +14,9 @@
     "Online mapy, BRouter a Photon",
     "Udržení obrazovky (pokud podporováno)",
     "Online výškové dlaždice Mapterhorn (terén/vrstevnice)",
-    "Online lesní plochy OpenFreeMap a volitelné letecké Mapy.com"
+    "Online lesní plochy OpenFreeMap a volitelné letecké Mapy.com",
+    "Kamera a orientace telefonu (na pokyn pro AR)",
+    "Stažení míst OpenStreetMap / Overpass a výšek pro offline AR (na pokyn)"
   ],
   "fullscreen": false,
   "largeData": true,
