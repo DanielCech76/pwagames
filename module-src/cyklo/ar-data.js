@@ -4,21 +4,23 @@ function parsePlaces(json,center,radius){if(json.remark)throw Error('Služba mí
 function cancelled(){return new DOMException('Zrušeno uživatelem','AbortError')}
 function checkAbort(signal){if(signal?.aborted)throw cancelled()}
 async function request(url,options={},signal,ms=30000,label='Server',onBytes){
- const c=new AbortController();let timedOut=false;
- const abort=()=>c.abort();signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)c.abort();
- const timer=setTimeout(()=>{timedOut=true;c.abort()},ms);
- try{
-  const {image,...init}=options,r=await fetch(url,{...init,signal:c.signal,credentials:'omit'});
+ const c=new AbortController();let timedOut=false,settled=false,reader,timer,abort;
+ const timeoutError=()=>{const e=Error(label+': časový limit '+ms/1000+' s vypršel.');e.name='TimeoutError';e.code='TIMEOUT';return e};
+ const deadline=new Promise((_,reject)=>{abort=()=>{settled=true;reject(cancelled());c.abort();reader?.cancel().catch(()=>{})};signal?.addEventListener('abort',abort,{once:true});if(signal?.aborted)abort();timer=setTimeout(()=>{timedOut=true;settled=true;reject(timeoutError());c.abort();reader?.cancel().catch(()=>{})},ms)});
+ const operation=(async()=>{
+  const {image,...init}=options;checkAbort(signal);const r=await fetch(url,{...init,signal:c.signal,credentials:'omit'});
+  if(c.signal.aborted){r.body?.cancel().catch(()=>{});throw cancelled()}
   if(!r.ok){const e=Error(label+': server vrátil HTTP '+r.status+'.');e.code='HTTP';throw e}
-  if(image&&r.body?.getReader){const reader=r.body.getReader(),chunks=[];let received=0;const total=Number(r.headers.get('Content-Length'))||0;for(;;){const next=await reader.read();if(next.done)break;chunks.push(next.value);received+=next.value.byteLength;onBytes?.(received,total)}return new Blob(chunks,{type:r.headers.get('Content-Type')||'image/png'})}
+  if(image&&r.body?.getReader){reader=r.body.getReader();const chunks=[];let received=0;const total=Number(r.headers.get('Content-Length'))||0;try{for(;;){const next=await reader.read();if(next.done)break;checkAbort(c.signal);chunks.push(next.value);received+=next.value.byteLength;if(!settled)onBytes?.(received,total)}return new Blob(chunks,{type:r.headers.get('Content-Type')||'image/png'})}finally{reader.releaseLock?.()}}
   return await (image?r.blob():r.json());
- }catch(error){
-  if(signal?.aborted)throw cancelled();
-  if(timedOut){const e=Error(label+': časový limit '+ms/1000+' s vypršel.');e.name='TimeoutError';e.code='TIMEOUT';throw e}
+ })();
+ try{return await Promise.race([operation,deadline])}catch(error){
+  if(signal?.aborted)throw cancelled();if(timedOut)throw timeoutError();
   if(error.code==='HTTP')throw error;
   const e=Error(label+': '+(error.name==='SyntaxError'?'neplatná odpověď serveru.':'požadavek selhal (síť, přístup nebo CORS).'));e.code='NETWORK';throw e;
- }finally{clearTimeout(timer);signal?.removeEventListener('abort',abort)}
+ }finally{settled=true;clearTimeout(timer);signal?.removeEventListener('abort',abort)}
 }
+
 let preferredTerrain=null;
 const terrainProviders=[{name:'Mapterhorn',url:key=>'https://tiles.mapterhorn.com/9/'+key+'.webp',timeout:15000},{name:'AWS Terrain Tiles',url:key=>'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/9/'+key+'.png',timeout:30000}];
 async function pixels(blob){const bitmap=await createImageBitmap(blob,{colorSpaceConversion:'none',premultiplyAlpha:'none'});try{const canvas=document.createElement('canvas');canvas.width=bitmap.width;canvas.height=bitmap.height;const c=canvas.getContext('2d',{willReadFrequently:true});c.drawImage(bitmap,0,0);return {width:bitmap.width,height:bitmap.height,data:c.getImageData(0,0,bitmap.width,bitmap.height).data}}finally{bitmap.close()}}
@@ -42,16 +44,22 @@ async function download(center,radius,signal,progress=()=>{},options={}){
   for(const p of points){const k=(Math.min(image.height-1,Math.floor(p.y*image.height))*image.width+Math.min(image.width-1,Math.floor(p.x*image.width)))*4;pack.grid[p.index]=Math.round(image.data[k]*256+image.data[k+1]+image.data[k+2]/256-32768)}
   if(!pack.sources.includes(source))pack.sources.push(source);done++;emit('Terén '+done+'/'+total+' dokončen · z cache '+cached);
  }
+ const known=new Map();for(const previous of options.previous||[])for(const p of previous.places||[])if(G.distance(center,p)<=radius)known.set(p.id||p.name,p);pack.places=[...known.values()].slice(0,1500);
  const same=options.previous?.find(p=>valid(p)&&p.namesComplete!==false&&G.distance(center,p.center)+radius<=p.radius+1);
- if(same){pack.places=same.places.filter(p=>G.distance(center,p)<=radius);pack.namesComplete=true;emit('Názvy míst jsou již uložené.',{phase:'names',percent:95})}
+ if(same){pack.places=same.places.filter(p=>G.distance(center,p)<=radius);pack.namesComplete=true}
+ // Commit a complete terrain snapshot before starting any independent place request.
+ emit('Terén stažený. Ukládám jej pro okamžité použití…',{phase:'terrain-ready',percent:82});
+ await options.onTerrain?.({...pack,places:pack.places.map(p=>({...p}))});checkAbort(signal);
+ if(same)emit('Názvy míst jsou již uložené.',{phase:'names',percent:95});
  else{
-  const around=`(around:${radius},${center.lat},${center.lon})`,query=`[out:json][timeout:25][maxsize:8388608];(nwr[natural=peak][name]${around};node[place~"^(city|town|village)$"][name]${around};nwr[tourism=viewpoint][name]${around};nwr[historic~"^(castle|ruins)$"][name]${around};);out center;`,errors=[];
-  for(const endpoint of ['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter']){
-   emit('Stahuji názvy míst · '+new URL(endpoint).hostname+'…',{phase:'names',percent:85});
-   try{const json=await request(endpoint,{method:'POST',body:new URLSearchParams({data:query})},signal,35000,'Názvy míst · '+new URL(endpoint).hostname);pack.places=parsePlaces(json,center,radius);pack.namesComplete=true;break}catch(e){checkAbort(signal);errors.push(e.message)}
+  const around=`(around:${radius},${center.lat},${center.lon})`,query=`[out:json][timeout:8][maxsize:8388608];(nwr[natural=peak][name]${around};node[place~"^(city|town|village)$"][name]${around};nwr[tourism=viewpoint][name]${around};nwr[historic~"^(castle|ruins)$"][name]${around};);out center;`,errors=[],endpoints=['https://overpass-api.de/api/interpreter','https://overpass.kumi.systems/api/interpreter'];
+  for(const [i,endpoint]of endpoints.entries()){
+   emit('Terén připraven · názvy '+(i+1)+'/'+endpoints.length+' · '+new URL(endpoint).hostname,{phase:'names',percent:85+i*5,requestTimeout:12000});
+   try{const json=await request(endpoint,{method:'POST',body:new URLSearchParams({data:query})},signal,12000,'Názvy míst · '+new URL(endpoint).hostname);pack.places=parsePlaces(json,center,radius);pack.namesComplete=true;break}catch(e){checkAbort(signal);errors.push(e.message)}
   }
-  if(!pack.namesComplete){const known=new Map();for(const previous of options.previous||[])for(const p of previous.places||[])if(G.distance(center,p)<=radius)known.set(p.id||p.name,p);pack.places=[...known.values()].slice(0,1500);pack.namesError=errors.join(' ')}
+  if(!pack.namesComplete)pack.namesError=errors.join(' ');
  }
+
  checkAbort(signal);emit(pack.namesComplete?'Podklady připravené k uložení.':'Terén připravený; názvy se nepodařilo doplnit.',{phase:'saving',percent:95});return pack;
 }
 function covers(pack,p,fraction=1){return valid(pack)&&!!p&&G.distance(pack.center,p)<=pack.radius*fraction&&G.sample(pack,p)!==null}

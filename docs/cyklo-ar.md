@@ -1,4 +1,4 @@
-# Rozhlédnout se – CYKLO 1.19.1
+# Rozhlédnout se – CYKLO 1.19.2
 
 Režim AR je dostupný tlačítkem **AR** vedle 2D/3D v CYKLO Open i CYKLO Mapy.com. Potřebuje jádro 2.1.2, které předává oprávnění kamery a magnetometru do modulu. Stávající verze modulů zůstávají neměnné.
 
@@ -49,3 +49,14 @@ Volba **Automaticky doplňovat chybějící podklady při GPS** je standardně v
 Najednou běží jediný požadavek. Po úspěchu je minimální odstup 30 s; při selhání se čekání prodlužuje až na 5 min, po 5 neúspěšných pokusech se automatika pozastaví. Ruční zrušení automatického stahování je rovněž pozastaví. Pokračování vyžaduje vypnout a zapnout volbu. Zavření AR nebo přechod na pozadí stahování ukončí. Smazání podkladů smaže oblasti i mezipaměť a automatiku pozastaví.
 
 `node tests/cyklo-ar-download.test.cjs` přidává kontroly záložního zdroje, znovupoužití dlaždic a názvů, částečného výpadku názvů, rozlišení timeoutu a zrušení, průběhu, automatického doplňování pouze po souhlasu, pokrytí, GPS a offline podmínek, souběhu, cooldownu, zrušení a limitu cache.
+
+
+## Oprava 1.19.2 – terén dostupný před názvy a pravdivý stav po návratu
+
+Ve verzi 1.19.1 se celá mřížka terénu stále ukládala až po dokončení nebo timeoutu dotazu na názvy. Nově se celý terén s dosud známými názvy atomicky uloží a zpřístupní ihned po dokončení dlaždic; nezávislý dotaz na názvy tuto dostupnost neblokuje. Pozdější přerušení dotazu zachová použitelný terén.
+
+Dotazy na názvy mají nejvýše dva pokusy po 12 s, serverový výpočet nejvýše 8 s. UI zobrazuje skutečnou dobu čekání, číslo pokusu a zbývající limit. Síťový helper vynucuje nezávislý hard deadline pomocí Promise.race; nespoléhá pouze na to, že fetch nebo čtení těla odpovědi po abortu odmítne Promise.
+
+Při zavření nebo přechodu na pozadí se ukazatel okamžitě označí jako přerušený, včetně příčiny a informace o uloženém terénu. Tento stav zůstane pravdivý i po opětovném otevření místo starého „běžícího“ 85 %. Čerstvá poslední poloha GPS do 30 s se při návratu zachová; starší se za aktuální nevydává.
+
+Regresní test reprodukuje postup terén → čekání na názvy → pozadí → návrat a opožděnou odpověď staré relace. Ověřuje dostupnost a uložení terénu před odpovědí názvů, odpočet, ukončený ukazatel, zachování čerstvé GPS, odmítnutí staré GPS a hard deadline i pro transport ignorující AbortController.
