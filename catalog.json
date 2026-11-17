@@ -24,7 +24,7 @@
     },
     {
       "id": "cyklo",
-      "version": "1.19.0",
+      "version": "1.19.1",
       "apiVersion": 1,
       "minCoreVersion": "2.1.2",
       "maxCoreMajor": 2,
@@ -40,19 +40,19 @@
         "Online výškové dlaždice Mapterhorn (terén/vrstevnice)",
         "Online lesní plochy OpenFreeMap a volitelné letecké Mapy.com",
         "Kamera a orientace telefonu (na pokyn pro AR)",
-        "Stažení míst OpenStreetMap / Overpass a výšek pro offline AR (na pokyn)"
+        "Podklady AR: Mapterhorn, záložní AWS Terrain Tiles a OpenStreetMap / Overpass (ručně nebo volitelně automaticky při GPS)"
       ],
       "fullscreen": false,
       "largeData": true,
       "edition": "open",
-      "manifest": "modules/cyklo/1.19.0/manifest.json",
-      "manifestSha256": "c92ad8fa864eccb643c98113d1b52dd95fb30139f6333113bbc4f635ac479f2a",
-      "size": 6877531
+      "manifest": "modules/cyklo/1.19.1/manifest.json",
+      "manifestSha256": "e299552c05a2c65534122137213e153e07bb5f004c75186e5db8258815022a2b",
+      "size": 6889266
     },
     {
       "id": "cyklo-mapy",
       "edition": "mapy",
-      "version": "1.19.0",
+      "version": "1.19.1",
       "apiVersion": 1,
       "minCoreVersion": "2.1.2",
       "maxCoreMajor": 2,
@@ -67,13 +67,13 @@
         "Online výškové dlaždice Mapterhorn (terén/vrstevnice)",
         "Online lesní plochy OpenFreeMap a volitelné letecké Mapy.com",
         "Kamera a orientace telefonu (na pokyn pro AR)",
-        "Stažení míst OpenStreetMap / Overpass a výšek pro offline AR (na pokyn)"
+        "Podklady AR: Mapterhorn, záložní AWS Terrain Tiles a OpenStreetMap / Overpass (ručně nebo volitelně automaticky při GPS)"
       ],
       "fullscreen": false,
       "largeData": true,
-      "manifest": "modules/cyklo-mapy/1.19.0/manifest.json",
-      "manifestSha256": "496fe37e762d69957451b409a800d203a99b59efb2c8ce65dfbf18a19191c3cd",
-      "size": 6877536
+      "manifest": "modules/cyklo-mapy/1.19.1/manifest.json",
+      "manifestSha256": "bb6c041ed4c7dfa48ffe00b54b65f62a2235f7d474a4144912d1930bce04ed24",
+      "size": 6889271
     },
     {
       "id": "letadlo",

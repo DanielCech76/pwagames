@@ -1,4 +1,4 @@
-# Rozhlédnout se – CYKLO 1.19.0
+# Rozhlédnout se – CYKLO 1.19.1
 
 Režim AR je dostupný tlačítkem **AR** vedle 2D/3D v CYKLO Open i CYKLO Mapy.com. Potřebuje jádro 2.1.2, které předává oprávnění kamery a magnetometru do modulu. Stávající verze modulů zůstávají neměnné.
 
@@ -13,7 +13,7 @@ Režim AR je dostupný tlačítkem **AR** vedle 2D/3D v CYKLO Open i CYKLO Mapy.
 
 ## Data a offline použití
 
-Ukládá se jedno kompletní okolí do úložiště modulu. Nové úspěšné stažení nahradí předchozí; chyba, zrušení nebo chyba zápisu předchozí balíček zachovají. Balíček obsahuje mřížku 129 × 129 výšek a nejvýše 1 500 pojmenovaných míst. Pro terén se používají z9 Terrarium WebP dlaždice Mapterhorn (nejvýše 36 na balíček), pro místa veřejný Overpass: vrcholy, města, obce, vyhlídky a památky. Po stažení kamera, senzory, popisky, projekce a terén nepotřebují internet; GPS může být bez dostupného signálu nahrazena ruční polohou. Toto stažení nepřidává offline dlaždice do běžné MapLibre mapy. Mapy.com obsah se do AR balíčku nekopíruje.
+Ukládají se nejvýše 4 kompletní oblasti do úložiště modulu a nejvýše 48 výškových dlaždic pro opakované použití. Chyba, zrušení nebo chyba zápisu předchozí oblasti zachovají. Balíček obsahuje mřížku 129 × 129 výšek a nejvýše 1 500 pojmenovaných míst. Pro terén se používají z9 Terrarium dlaždice Mapterhorn nebo záložního AWS Terrain Tiles (nejvýše 36 na balíček), pro místa veřejný Overpass: vrcholy, města, obce, vyhlídky a památky. Po stažení kamera, senzory, popisky, projekce a terén nepotřebují internet; GPS může být bez dostupného signálu nahrazena ruční polohou. Toto stažení nepřidává offline dlaždice do běžné MapLibre mapy. Mapy.com obsah se do AR balíčku nekopíruje.
 
 ## Přesnost
 
@@ -34,3 +34,18 @@ Jádro je připravené pro budoucí zapojení do Letadla; tato verze jej zapojuj
 `node tests/cyklo-ar.test.cjs` ověřuje směry a projekci na výšku/šířku, kalibraci, přechod přes sever, zakřivení, výškové vzorkování, zakrytí terénem, validaci dat, nezačínání sledování při otevření, GPS ID 0, opožděná oprávnění kamery, uvolnění zařízení a ochranu před pozdním stažením po zavření. Regresní kontroly mapy, plánovače, GPS, dialogů, modulu a jádra jsou zachované.
 
 Při kontrole v cloudovém prohlížeči byl dostupný WebGL omezený a živé stažení výšek vrátilo HTTP 502. Chování při chybě je ověřené; přesnost fyzické kamery a kompasu a živé stažení na Androidu je nutné ověřit v terénu.
+
+
+## Oprava 1.19.1 – spolehlivější stahování a automatické doplňování
+
+Původní klient měl 20sekundový časový limit pro výškovou dlaždici. Interní timeout i ruční zrušení vyvolaly AbortError a UI oba případy označilo jako „Stažení zrušeno“. Tento text proto nebyl důkazem ručního zrušení. Nový klient rozlišuje timeout (zdroj, dlaždice a limit), HTTP chybu, síť/CORS a skutečné zrušení podle nadřazeného signálu.
+
+Mapterhorn doplňuje záložní AWS Terrain Tiles / Mapzen ve stejném formátu Terrarium. Zdroj, který v dané relaci uspěl, má přednost pro další chybějící dlaždice. Hotové dlaždice se ukládají průběžně do lokální mezipaměti, takže opakování po chybě nebo zrušení znovu nestahuje dokončené dlaždice. Limit mezipaměti je 48 dlaždic. Při přímém ověření 17. 11. 2026 v prostředí vývoje Mapterhorn vrátil HTTP 403, zatímco stejná z9 dlaždice z AWS vrátila HTTP 200 a Access-Control-Allow-Origin: *. To neprokazuje stejnou příčinu na telefonu uživatele; nová diagnostika umožňuje příčinu rozlišit přímo v aplikaci.
+
+Průběhový ukazatel je dostupný i při zavřeném nastavení. Terén tvoří 0–80 %, názvy míst 85–95 % a uložení 97–100 %. Zobrazuje také počty dlaždic, použití cache a dostupné počty stažených bajtů. 100 % se zobrazí až po úspěšném zápisu. Pokud nejsou názvy dostupné ani z druhého Overpass serveru, terén se přesto uloží, neúplné názvy jsou zřetelně označené a lze je později doplnit. Názvy se znovu nepoptávají, pokud je celé požadované okolí již pokryté úplnými uloženými názvy.
+
+Volba **Automaticky doplňovat chybějící podklady při GPS** je standardně vypnutá a ukládá se v daném modulu. Po zapnutí pracuje jen při otevřeném AR, čerstvé GPS do 30 s a přesnosti do 50 m. Ručně zvolená poloha, známý offline stav a staré měření automatické požadavky nespouštějí. Na hranici 90 % poloměru pokrytí doplní nové okolí, aby výhled nezůstal bez dat po opuštění oblasti. Používá uložené dlaždice a uchovává nejvýše 4 poslední oblasti. Názvy nového okolí se dotazují pro tuto oblast a mohou se překrývat s předchozími výsledky.
+
+Najednou běží jediný požadavek. Po úspěchu je minimální odstup 30 s; při selhání se čekání prodlužuje až na 5 min, po 5 neúspěšných pokusech se automatika pozastaví. Ruční zrušení automatického stahování je rovněž pozastaví. Pokračování vyžaduje vypnout a zapnout volbu. Zavření AR nebo přechod na pozadí stahování ukončí. Smazání podkladů smaže oblasti i mezipaměť a automatiku pozastaví.
+
+`node tests/cyklo-ar-download.test.cjs` přidává kontroly záložního zdroje, znovupoužití dlaždic a názvů, částečného výpadku názvů, rozlišení timeoutu a zrušení, průběhu, automatického doplňování pouze po souhlasu, pokrytí, GPS a offline podmínek, souběhu, cooldownu, zrušení a limitu cache.
