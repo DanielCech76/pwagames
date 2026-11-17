@@ -129,6 +129,27 @@
       "manifest": "modules/pong/2.3.0/manifest.json",
       "manifestSha256": "db6c65fc8a04e11fa9402aedeec1a5f24987e553e8360044b2d45ff76984c321",
       "size": 40102
+    },
+    {
+      "id": "star-run",
+      "version": "1.0.0",
+      "apiVersion": 1,
+      "minCoreVersion": "2.1.1",
+      "maxCoreMajor": 2,
+      "dataSchema": 1,
+      "name": "Star Run",
+      "description": "Průlet mezi asteroidy, energetické brány a štít. Dotyk i náklon, na výšku i na šířku.",
+      "icon": "🚀",
+      "theme": "blue",
+      "permissions": [
+        "Celá obrazovka (na pokyn)",
+        "Orientace telefonu (volitelně, na pokyn)",
+        "Místní rekordy a nastavení"
+      ],
+      "fullscreen": false,
+      "manifest": "modules/star-run/1.0.0/manifest.json",
+      "manifestSha256": "5b146dc496f2d497bb18ed8d0615e32eb19bfaea3919b908a945dba092a246fc",
+      "size": 30320
     }
   ]
 }

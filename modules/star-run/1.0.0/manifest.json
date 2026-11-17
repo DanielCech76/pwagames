@@ -1,0 +1,47 @@
+{
+  "format": 1,
+  "id": "star-run",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.1.1",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Star Run",
+  "description": "Průlet mezi asteroidy, energetické brány a štít. Dotyk i náklon, na výšku i na šířku.",
+  "icon": "🚀",
+  "theme": "blue",
+  "permissions": [
+    "Celá obrazovka (na pokyn)",
+    "Orientace telefonu (volitelně, na pokyn)",
+    "Místní rekordy a nastavení"
+  ],
+  "fullscreen": false,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "bridge.js",
+      "size": 1994,
+      "sha256": "274714f9194d58b1c8f24f5d0357981e316ba77242bf47ad9063fd8163aae433"
+    },
+    {
+      "path": "engine.js",
+      "size": 2425,
+      "sha256": "2831f1e797c5e6e00f1a41bed4f7b8b6cd936e50cd476d4bc327b4597fcaaa92"
+    },
+    {
+      "path": "game.js",
+      "size": 14265,
+      "sha256": "c92baa47e39849f1517e90976c23dccd42c499a435758b2157a9b9e7d5f02bca"
+    },
+    {
+      "path": "index.html",
+      "size": 4981,
+      "sha256": "19130fdea7e5c2cdba5de6f0b0d6da4422c7d4fe45f2a63de43843b5853911ec"
+    },
+    {
+      "path": "style.css",
+      "size": 6655,
+      "sha256": "1935f026e90342b9b420dfd51f5aaefa42a98dc93427c1fb5afe82d0e256fc41"
+    }
+  ]
+}
