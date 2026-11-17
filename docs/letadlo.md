@@ -30,3 +30,9 @@ Automatický test `tests/letadlo.test.cjs`: délka/směr trasy, geodetická inte
 Prohlížeč v pracovním prostředí nepodporuje WebGL (`Error creating WebGL context`): ověřená mapa, načtení dat, simulace a seznam míst, fallback do mapy. 3D renderer a dotykové rozhlížení nejsou v tomto prohlížeči vizuálně ověřené. Nezaměňovat matematické testy za vizuální potvrzení. Android, skutečný GNSS příjem v kabině, portrait/landscape ergonomie, příkon a výkon vyžadují ověření na zařízení.
 
 Na telefonu: nainstalovat modul → simulace → pauza → Okénko → obě strany → tažení/zoom/poloha hlavy → kabina vypnout/zapnout → Letadlo/Mapa → otočit telefon → dialog a systémové Zpět → režim letadlo → znovu spustit stažený modul. Živou GPS zkoušet u okna, po skrytí ověřit zastavení. Bez kurzu při stání používat mapu nebo simulaci.
+
+
+## 1.2.0 — route-specific offline packs
+The module contains no terrain or imagery data. Choosing airports only checks local availability. Download data explicitly or start a flight to download the selected route. 28 unordered airport pairs use separately cropped terrain and imagery, including a viewing margin within the original source coverage. Data are hosted under flight-data/v1 and cached independently of module versions. Downloads have integrity checks, progress, a 60-second deadline, cancellation and retry of missing files. Incomplete packs never receive the ready marker. Deletion affects only the selected route.
+
+This release retains the original coarse Blue Marble imagery; the uncommitted 1.1.0 detail work was not available in the repository. It does not claim street or building detail. Old 1.0.0 packages remain immutable for rollback. Generate route data manually with scripts/build-route-data.py (Pillow); normal builds only copy the already generated data.
