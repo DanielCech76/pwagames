@@ -1,0 +1,54 @@
+{
+  "format": 1,
+  "source": "GeoNames",
+  "license": "CC BY 4.0",
+  "cities": 5946,
+  "peaks": 334,
+  "peakCountries": [
+    "CZ",
+    "AT",
+    "SK",
+    "DE",
+    "PL",
+    "CH",
+    "FR",
+    "IT",
+    "SI"
+  ],
+  "cityCoverage": "worldwide; population >= 100000 or national capital",
+  "peakSelection": "highest explicit GeoNames elevation per 20 km neighbourhood, elevations >= 1500 m; not prominence",
+  "inputs": [
+    {
+      "file": "cities15000.zip",
+      "url": "https://download.geonames.org/export/dump/cities15000.zip",
+      "sha256": "0f8657850fbad681c25dc222150794b60b11bbe57979c80f55ee1668f8a1bc46"
+    },
+    {
+      "file": "CH.zip",
+      "url": "https://download.geonames.org/export/dump/CH.zip",
+      "sha256": "596eecac6daa8aae114840b4bb7b1ccb5d664264f91d0f0f6fbc7dab05953461"
+    },
+    {
+      "file": "FR.zip",
+      "url": "https://download.geonames.org/export/dump/FR.zip",
+      "sha256": "303a5f7a1fac090c2539a0cd3b81688bc18594fb7f8f44001f6950912c7a2778"
+    },
+    {
+      "file": "IT.zip",
+      "url": "https://download.geonames.org/export/dump/IT.zip",
+      "sha256": "d88ec46a8c52c7fba9183b16a73a767bf34e77b43aba628f91b24f8398cd2294"
+    },
+    {
+      "file": "SI.zip",
+      "url": "https://download.geonames.org/export/dump/SI.zip",
+      "sha256": "5cbec9d60e115ac692f41dd295360c16994935def8be0b849924225e4f12d23b"
+    }
+  ],
+  "regionalSnapshotSha256": "84ac077d903afae9001a314c426d55b855e4c157be1aa41d0c5e10b1fc63635b",
+  "data": {
+    "file": "places.json",
+    "bytes": 417782,
+    "count": 6280,
+    "sha256": "d6fa7e4f9d5721d23b3c8a9870d8c3a6663a6334606bc5796e3219344bddad78"
+  }
+}

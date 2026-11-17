@@ -1,4 +1,19 @@
-# Rozhlédnout se – CYKLO 1.25.0
+# Rozhlédnout se – CYKLO 1.26.0
+
+## 1.26.0 — Schválená grafika, vzdálenostní řady a nové objekty
+
+Panel reprodukuje schválený návrh pomocí skutečných SVG ikon a CSS: neprůhledná tmavě zelená plocha, samostatných pět ikonových záložek bez světlého společného podkladu, limetkové zvýraznění, zaoblené přepínače a posuvníky. Název i záložky jsou pevné. Samostatný posuvný obsah začíná pod záložkami a je oříznutý, takže se za nimi nemohou zobrazovat prvky nastavení. Ovládání je přizpůsobeno oběma orientacím telefonu.
+
+Po výběru podle významnosti se karty rozmisťují od nejvzdálenějšího objektu k nejbližšímu. Vzdálenější karta nikdy neleží pod bližší; mohou sdílet jednu řadu. Každá karta leží nad svým bodem a nezobrazuje se, pokud na ni nad bodem není místo. Spojnice je přímá bez hrotu: blízko silnější tmavě zelená se světlým obrysem, obzor tenká černá, za obzorem přerušovaná černá. Oba konce musí být uvnitř mapy; připnutí to nemůže obejít. Cíle za obzorem ukazují směr na horizontu, nejsou vykreslené jako viditelné místo pod zakřivením Země. Tyto typy spojnic používá také fotoexport. Původní 650ms podržení mimo obraz z verze 1.25.0 se již nepoužívá.
+
+Nové samostatné filtry jsou Budovy, Instituce a Přehrady. Pojmenované školy, univerzity, nemocnice a další veřejné instituce rozlišujeme podle atributů OSM; nádrže a přehrady podle typu vodního objektu nebo vodního názvu. Data se získávají z uložených detailů a také z již načtených vektorových dlaždic mapy. Nativní názvy OSM zůstávají dostupné; vlastní karty respektují filtry a kapacitu obrazovky. Nepojmenovaným objektům názvy nevymýšlíme.
+
+Dosah za obzorem je 50–1 000 km. Běžné objekty a skupina Obzor jsou omezené 200 km. Nad 200 km se při doplnění názvů připojuje lehký katalog `ar-place-data/significant-v1/`, který obsahuje 5 946 velkých měst a hlavních měst celosvětově a 334 vysokých vrcholů ve střední Evropě a Alpách (CZ, AT, SK, DE, PL, CH, FR, IT, SI). Města mají nejméně 100 000 obyvatel nebo jsou národní metropolí. Vrcholy mají uvedenou výšku nejméně 1 500 m; z 20km okolí ponecháváme nejvyšší dostupný. Toto prostorové zjednodušení není skutečná prominence a katalog není úplný světový seznam hor. Výchozí přepínač „Jen velká města a dominantní vrcholy“ omezuje další případně dostupné cíle nad 200 km podle doložené velikosti/výšky. Samotné vypnutí filtru nestahuje další data. U neznámé výšky cíle počítáme geometrický horizont konzervativně s nulovou nadmořskou výškou a skutečnou viditelnost označujeme jako neověřenou.
+
+Vzdálené názvy nevyžadují stahování DEM do 1 000 km. Podrobná část katalogu používá pouze blízké buňky do 100 km, samostatný dlouhý dosah pokrývají města a vybrané vrcholy. Chybějící regionální pokrytí se nevydává za úplné. Zdrojové exporty GeoNames, licence CC BY 4.0, výběrová pravidla a kontrolní součty uvádí manifest a reprodukovatelný skript `scripts/build-ar-significant.py`.
+
+Ověření vydání: 46 sestavovacích a regresních kontrol, včetně skutečného dlouhého katalogu, pořadí podle vzdálenosti, spojnic uvnitř záběru, nových kategorií a PNG kreslení. V prohlížeči ověřen panel na výšku 390 × 844 i na šířku 844 × 390, pevné záložky při posouvání a živé popisky nad syntetickým obrazem kamery. Fyzické senzory a WebGL mapa nejsou v testovacím prohlížeči dostupné; nešlo o test vykreslování na skutečném telefonu.
+
 
 Režim AR je dostupný tlačítkem **AR** vedle 2D/3D v CYKLO Open i CYKLO Mapy.com. Potřebuje jádro 2.1.2, které předává oprávnění kamery a magnetometru do modulu. Stávající verze modulů zůstávají neměnné.
 
