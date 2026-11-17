@@ -71,3 +71,16 @@ Katalog je rozdělen do 149 regionálních buněk po jednom stupni a samostatné
 Úspěšné načtení katalogu vynechá oba servery Overpass úplně. Overpass zůstává pouze jako záložní cesta při selhání načtení statického katalogu. V balíčku se ukládá zdroj, rozsah a datum snapshotu; názvy z jiného zdroje se nevydávají za OpenStreetMap.
 
 Opakovatelné zpracování zdrojů: `python scripts/build-ar-gazetteer.py --sources /adresar/s/oficialnimi/ZIPy`. Zdroje musí být dodané explicitně; skript sám síť nepoužívá. `node tests/cyklo-ar-catalog.test.cjs` ověřuje všechny komprimované soubory a hashe, skutečné veřejné body v okolí Poděbrad, filtr dosahu, načtení ze stejného hostitele, úplné vynechání Overpass, opakované použití bez sítě a kompletní offline balíček terénu i názvů.
+
+
+## 1.20.0 – celoplošný výhled a ikonové ovládání
+
+Výhled se otevírá v režimu **Jen mapa**, bez automatického spuštění zařízení. Kamera, senzory a GPS mají nezávislá ikonová tlačítka. Přepnutí na mapu zastaví všechny kamerové stopy včetně opožděného udělení oprávnění; přechod na pozadí vše uvolní. Nastavení se otevírá ozubeným kolem jako boční panel na šířku nebo spodní panel na výšku. Tlačítka mají názvy pro čtečky a nápovědu při najetí; aktivní stav je zelený. Oko schová ovládání, zůstane tlačítko návratu ovládání. Dokončené stahování po zavření nastavení nezabírá obraz, běžící průběh zůstává viditelný.
+
+Minimální výška pozorovatele je 1,7 m (vstup i výpočet); rozhledna se zadává jako výška plošiny plus výška telefonu. Terén má síť soustředěnou kolem pozorovatele (krok 16 m v nejbližším okolí), pokračuje pod kameru a trojúhelníky protínající blízkou rovinu se ořezávají. Rozlišení původního DEM se tím nezvyšuje. Ikona vrstev přepíná plochý a výškový model. Plochý model je perspektivní rovina, nikoli pohled shora; běžná 2D cyklomapa je dostupná návratem. Budovy čerpají skutečné načtené vektorové půdorysy z běžné mapy do 2 km, jejich výšky mohou být odhadnuté (6 m při chybějícím údaji). Nejde o nový offline balíček budov; při chybějících podkladech se zobrazí informace. Budovy a plastický přepínač jsou nad živou kamerou neaktivní.
+
+Popisky mají ikonu typu, vzdálenost a druhý řádek s názvem. Vrcholy, hřebeny a průsmyky přidávají známou nadmořskou výšku; propasti skutečně dostupnou hloubku, nikdy náhradní výšku terénu jako hloubku. Kategorie jsou obce, města, vrcholy, řeky, jezera, moře, propasti, památky a ostatní. Katalog aktuálně neobsahuje všechny tyto typy v každé oblasti; filtr chybějící objekty nedoplňuje. Blízko (výchozí 2 km) se povolují všechny významnosti, středně (do 10 km) hlavní místa a dál významné cíle. Pásma, hustota a kategorie se ukládají do nastavení modulu. Překryvy se vynechávají.
+
+Klepnutí na popisek vybere cíl bez otevření nastavení. Zaměřovač dole vybere nejbližší známý bod ve středu obrazu; vybraný cíl má přednost a šipka na okraji ukazuje stranu při jeho opuštění záběru. Tlačítko zaměření v ručním režimu otočí pohled na cíl, při senzorech vede uživatele šipkou. Samostatné tlačítko zarovná senzory podle známého cíle. Tažením mapy lze bez senzorů měnit směr a náklon.
+
+Ověření zahrnuje projekci a ořezávání, síť pod pozorovatelem, minimální výšku, nezávislé přepínání zařízení, opožděná oprávnění, filtry významnosti i původní testy stahování a offline katalogu. Přesnost kompasu a kamery zůstává k ověření na fyzickém telefonu.
