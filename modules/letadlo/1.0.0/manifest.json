@@ -1,0 +1,76 @@
+{
+  "format": 1,
+  "id": "letadlo",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.1.1",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Letadlo",
+  "description": "Offline let nad skutečným terénem Alp, mapa, GPS a prostorový výhled z okénka.",
+  "icon": "✈",
+  "theme": "blue",
+  "permissions": [
+    "Poloha až po spuštění živého letu",
+    "Místní nastavení"
+  ],
+  "fullscreen": false,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "app.js",
+      "size": 22154,
+      "sha256": "acc7f43e255e808e7b94a4c2fceb4fcb0625a7ec17eeae3869b45b102a13b1c2"
+    },
+    {
+      "path": "bridge.js",
+      "size": 1994,
+      "sha256": "274714f9194d58b1c8f24f5d0357981e316ba77242bf47ad9063fd8163aae433"
+    },
+    {
+      "path": "data/alps-dem.bin",
+      "size": 296450,
+      "sha256": "434001420f684e195937103e1db632ae6e2511e9cf0a7c56268ecba3e2465f73"
+    },
+    {
+      "path": "data/alps.jpg",
+      "size": 206056,
+      "sha256": "199aeeb165233819018f447a03d2ca61e3c56b49e73f63381ac9a7b8c555b558"
+    },
+    {
+      "path": "data/region.json",
+      "size": 270,
+      "sha256": "95b05334e5aa5d727cda0893ffdcb994b6bc941f9b473a527aa11cb39910e6f7"
+    },
+    {
+      "path": "data/terrain-attribution.md",
+      "size": 12300,
+      "sha256": "2ce4d3414b4592d17ad56a5af57feb480686ddcfb0a3e4ea0b566d28cde13567"
+    },
+    {
+      "path": "engine.js",
+      "size": 2856,
+      "sha256": "c080b99d9b9d0f23846dd55be226ad37c7d9a7e0343125ef427a941cab0bb34e"
+    },
+    {
+      "path": "index.html",
+      "size": 6349,
+      "sha256": "ea5b378adba4d54ceebec4ecfee8aa52142e3bded972ab368d8b7357d4a3f754"
+    },
+    {
+      "path": "style.css",
+      "size": 6909,
+      "sha256": "10515c2b0c97d2f4b375ee227501b903f7c9a0f2ea57c612d16b89f052163bd2"
+    },
+    {
+      "path": "vendor/LICENSE-three.txt",
+      "size": 1081,
+      "sha256": "4c40a1ef62450b857c3b2aaf294936304cd552d965fbcd9d32d4c5bcf4ba4454"
+    },
+    {
+      "path": "vendor/three.module.js",
+      "size": 691648,
+      "sha256": "08fd7545d13d2c7fb65ab691530a802dafefd638596501854f267d0fb13c39e7"
+    }
+  ]
+}
