@@ -1,0 +1,47 @@
+{
+  "format": 1,
+  "id": "star-run",
+  "version": "1.1.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.1.1",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Star Run",
+  "description": "Krátké levely, barevné brány, jiskry a střelba na odolné asteroidy. Dotyk i náklon.",
+  "icon": "🚀",
+  "theme": "blue",
+  "permissions": [
+    "Celá obrazovka (na pokyn)",
+    "Orientace telefonu (volitelně, na pokyn)",
+    "Místní rekordy a nastavení"
+  ],
+  "fullscreen": false,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "bridge.js",
+      "size": 1994,
+      "sha256": "274714f9194d58b1c8f24f5d0357981e316ba77242bf47ad9063fd8163aae433"
+    },
+    {
+      "path": "engine.js",
+      "size": 5102,
+      "sha256": "64ed92a3fdd9866138e0493c7102b208b62847c6e9d8c763fae7ff85796def2c"
+    },
+    {
+      "path": "game.js",
+      "size": 17714,
+      "sha256": "a4fc744cadbef6f87df74a11fd8f707f5c7d667e48fa8a39f53bf3bb90ca746c"
+    },
+    {
+      "path": "index.html",
+      "size": 6218,
+      "sha256": "9cc885f3dbc46bf7f11a27a508b7b2ddea57e1ba31939893f123d8596239311a"
+    },
+    {
+      "path": "style.css",
+      "size": 8048,
+      "sha256": "f2983ff979b96ce321297eca72241612bc11aa30d91f278bc9e2ee721f04f307"
+    }
+  ]
+}
