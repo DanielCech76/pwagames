@@ -1,4 +1,4 @@
-# Rozhlédnout se – CYKLO 1.21.0
+# Rozhlédnout se – CYKLO 1.21.1
 
 Režim AR je dostupný tlačítkem **AR** vedle 2D/3D v CYKLO Open i CYKLO Mapy.com. Potřebuje jádro 2.1.2, které předává oprávnění kamery a magnetometru do modulu. Stávající verze modulů zůstávají neměnné.
 
@@ -103,3 +103,14 @@ Jeden požadavek detailů má nejvýše 16 vektorových dlaždic, 10 s na index 
 Mapový výhled používá malý WebGL renderer s hloubkovým bufferem pro správné zakrytí geometrie; bez WebGL zůstává zjednodušená Canvas varianta. Nové ar-detail.js a ar-renderer.js jsou součástí úplného offline modulu. Dekodér vektorů je sestavený z připnutých balíčků pbf, vector-tile a earcut; reprodukce: `node scripts/build-look-vendor.mjs`. Licence jsou ve vendor/.
 
 Ověření 17. 11. 2026: živé stažení v testovacím prohlížeči dokončilo 6/6 dlaždic a uložilo 4619 prvků na 100 %. Přímý požadavek z vývojového shellu vrátil HTTP 403, browserové stažení stejného zdroje fungovalo. Prohlížeč měl dostupnou jen Canvas variantu; skutečná kompilace a linkování GPU shaderů i hloubkové zakrytí byly ověřeny pomocí EGL/GLES (`python scripts/check-look-gpu.py`). Testy zahrnují cache, zrušení, limity, skutečné polygony, otvory, předvolby, výchozí zařízení a neprodlužování GPS hlášky. Fyzickou přesnost senzorů je nadále potřeba ověřit na telefonu.
+
+
+## 1.21.1 – posouvání nastavení a přednost blízkých popisků
+
+Panel má pevnou výšku odvozenou od viewportu, samostatnou svisle posuvnou část a zvýrazněný scrollbar. Nadpis zůstává nad posuvnou částí, ikonové záložky jsou při posunu přilepené nahoře. Oprava odstraňuje nevyhodnocené procentní max-height, kvůli kterému spodní pole na Androidu přetékala mimo panel.
+
+Výběr popisků nově nejdřív zpracuje blízké pásmo podle vzdálenosti, pak hlavní a vzdálená místa podle významu. Výběr se stále řídí kategoriemi, zakrytím terénem, záběrem a překryvy. Minimální odstup místa je 5 m místo původních 30 m; nejde o záruku přesnosti GPS na 5 m.
+
+Stažené vektorové detaily nově dekódují také pojmenované POI, místní názvy a vrcholy. Z těchto a již dostupných pojmenovaných budov, cest či vodních prvků lze vytvořit blízké popisky; nepojmenované objekty nedostávají vymyšlené názvy. Obyčejný katalog měst nadále nepředstavuje úplný seznam blízkých turistických míst. Pro nové názvy je potřeba znovu stáhnout detaily okolí; binární dlaždice se znovu používají z cache.
+
+Doporučené nastavení: kategorie v záložce Popisky, Blízké detaily do 2–5 km a vyšší Hustota; v Detailech popředí zvolit odpovídající dosah a stáhnout okolí. Hlavní místa do 30 km upravují vzdálenější pásmo, nikoli množství dostupných blízkých objektů. Neznámé nebo skutečně zakryté místo tato nastavení nezobrazí.
