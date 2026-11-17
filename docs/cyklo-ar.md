@@ -1,4 +1,4 @@
-# Rozhlédnout se – CYKLO 1.24.0
+# Rozhlédnout se – CYKLO 1.24.1
 
 Režim AR je dostupný tlačítkem **AR** vedle 2D/3D v CYKLO Open i CYKLO Mapy.com. Potřebuje jádro 2.1.2, které předává oprávnění kamery a magnetometru do modulu. Stávající verze modulů zůstávají neměnné.
 
@@ -157,3 +157,7 @@ Vrstevnice používají stejný lokálně přibalený generátor a výškový zd
 Podrobný podklad nadále potřebuje dostupná online data; stávající stažení AR ukládá DEM, názvy a geometrii/bodové detaily, nikoli kompletní stylovanou MapLibre mapu. Offline uložené výšky a názvy zůstávají použitelné pro kamerové popisky. Odstranění staré záložní scény tuto skutečnost neskrývá.
 
 Ověření: všech 44 kontrol vydání, nové případy skutečného řadiče (senzorové události → kalibrace/vyhlazení → kamera mapy v ruční a automatické výšce), zachování senzorů, nucená rovina a vypnuté budovy, posuvník/automatická výška, roll, pohled nad horizont, zoom u země, blízké vrstevnice, částečné chyby, čekání na skutečné nulté DEM a odstranění mapy. V prohlížeči ověřeny oba konce posuvníku, návrat na automatickou výšku, kompaktní panel a kamera se spouští. Testovací prohlížeč neumožňuje vytvořit WebGL kontext; fyzické senzory a finální vykreslení podrobné mapy/vrstevnic na telefonu nebyly přímo ověřeny.
+
+### 1.24.1 — Nativní dlouhé podržení výšky
+
+Nativní kontextové gesto telefonu i pravé tlačítko myši otevírají přímo svislý posuvník výšky, stejně jako časované podržení. Přidán regresní případ, aby toto gesto neotevíralo prázdný obecný panel.
