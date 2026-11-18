@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "Letadlo",
+  "short_name": "Letadlo",
+  "lang": "cs",
+  "description": "Simulace letu, živá GPS a výhled z okénka s mapami pro offline použití.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#102b40",
+  "theme_color": "#102b40",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
