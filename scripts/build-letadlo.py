@@ -34,6 +34,12 @@ html = html.replace('</head>', '''
 <style>body:has(#flight[hidden]) #back { visibility: hidden; }</style>
 <script src="./install.js" defer></script>
 </head>''')
+html = html.replace('<p id="routeDescription"', '''
+<div style="margin-top: 12px">
+  <button id="installApp" type="button" aria-controls="installHelp" hidden>Nainstalovat aplikaci</button>
+  <p id="installHelp" class="muted" role="status" hidden>V Chromu otevři nabídku ⋮ a zvol Nainstalovat aplikaci nebo Přidat na plochu. V Safari na iPhonu použij Sdílet → Přidat na plochu.</p>
+</div>
+<p id="routeDescription"''')
 index.write_text(html, encoding='utf-8')
 
 for asset in sorted((root / 'letadlo').iterdir()):
