@@ -22,3 +22,5 @@ main[data-pair] #drawing, main[data-pair] #advanced, main[data-pair] #overlay, m
 select { min-height: 44px; max-width: 100%; border: 1px solid #536278; border-radius: 10px; padding: 6px 10px; color: inherit; background: #222e40; font: inherit; }
 
 #model-storage { margin-top: 8px; }
+
+.name-option { min-height: 44px; display: inline-flex; align-items: center; gap: 7px; }

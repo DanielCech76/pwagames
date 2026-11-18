@@ -13,6 +13,10 @@ export const models = {
     id: 'onnx-community/sam2.1-hiera-tiny-ONNX', revision: '814a066640debee5a91e70aa401fb8e17e030503',
     klass: 'Sam2Model', dtype: 'q8', external: true, files: samFiles.flatMap(file => [file, file + '_data'])
   },
+  names: {
+    id: 'onnx-community/mobilenet_v2_1.0_224', revision: 'c5903ea5f5bb219f02c85a778af0fedf14f502d8',
+    dtype: 'fp32', files: ['model.onnx']
+  },
   depth: {
     id: 'onnx-community/depth-anything-v2-small-ONNX', revision: 'c3b67641fd837b2368757101311e5d21e511441e',
     dtype: 'q4', external: true, files: ['model_q4.onnx', 'model_q4.onnx_data']

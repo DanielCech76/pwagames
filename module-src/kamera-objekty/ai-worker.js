@@ -1,3 +1,4 @@
+import { confidentName, maskedCrop } from './naming.js';
 import { maskBounds } from './outline.js';
 import { compareViews } from "./views.js";
 
@@ -5,6 +6,7 @@ import { runtime, models, saveAssets } from './model-storage.js';
 
 let loaded;
 let library;
+let classifier;
 
 async function load(kind) {
   if (loaded?.kind !== kind) {
@@ -14,44 +16,47 @@ async function load(kind) {
       const { predict, model } = await previous.promise;
       await (predict ?? model).dispose();
     }
-    const promise = (async () => {
-      const cache = await saveAssets([kind], (done, total) => {
-        if (done < total) self.postMessage({ phase: 'download', progress: done * 100 / total });
-      });
-      library ??= (async () => {
-        const responses = await Promise.all(runtime.map(url => cache.match(url)));
-        const [script, wasmScript, wasmBytes] = await Promise.all(responses.map(response => response.arrayBuffer()));
-        const scriptUrl = URL.createObjectURL(new Blob([script], { type: 'text/javascript' }));
-        const wasmUrl = URL.createObjectURL(new Blob([wasmScript], { type: 'text/javascript' }));
-        const binaryUrl = URL.createObjectURL(new Blob([wasmBytes], { type: 'application/wasm' }));
-        const tf = await import(scriptUrl);
-        tf.env.allowLocalModels = false;
-        tf.env.useBrowserCache = false;
-        tf.env.useCustomCache = true;
-        tf.env.customCache = cache;
-        tf.env.backends.onnx.wasm.numThreads = 1;
-        tf.env.backends.onnx.wasm.wasmPaths = { mjs: wasmUrl, wasm: binaryUrl };
-        return tf;
-      })().catch(error => {
-        library = null;
-        throw error;
-      });
-      const tf = await library;
-      const { id, revision, klass, dtype, external } = models[kind];
-      const options = { revision, device: 'wasm', dtype, use_external_data_format: Boolean(external) };
-      if (kind === 'depth') return { tf, predict: await tf.pipeline('depth-estimation', id, options) };
-      const [processor, model] = await Promise.all([
-        tf.AutoProcessor.from_pretrained(id, options),
-        tf[klass].from_pretrained(id, options)
-      ]);
-      return { tf, processor, model };
-    })();
+    const promise = prepare(kind);
     loaded = { kind, promise };
     promise.catch(() => {
       if (loaded?.promise === promise) loaded = null;
     });
   }
   return loaded.promise;
+}
+
+async function prepare(kind) {
+  const cache = await saveAssets([kind], (done, total) => {
+    if (done < total) self.postMessage({ phase: 'download', progress: done * 100 / total });
+  });
+  library ??= (async () => {
+    const responses = await Promise.all(runtime.map(url => cache.match(url)));
+    const [script, wasmScript, wasmBytes] = await Promise.all(responses.map(response => response.arrayBuffer()));
+    const scriptUrl = URL.createObjectURL(new Blob([script], { type: 'text/javascript' }));
+    const wasmUrl = URL.createObjectURL(new Blob([wasmScript], { type: 'text/javascript' }));
+    const binaryUrl = URL.createObjectURL(new Blob([wasmBytes], { type: 'application/wasm' }));
+    const tf = await import(scriptUrl);
+    tf.env.allowLocalModels = false;
+    tf.env.useBrowserCache = false;
+    tf.env.useCustomCache = true;
+    tf.env.customCache = cache;
+    tf.env.backends.onnx.wasm.numThreads = 1;
+    tf.env.backends.onnx.wasm.wasmPaths = { mjs: wasmUrl, wasm: binaryUrl };
+    return tf;
+  })().catch(error => {
+    library = null;
+    throw error;
+  });
+  const tf = await library;
+  const { id, revision, klass, dtype, external } = models[kind];
+  const options = { revision, device: 'wasm', dtype, use_external_data_format: Boolean(external) };
+  if (kind === 'depth') return { tf, predict: await tf.pipeline('depth-estimation', id, options) };
+  if (kind === 'names') return { tf, predict: await tf.pipeline('image-classification', id, options) };
+  const [processor, model] = await Promise.all([
+    tf.AutoProcessor.from_pretrained(id, options),
+    tf[klass].from_pretrained(id, options)
+  ]);
+  return { tf, processor, model };
 }
 
 function unpack(tensor, scores, width, height, resized, padded) {
@@ -145,10 +150,33 @@ async function segment(kind, frame, prompts, reference, tracking) {
   }
 }
 
+async function identify(frame, items) {
+  if (!items.length) return items;
+  try {
+    classifier ??= prepare('names').catch(error => {
+      classifier = null;
+      throw error;
+    });
+    const { tf, predict } = await classifier;
+    self.postMessage({ phase: 'naming' });
+    for (const item of items) {
+      const { rgb, size } = maskedCrop(frame, item);
+      item.name = confidentName(await predict(new tf.RawImage(rgb, size, size, 3), { top_k: 2 }));
+    }
+  } catch (error) {
+    console.warn('Object names unavailable:', error);
+    self.postMessage({ phase: 'naming-error' });
+  }
+  return items;
+}
+
 self.onmessage = async ({ data: request }) => {
   try {
     if (request.kind === 'views') {
       self.postMessage({ result: compareViews(request.frame, request.second, request.reference) });
+    } else if (request.kind === 'names') {
+      const result = await identify(request.frame, request.items);
+      self.postMessage({ result }, result.map(item => item.mask.buffer));
     } else if (request.kind === 'depth') {
       const { tf, predict } = await load('depth');
       self.postMessage({ phase: 'analysis' });
@@ -158,6 +186,7 @@ self.onmessage = async ({ data: request }) => {
       self.postMessage({ result: depth.data }, [depth.data.buffer]);
     } else {
       const result = await segment(request.kind, request.frame, request.prompts, request.reference, request.tracking);
+      if (request.names) await identify(request.frame, result);
       self.postMessage({ result }, result.map(item => item.mask.buffer));
     }
   } catch (error) {

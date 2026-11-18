@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Objekty v kameře</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main hidden>
+    <header>
+      <button id="back">← Kolekce</button>
+      <h1>Objekty v kameře</h1>
+    </header>
+    <div id="view">
+      <video playsinline muted></video>
+      <canvas id="still" hidden></canvas>
+      <canvas id="depth-layer" hidden aria-hidden="true"></canvas>
+      <canvas id="overlay" aria-hidden="true"></canvas>
+      <p id="empty">Zapni kameru a namiř ji na předměty s dobře viditelnými okraji.</p>
+    </div>
+    <div class="controls">
+      <button id="camera">Zapnout kameru</button>
+      <button id="live" aria-pressed="true" disabled>Živě</button>
+      <button id="snapshot" aria-pressed="false" disabled>Snímek</button>
+    </div>
+    <div id="drawing" class="controls" hidden aria-label="Úprava výběru">
+      <button id="trace" aria-pressed="true">Obkreslit</button>
+      <button id="add" aria-pressed="false" disabled>Přidat</button>
+      <button id="subtract" aria-pressed="false" disabled>Ubrat</button>
+      <button id="undo" disabled>Zpět tah</button>
+      <button id="refine" disabled>Zpřesnit</button>
+      <button id="refine-ai" disabled>Zpřesnit AI</button>
+      <button id="next" disabled>Další objekt</button>
+    </div>
+    <div id="advanced" class="controls" hidden aria-label="Rozšířené metody">
+      <button id="automatic">Najít objekty AI</button>
+      <select id="object-target" aria-label="Objekt pro sledování" hidden></select>
+      <button id="depth" aria-pressed="false">Mapa hloubky</button>
+      <button id="compare">Paralaxa</button>
+      <button id="track">Sledovat SAM 2</button>
+      <button id="cancel-analysis" hidden>Zrušit analýzu</button>
+    </div>
+    <div id="pair" class="controls" hidden>
+      <button id="second">Pořídit další pohled</button>
+      <button id="cancel-pair">Zrušit</button>
+    </div>
+    <p id="status" role="status">Kamera je vypnutá.</p>
+    <div class="controls" id="model-storage">
+      <button id="download-models">Stáhnout AI offline</button>
+      <label class="name-option"><input type="checkbox" id="show-names"> Pojmenovat objekty</label>
+      <small id="model-state" role="status">Kontroluji úložiště…</small>
+    </div>
+    <p class="note">Obraz zůstává v telefonu. Stažení všech modelů zabere přibližně 140 MB.</p>
+  </main>
+  <script data-module-id="kamera-objekty" src="./bridge.js"></script>
+  <script type="module" src="./camera.js"></script>
+</body>
+</html>
