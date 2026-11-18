@@ -1,5 +1,5 @@
 const PREFIX = 'letadlo-shell:';
-const CACHE = PREFIX + '20aa7bfd9cb7ac00';
+const CACHE = PREFIX + 'e5718c0092c22e62';
 const FILES = ["app.js", "bridge.js", "data-worker.js", "detail-geo.js", "detail-renderer.js", "engine.js", "icon-192.png", "icon-512.png", "icon-maskable.png", "index.html", "install.js", "manifest.webmanifest", "offline.js", "style.css", "tile-paint.js", "tracks.js", "vendor/LICENSE-bootstrap-icons.txt", "vendor/LICENSE-fflate.txt", "vendor/LICENSE-pbf.txt", "vendor/LICENSE-pmtiles.txt", "vendor/LICENSE-point-geometry.txt", "vendor/LICENSE-three.txt", "vendor/LICENSE-vector-tile.txt", "vendor/maps.js", "vendor/three.module.js"];
 const scope = new URL(self.registration.scope);
 
