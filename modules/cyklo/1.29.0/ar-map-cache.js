@@ -1,0 +1,17 @@
+/* Session-only native tile bytes. Copies protect cached buffers from worker transfer. */
+(function(root){'use strict';
+const aborted=()=>new DOMException('Požadavek zrušen','AbortError');
+class TileCache{
+ constructor({maxBytes=24*1024*1024,maxEntries=256,ttl=600000,fetcher=(...args)=>root.fetch(...args),clock=()=>Date.now()}={}){this.maxBytes=maxBytes;this.maxEntries=maxEntries;this.ttl=ttl;this.fetcher=fetcher;this.clock=clock;this.entries=new Map();this.pending=new Map();this.bytes=0;this.closed=false}
+ request(url,options={},signal){if(this.closed||signal?.aborted)return Promise.reject(aborted());const key=JSON.stringify([url,options.headers||{},options.credentials||'same-origin']);const hit=this.entries.get(key);if(hit){if(this.clock()-hit.at<this.ttl){this.entries.delete(key);this.entries.set(key,hit);return Promise.resolve({data:hit.data.slice(0)})}this.remove(key)}
+  let job=this.pending.get(key),fresh=!job;if(!job){job={key,url,options,clients:new Set(),controller:new AbortController()};this.pending.set(key,job)}
+  const result=new Promise((resolve,reject)=>{const client={resolve,reject,signal};client.abort=()=>{job.clients.delete(client);signal?.removeEventListener('abort',client.abort);reject(aborted());if(!job.clients.size){job.controller.abort();if(this.pending.get(key)===job)this.pending.delete(key)}};job.clients.add(client);signal?.addEventListener('abort',client.abort,{once:true})});if(fresh)this.load(job);return result;
+ }
+ async load(job){let data,error;try{const response=await this.fetcher(job.url,{headers:job.options.headers,credentials:job.options.credentials||'same-origin',signal:job.controller.signal});if(!response.ok)throw Error('Mapová dlaždice: HTTP '+response.status);data=await response.arrayBuffer();if(job.controller.signal.aborted||this.closed)throw aborted();if(!/no-store/i.test(response.headers?.get('Cache-Control')||'')&&data.byteLength<=this.maxBytes){this.remove(job.key);this.entries.set(job.key,{data,at:this.clock()});this.bytes+=data.byteLength;while(this.bytes>this.maxBytes||this.entries.size>this.maxEntries)this.remove(this.entries.keys().next().value)}}catch(e){error=e}if(this.pending.get(job.key)===job)this.pending.delete(job.key);for(const client of job.clients){client.signal?.removeEventListener('abort',client.abort);error?client.reject(error):client.resolve({data:data.slice(0)})}job.clients.clear();}
+ remove(key){const old=this.entries.get(key);if(old){this.bytes-=old.data.byteLength;this.entries.delete(key)}}
+ close(){this.closed=true;for(const job of this.pending.values()){job.controller.abort();for(const c of job.clients){c.signal?.removeEventListener('abort',c.abort);c.reject(aborted())}job.clients.clear()}this.pending.clear();this.entries.clear();this.bytes=0}
+}
+let sequence=0;
+function attach(api){if(!api?.addProtocol||!api?.removeProtocol)return null;const cache=new TileCache(),scheme='cyklo-look-'+(++sequence),prefix=scheme+'://';api.addProtocol(scheme,(request,controller)=>cache.request(decodeURIComponent(request.url.slice(prefix.length)),request,controller?.signal));return {cache,transform(url,type){return type==='Tile'&&/^https:\/\/(tiles\.openfreemap\.org|tiles\.mapterhorn\.com)\//.test(url)?{url:prefix+encodeURIComponent(url)}:{url}},destroy(){cache.close();api.removeProtocol(scheme)}}}
+root.GeoLookTileCache={TileCache,attach};if(typeof module!=='undefined')module.exports=root.GeoLookTileCache;
+})(globalThis);

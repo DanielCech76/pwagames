@@ -1,3 +1,11 @@
+## 1.29.0 — lokální vizuální zarovnání
+
+V panelu Zarovnání jsou automatické porovnání obrysu krajiny (experimentální), ruční výběr známého cíle kdekoliv v obraze a jemné korekce směru/náklonu. Automatika používá jednorázový snímek skutečného videa, rozpoznává modrou oblohu, porovnává hranici s DEM do 30 km a hledá korekci ±16° směru / ±10° náklonu. Odmítá rovný obzor, málo hranice, neúplné DEM a nejednoznačné shody. Při neúspěchu zachová předchozí korekci a doporučí ruční bod. Obraz neopouští telefon. Nepoužívá VPS, nemění GPS polohu a nerozpoznává fasády ani identity objektů. Blízké stromy/budovy a mraky mohou shodu zkreslit, proto ověřte výsledek a použijte ruční opravu/reset. Průběžné vizuální sledování bodů není součástí této verze.
+
+Ruční postup: vybrat konkrétní známé místo, stisknout ikonu zaměření bodu, klepnout na jeho skutečné umístění v obraze. Výška cíle i pozorovatele musí být známá a senzory aktuální. Lze nadále zaměřit cíl středovým křížem. Posuvníky korekcí umožňují ruční doladění a Reset obnoví senzory bez korekce. Parametr FOV musí odpovídat skutečnému výřezu videa. Automatika koriguje orientaci, nikoli plnou prostorovou pozici.
+
+Ověření: syntetická krajina/obraz, nejednoznačný a chybějící obzor, odlehlé body a ruční projekce v obou orientacích. Fyzický telefon a skutečné venkovní světelné podmínky vyžadují ověření uživatelem.
+
 # Rozhlédnout se – CYKLO 1.28.1
 
 ## 1.28.1 — Opakované použití mapy při změně orientace
