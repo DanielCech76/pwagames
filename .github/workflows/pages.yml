@@ -53,6 +53,8 @@ jobs:
           node tests/cyklo-ar-detail.test.cjs
           node tests/cyklo-ar-overview.test.cjs
           node tests/cyklo-ar-map.test.cjs
+          node tests/cyklo-ar-map-cache.test.cjs
+          node tests/cyklo-ar-resize.test.cjs
           node tests/cyklo-ar-stability.test.cjs
           node tests/cyklo-ar-depth.test.cjs
           node tests/cyklo-ar-loading.test.cjs

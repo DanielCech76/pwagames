@@ -1,4 +1,17 @@
-# Rozhlédnout se – CYKLO 1.28.0
+# Rozhlédnout se – CYKLO 1.28.1
+
+## 1.28.1 — Opakované použití mapy při změně orientace
+
+Změna velikosti nebo otočení displeje již nevolá reset pohledu ani přestavbu načtených oblastí. Zachovává stejnou instanci mapy, její zdroje a reliéf, uložené výšky/názvy/detailní oblasti, plán 360° i uložené zarovnání. Nový rozměr přepočítá pouze výřez a rozmístění popisků/ovládání. Při změně úhlu displeje se čerstvé měření senzorů převede do nových os; čas původního měření se neposouvá, takže se staré měření nevydává za nové.
+
+MapLibre používá jediný řízený resize z vykreslovací smyčky, bez druhého automatického ošetření okna. Již vykreslená mapa se při změně rozměrů nezakrývá úvodní načítací obrazovkou. Chybějící části se doplňují průběžně a stav mapy může uvádět „doplňuji“. Poslední známé výšky omezeného počtu dotázaných bodů zůstávají dostupné i během doplňování DEM. Selhání nové dlaždice s již vykreslenou mapou neodstraňuje uložený obraz; počáteční neúspěch bez mapy se nadále hlásí jako chyba.
+
+Kromě dekódované cache rendereru se pro právě otevřený výhled používá omezená cache původních vektorových a výškových dlaždic OpenFreeMap/Mapterhorn: nejvýše 24 MiB nebo 256 odpovědí, LRU, čerstvost 10 minut, bez ukládání na disk. Shodné souběžné požadavky sdílejí jeden přenos. Zrušení jednoho spotřebitele neruší další; zrušení všech či uzavření mapy přenos přeruší. Každý příjemce dostane vlastní kopii bufferu, takže předání workeru nepoškodí uložená data. Neúspěšné odpovědi a no-store odpovědi se neukládají. Cache vykreslovače pro dlaždice mimo záběr má strop 128 dlaždic na zdroj a větší rezervu mezi úrovněmi přiblížení. Uzavření mapy odstraní vlastní protokol i paměťovou cache, také při neúspěšném vytvoření WebGL kontextu.
+
+Při návratu z výšky na šířku a zpět se stejné čerstvé dlaždice znovu využijí. Širší záběr nebo jiná potřebná úroveň detailu mohou potřebovat další dlaždice, které dosud načtené nebyly. Nejde o předstažení celé mapy ani o nový trvalý offline balíček; vlastní stažené AR oblasti mají nadále samostatné úložiště a limity.
+
+Ověření: 52 sestavovacích a regresních kontrol. Nové testy zahrnují zachování mapové instance, reliéfu, kalibrace a 360° plánu, přepočet os senzorů bez změny stáří měření, nezakrytí existující mapy při doplňování, zachování známé výšky, omezené LRU/TTL a kopie bufferů. Dále se ověřuje jediný přenos shodných dlaždic, zrušení jednotlivých spotřebitelů, opakování po chybě, napojení protokolu do skutečné třídy mapy a úklid při zavření či chybě konstruktoru. Jde o automatické testy řízení a přenosu; rotace na fyzickém telefonu a WebGL vykreslení nebyly v prostředí vývoje měřeny.
+
 
 ## 1.28.0 — Dotaz pomocí přesouvatelných zaměřovacích bodů
 
