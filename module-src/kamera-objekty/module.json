@@ -1,0 +1,14 @@
+{
+  "id": "kamera-objekty",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.0.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Objekty v kameře",
+  "description": "Označení oblastí v živém obrazu nebo na snímku bez názvů kategorií.",
+  "icon": "▣",
+  "theme": "blue",
+  "permissions": ["Kamera (až po zapnutí)"],
+  "fullscreen": false
+}
