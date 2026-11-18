@@ -1,3 +1,4 @@
+import { createDrawing } from './drawing.js';
 import { detectRegions, smoothRegions } from './regions.js';
 
 const byId = id => document.getElementById(id);
@@ -19,6 +20,7 @@ let timer;
 let generation = 0;
 let frozen = false;
 let boxes = [];
+const drawing = createDrawing(overlay, status, paint);
 
 function paint() {
   ink.clearRect(0, 0, overlay.width, overlay.height);
@@ -26,7 +28,8 @@ function paint() {
   ink.shadowColor = '#10151e';
   ink.shadowBlur = ink.lineWidth;
   ink.strokeStyle = '#6dffbd';
-  for (const { x, y, w, h } of boxes) {
+  const selections = drawing.paint(ink, overlay.width, overlay.height);
+  for (const { x, y, w, h } of selections ?? boxes) {
     ink.strokeRect(x * overlay.width, y * overlay.height, w * overlay.width, h * overlay.height);
   }
 }
@@ -48,7 +51,7 @@ function analyze(source, width, height, smooth) {
   const found = detectRegions(pixels.getImageData(0, 0, w, h));
   boxes = smooth ? smoothRegions(boxes, found) : found;
   paint();
-  const message = (frozen ? 'Snímek' : 'Živě') + ' · Označené oblasti ' + boxes.length;
+  const message = 'Živě · Označené oblasti ' + boxes.length;
   if (status.textContent !== message) status.textContent = message;
 }
 
@@ -61,6 +64,7 @@ function scan() {
 
 function setFrozen(value) {
   frozen = value;
+  if (!value) drawing.reset();
   still.hidden = !value;
   video.hidden = value;
   live.setAttribute('aria-pressed', String(!value));
@@ -139,7 +143,15 @@ snapshot.onclick = () => {
   still.height = video.videoHeight;
   still.getContext('2d').drawImage(video, 0, 0);
   setFrozen(true);
-  analyze(still, still.width, still.height, false);
+  overlay.width = still.width;
+  overlay.height = still.height;
+  const scale = Math.min(1, 384 / Math.max(still.width, still.height));
+  sample.width = Math.max(1, Math.round(still.width * scale));
+  sample.height = Math.max(1, Math.round(still.height * scale));
+  pixels.drawImage(still, 0, 0, sample.width, sample.height);
+  const image = pixels.getImageData(0, 0, sample.width, sample.height);
+  boxes = detectRegions(image);
+  drawing.reset(image);
 };
 byId('back').onclick = () => window.ArcadeHost.back();
 document.addEventListener('visibilitychange', () => {
