@@ -1,12 +1,8 @@
 import { maskBounds } from './outline.js';
 import { compareViews } from "./views.js";
 
-const runtime = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/dist/';
-const models = {
-  sam: ['Xenova/slimsam-77-uniform', '5850ab45f587c112167512ffef949107115e26a0', 'SamModel'],
-  sam2: ['onnx-community/sam2.1-hiera-tiny-ONNX', '814a066640debee5a91e70aa401fb8e17e030503', 'Sam2Model'],
-  depth: ['onnx-community/depth-anything-v2-small-ONNX', 'c3b67641fd837b2368757101311e5d21e511441e']
-};
+import { runtime, models, saveAssets } from './model-storage.js';
+
 let loaded;
 let library;
 
@@ -19,20 +15,30 @@ async function load(kind) {
       await (predict ?? model).dispose();
     }
     const promise = (async () => {
-      library ??= import(runtime + 'transformers.min.js').then(tf => {
+      const cache = await saveAssets([kind], (done, total) => {
+        if (done < total) self.postMessage({ phase: 'download', progress: done * 100 / total });
+      });
+      library ??= (async () => {
+        const responses = await Promise.all(runtime.map(url => cache.match(url)));
+        const [script, wasmScript, wasmBytes] = await Promise.all(responses.map(response => response.arrayBuffer()));
+        const scriptUrl = URL.createObjectURL(new Blob([script], { type: 'text/javascript' }));
+        const wasmUrl = URL.createObjectURL(new Blob([wasmScript], { type: 'text/javascript' }));
+        const binaryUrl = URL.createObjectURL(new Blob([wasmBytes], { type: 'application/wasm' }));
+        const tf = await import(scriptUrl);
         tf.env.allowLocalModels = false;
+        tf.env.useBrowserCache = false;
+        tf.env.useCustomCache = true;
+        tf.env.customCache = cache;
         tf.env.backends.onnx.wasm.numThreads = 1;
-        tf.env.backends.onnx.wasm.wasmPaths = runtime;
+        tf.env.backends.onnx.wasm.wasmPaths = { mjs: wasmUrl, wasm: binaryUrl };
         return tf;
-      }).catch(error => {
+      })().catch(error => {
         library = null;
         throw error;
       });
       const tf = await library;
-      const [id, revision, klass] = models[kind];
-      const options = { revision, device: 'wasm', dtype: kind === 'depth' ? 'q4' : 'q8', use_external_data_format: kind !== 'sam', progress_callback: event => {
-        if (event.status === 'progress') self.postMessage({ phase: 'download', file: event.file, progress: event.progress });
-      } };
+      const { id, revision, klass, dtype, external } = models[kind];
+      const options = { revision, device: 'wasm', dtype, use_external_data_format: Boolean(external) };
       if (kind === 'depth') return { tf, predict: await tf.pipeline('depth-estimation', id, options) };
       const [processor, model] = await Promise.all([
         tf.AutoProcessor.from_pretrained(id, options),

@@ -46,7 +46,11 @@
       <button id="cancel-pair">Zrušit</button>
     </div>
     <p id="status" role="status">Kamera je vypnutá.</p>
-    <p class="note">Obraz zůstává v telefonu. První spuštění každého AI modelu vyžaduje stažení přes internet.</p>
+    <div class="controls" id="model-storage">
+      <button id="download-models">Stáhnout AI offline</button>
+      <small id="model-state" role="status">Kontroluji úložiště…</small>
+    </div>
+    <p class="note">Obraz zůstává v telefonu. Stažení všech modelů zabere přibližně 125 MB.</p>
   </main>
   <script src="./bridge.js"></script>
   <script type="module" src="./camera.js"></script>

@@ -1,3 +1,4 @@
+import { availability, models, saveAssets } from './model-storage.js';
 import { gridPrompts, outlinePrompts, shiftMask } from './prompts.js';
 
 export function createAdvanced({ status, drawing, showVideo, showFrame, capture }) {
@@ -13,6 +14,9 @@ export function createAdvanced({ status, drawing, showVideo, showFrame, capture 
   const second = get('second');
   const objects = get('object-target');
   const cancel = get('cancel-analysis');
+  const download = get('download-models');
+  const modelState = get('model-state');
+  let downloadController;
   let image;
   let pair;
   let worker;
@@ -57,6 +61,10 @@ export function createAdvanced({ status, drawing, showVideo, showFrame, capture 
   }
 
   function run(kind, frame, options = {}) {
+    if (downloadController && kind !== 'views') {
+      setMessage('Počkej na dokončení stahování AI modelů.');
+      return Promise.resolve(null);
+    }
     if (pending) {
       setMessage('Počkej na dokončení právě spuštěné analýzy.');
       return Promise.resolve(null);
@@ -67,6 +75,7 @@ export function createAdvanced({ status, drawing, showVideo, showFrame, capture 
         pending = null;
         update();
         resolve(value);
+        if (kind !== 'views') void refreshModels();
       }
       function fail(error) {
         console.warn('Camera analysis:', error);
@@ -84,11 +93,13 @@ export function createAdvanced({ status, drawing, showVideo, showFrame, capture 
             fail('timeout');
           }, 180000);
         }
-        pending = { resolve };
+        const task = { resolve };
+        pending = task;
         renewTimeout();
         update();
         setMessage(kind === 'views' ? 'Porovnávám snímky…' : 'Připravuji model…');
         worker.onmessage = ({ data }) => {
+          if (pending !== task) return;
           renewTimeout();
           if (data.phase === 'download') {
             setMessage('Stahuji model' + (Number.isFinite(data.progress) ? ' · ' + Math.round(data.progress) + ' %' : '') + '…');
@@ -102,6 +113,7 @@ export function createAdvanced({ status, drawing, showVideo, showFrame, capture 
           }
         };
         worker.onerror = event => {
+          if (pending !== task) return;
           worker.terminate();
           worker = null;
           fail(event.message);
@@ -140,16 +152,74 @@ export function createAdvanced({ status, drawing, showVideo, showFrame, capture 
     setMessage('Analýza zrušena.');
   };
 
-  automatic.onclick = async () => {
-    const frame = image;
+  async function analyze(frame, automatically = false) {
+    if (frame !== image || !frame || pending || (automatically && drawing.hasDraft())) return;
     const items = await run('sam', frame, { prompts: gridPrompts(frame) });
-    if (frame !== image || !items) return;
+    if (frame !== image || !items || (automatically && drawing.hasDraft())) return;
     candidates = items;
     objects.replaceChildren(...items.map((_, i) => new Option('Objekt ' + (i + 1), String(i))));
     drawing.setPreview(items);
     update();
-    setMessage(items.length ? 'AI našla kandidáty: ' + items.length + '. Pro sledování vyber objekt ze seznamu.' : 'AI nenašla dostatečně jisté objekty.');
+    setMessage(items.length ? 'AI označila obrysy: ' + items.length + '. Pro sledování vyber objekt ze seznamu.' : 'AI nenašla dostatečně jisté objekty. Zůstávají základní obrysy.');
+    void refreshModels();
+  }
+
+  automatic.onclick = () => analyze(image);
+
+  async function analyzeNewFrame() {
+    const frame = image;
+    const available = await availability().catch(() => ({}));
+    if (frame !== image || pending || drawing.hasDraft()) return;
+    if (available.sam) await analyze(frame, true);
+    else setMessage('Základní obrysy jsou hotové. Stáhni AI modely pro automatickou AI analýzu.');
+  }
+
+  async function refreshModels() {
+    if (downloadController) return;
+    try {
+      const available = await availability();
+      if (downloadController) return;
+      const count = Object.values(available).filter(Boolean).length;
+      download.disabled = count === Object.keys(models).length;
+      modelState.textContent = download.disabled ? 'AI modely připravené offline' : 'Uloženo ' + count + ' ze 3 modelů';
+    } catch {
+      modelState.textContent = 'Úložiště modelů je nedostupné.';
+    }
+  }
+
+  download.onclick = async () => {
+    if (downloadController) {
+      downloadController.abort();
+      return;
+    }
+    if (pending) {
+      modelState.textContent = 'Počkej na dokončení právě spuštěné analýzy.';
+      return;
+    }
+    const controller = new AbortController();
+    downloadController = controller;
+    download.textContent = 'Zrušit stahování';
+    modelState.textContent = 'Připravuji stažení…';
+    try {
+      const persistence = navigator.storage?.persist?.().catch(() => false);
+      await saveAssets(Object.keys(models), (done, total) => {
+        modelState.textContent = 'Stahuji AI · ' + done + ' z ' + total + ' souborů';
+      }, controller.signal);
+      await persistence;
+      if (image && !pending) queueMicrotask(() => void analyzeNewFrame());
+    } catch (error) {
+      modelState.textContent = controller.signal.aborted
+        ? 'Stahování přerušeno. Uložené soubory se při dalším pokusu použijí.'
+        : error.name === 'QuotaExceededError' ? 'V telefonu není dost místa pro AI modely.'
+          : 'Stažení se nezdařilo. Zkus pokračovat po připojení k internetu.';
+      return;
+    } finally {
+      downloadController = null;
+      download.textContent = 'Stáhnout AI offline';
+    }
+    await refreshModels();
   };
+
   objects.onchange = () => {
     drawing.setPreview([candidates[Number(objects.value)]]);
   };
@@ -241,5 +311,11 @@ export function createAdvanced({ status, drawing, showVideo, showFrame, capture 
     drawing.setPreview(items);
     setMessage('SAM 2 přenesl výběr na další snímek. Můžeš pokračovat dalším pohledem.');
   };
-  return { reset, refine, dispose() { reset(); worker?.terminate(); worker = null; } };
+  return { reset, refine, analyzeNewFrame, refreshModels, dispose() {
+    reset();
+    worker?.terminate();
+    worker = null;
+  }, close() {
+    downloadController?.abort();
+  } };
 }
