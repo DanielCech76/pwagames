@@ -1,3 +1,11 @@
+## 1.31.1 — dostupné překrytí a vysvětlení neúspěšné identifikace
+
+V kameře nyní i špendlík zaměřovacích bodů otevře společný režim kalibrace s mapovým překrytím a sledováním bodů. Dosavadní samostatný režim bodů neaktivoval průsečíky s modely budov ani sledování záplat; proto na snímcích chyběla kalibrační lišta a při dotazu se hledalo pouze mezi promítnutými názvy. U bodu a na jeho liště je navíc explicitní vstup „Mapa přes kameru“, pokud překrytí není aktivní. Otevření kalibrace samo nezahajuje síťový přenos.
+
+Kalibrační lišta ukazuje stav podkladů (chybějící poloha/výšky/detailní geometrie/počet staveb) a obsahuje přímé doplnění terénu 5 km a detailů 1 km. Výsledek neoznačuje za kompletní, pokud podklady stále chybí nebo stavby nemají výšky. Bez prostorové shody může nabídnout blízké objekty ze stažené geometrie včetně bezejmenných půdorysů, ale výslovně jako neověřené okolí. Tyto referenční body lze potvrdit pro popisek, nikoli použít pro kalibraci přesného rohu. Automatické rozpoznávání identity z fotografie tím nevzniká.
+
+Přímo v liště je skutečná výška telefonu nad terénem 1,7–500 m, včetně upozornění na patro/plošinu. Při změně se přepočte model a zneplatní staré kalibrační páry. Výchozích 1,7 m není správná výška pro fotografování z vyššího patra.
+
 ## 1.31.0 — asistovaná vícebodová kalibrace
 
 Nový režim kalibrace (ikona rámečku/kříže v liště nebo v panelu Zarovnání) překrývá video průhledným lokálním modelem terénu, ulic a staveb ze stažených dat. Průhlednost 0–80 %, volba pouze hran, tažení mapového překrytí opravuje yaw/pitch (ne GPS ani libovolnou 2D transformaci). Stromy se nevykreslují. Chybějící výšky nejsou doplňovány. Model terénu má omezený dosah do 4 km, stavby do 1,5 km; nenahrazuje úplný nativní mapový podklad. Lišta je kompaktní, zalamuje se na telefonu a hlavní nástrojová lišta má scrollbar.

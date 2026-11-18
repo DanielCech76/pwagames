@@ -103,3 +103,7 @@
 .look-calibrating #lookProbeBar{bottom:calc(var(--look-calibration-height,140px) + 22px)}.look-calibrating #lookProbeInfo{bottom:calc(var(--look-calibration-height,140px) + 70px);max-height:calc(100dvh - var(--look-calibration-height,140px) - 100px)}.look-calibrating .look-bottom,.look-calibrating #lookStatus{display:none!important}#lookDialog .look-probe-point[data-tracking=direction] svg{stroke-dasharray:3 3}#lookCalibrationSelection[data-tracking=direction]{border-style:dashed}
 
 .look-calibrating #lookPhoto{top:70px!important;left:auto!important;right:76px!important;bottom:auto!important}
+
+#lookDialog .look-overlay-entry{width:auto;min-width:0;min-height:34px;padding:5px 9px;border:1px solid #d6fa80;border-radius:9px;background:#224a38;color:#d6fa80;font-size:12px;white-space:normal}.look-calibration-data{font-size:11px;line-height:1.35;color:#d6fa80;margin-top:5px}#lookProbeInfo .look-overlay-entry{margin:5px 0}.look-calibration-tools label>span{white-space:nowrap}
+
+.look-calibration-height{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px;margin:6px 0 0}#lookDialog #lookCalibrationHeight{box-sizing:border-box;width:66px;max-width:66px;min-width:0;font-size:12px;padding:4px;min-height:28px}.look-calibration-height small{font-size:10px;color:#c2d4c6}
