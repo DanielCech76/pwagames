@@ -1,3 +1,4 @@
+import { paintNames } from './naming.js';
 import { createAdvanced } from './advanced.js';
 import { createDrawing } from './drawing.js';
 import { detectRegions } from './regions.js';
@@ -62,6 +63,10 @@ function paint() {
   const selections = drawing.paint(ink, overlay.width, overlay.height);
   ink.lineCap = 'round';
   strokeContours(ink, selections ?? regions, overlay.width, overlay.height);
+  if (selections?.some(item => item.name) && byId('show-names').checked) {
+    const scale = Math.min(overlay.clientWidth / overlay.width, overlay.clientHeight / overlay.height);
+    if (scale > 0) paintNames(ink, selections, overlay.width, overlay.height, 14 / scale);
+  }
 }
 
 function analyze(source, width, height) {
@@ -178,6 +183,7 @@ snapshot.onclick = () => {
   }
 };
 byId('back').onclick = () => window.ArcadeHost.back();
+new ResizeObserver(paint).observe(overlay);
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) stop();
 });

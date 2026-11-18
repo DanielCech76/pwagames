@@ -246,7 +246,7 @@ export function createDrawing(overlay, status, redraw, aiRefine) {
       }
     }
     ctx.restore();
-    return active || strokes.length || accepted.length || preview.length ? selections.map(item => ({ mask: item.mask, width: frame.width, height: frame.height })) : null;
+    return active || strokes.length || accepted.length || preview.length ? selections.map(item => ({ ...item, width: frame.width, height: frame.height })) : null;
   }
-  return { reset, paint, selected, setPreview, hasDraft: () => Boolean(active || strokes?.length || accepted?.length) };
+  return { reset, paint, selected, setPreview, repaint: redraw, hasDraft: () => Boolean(active || strokes?.length || accepted?.length) };
 }

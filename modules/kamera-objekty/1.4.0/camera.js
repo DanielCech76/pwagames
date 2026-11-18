@@ -1,0 +1,198 @@
+import { paintNames } from './naming.js';
+import { createAdvanced } from './advanced.js';
+import { createDrawing } from './drawing.js';
+import { detectRegions } from './regions.js';
+import { strokeContours } from './contours.js';
+
+const byId = id => document.getElementById(id);
+const main = document.querySelector('main');
+const video = document.querySelector('video');
+const still = byId('still');
+const overlay = byId('overlay');
+const camera = byId('camera');
+const live = byId('live');
+const snapshot = byId('snapshot');
+const empty = byId('empty');
+const status = byId('status');
+const sample = document.createElement('canvas');
+const pixels = sample.getContext('2d', { willReadFrequently: true });
+const ink = overlay.getContext('2d');
+
+let stream;
+let timer;
+let generation = 0;
+let frozen = false;
+let regions = [];
+const drawing = createDrawing(overlay, status, paint, (...args) => advanced.refine(...args));
+const advanced = createAdvanced({ status, drawing, showVideo, showFrame, capture });
+
+function showVideo(value) {
+  still.hidden = value;
+  video.hidden = !value;
+}
+
+function capture() {
+  if (!stream || video.readyState < 2) return null;
+  const scale = Math.min(1, 384 / Math.max(video.videoWidth, video.videoHeight));
+  sample.width = Math.max(1, Math.round(video.videoWidth * scale));
+  sample.height = Math.max(1, Math.round(video.videoHeight * scale));
+  const photo = document.createElement('canvas');
+  photo.width = video.videoWidth;
+  photo.height = video.videoHeight;
+  photo.getContext('2d').drawImage(video, 0, 0);
+  pixels.drawImage(photo, 0, 0, sample.width, sample.height);
+  return { image: pixels.getImageData(0, 0, sample.width, sample.height), photo };
+}
+
+function showFrame({ image, photo }) {
+  still.width = overlay.width = photo.width;
+  still.height = overlay.height = photo.height;
+  still.getContext('2d').drawImage(photo, 0, 0);
+  setFrozen(true);
+  regions = detectRegions(image);
+  drawing.reset(image);
+  advanced.reset(image);
+}
+
+function paint() {
+  ink.clearRect(0, 0, overlay.width, overlay.height);
+  ink.lineWidth = Math.max(2, Math.min(overlay.width, overlay.height) / 160);
+  ink.shadowColor = '#10151e';
+  ink.shadowBlur = ink.lineWidth;
+  ink.strokeStyle = '#6dffbd';
+  const selections = drawing.paint(ink, overlay.width, overlay.height);
+  ink.lineCap = 'round';
+  strokeContours(ink, selections ?? regions, overlay.width, overlay.height);
+  if (selections?.some(item => item.name) && byId('show-names').checked) {
+    const scale = Math.min(overlay.clientWidth / overlay.width, overlay.clientHeight / overlay.height);
+    if (scale > 0) paintNames(ink, selections, overlay.width, overlay.height, 14 / scale);
+  }
+}
+
+function analyze(source, width, height) {
+  const scale = Math.min(1, 224 / Math.max(width, height));
+  const w = Math.max(1, Math.round(width * scale));
+  const h = Math.max(1, Math.round(height * scale));
+  if (sample.width !== w || sample.height !== h) {
+    sample.width = w;
+    sample.height = h;
+  }
+  if (overlay.width !== width || overlay.height !== height) {
+    overlay.width = width;
+    overlay.height = height;
+    regions = [];
+  }
+  pixels.drawImage(source, 0, 0, w, h);
+  regions = detectRegions(pixels.getImageData(0, 0, w, h));
+  paint();
+  const message = 'Živě · Označené oblasti ' + regions.length;
+  if (status.textContent !== message) status.textContent = message;
+}
+
+function scan() {
+  if (!frozen && stream && video.readyState >= 2) {
+    snapshot.disabled = false;
+    analyze(video, video.videoWidth, video.videoHeight);
+  }
+}
+
+function setFrozen(value) {
+  frozen = value;
+  if (!value) {
+    advanced.reset();
+    drawing.reset();
+  }
+  showVideo(!value);
+  live.setAttribute('aria-pressed', String(!value));
+  snapshot.setAttribute('aria-pressed', String(value));
+}
+
+function stop(message = 'Kamera je vypnutá.') {
+  generation++;
+  clearInterval(timer);
+  const previous = stream;
+  stream = null;
+  previous?.getTracks().forEach(track => track.stop());
+  video.srcObject = null;
+  setFrozen(false);
+  advanced.dispose();
+  still.width = 1;
+  still.height = 1;
+  regions = [];
+  paint();
+  empty.hidden = false;
+  camera.textContent = 'Zapnout kameru';
+  live.disabled = true;
+  snapshot.disabled = true;
+  status.textContent = message;
+}
+
+async function start() {
+  const request = ++generation;
+  camera.textContent = 'Zrušit';
+  status.textContent = 'Čekám na přístup ke kameře…';
+  try {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      stop('Kamera vyžaduje HTTPS a podporovaný prohlížeč.');
+      return;
+    }
+    const requested = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false
+    });
+    if (request !== generation) {
+      requested.getTracks().forEach(track => track.stop());
+      return;
+    }
+    stream = requested;
+    stream.getVideoTracks().forEach(track => track.addEventListener('ended', () => {
+      if (stream === requested) stop('Přístup ke kameře byl ukončen.');
+    }));
+    video.srcObject = stream;
+    await video.play();
+    if (request !== generation) return;
+    empty.hidden = true;
+    camera.textContent = 'Vypnout kameru';
+    live.disabled = false;
+    timer = setInterval(scan, 150);
+    scan();
+  } catch (error) {
+    if (request !== generation) return;
+    stop(error.name === 'NotAllowedError'
+      ? 'Přístup ke kameře je zamítnutý. Povol kameru v nastavení webu.'
+      : 'Kameru se nepodařilo spustit.');
+  }
+}
+
+camera.onclick = () => {
+  if (camera.textContent === 'Zapnout kameru') void start();
+  else stop();
+};
+live.onclick = () => {
+  regions = [];
+  paint();
+  setFrozen(false);
+  scan();
+};
+snapshot.onclick = () => {
+  if (frozen) return;
+  const image = capture();
+  if (image) {
+    showFrame(image);
+    void advanced.analyzeNewFrame();
+  }
+};
+byId('back').onclick = () => window.ArcadeHost.back();
+new ResizeObserver(paint).observe(overlay);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) stop();
+});
+window.ArcadeHost.register({
+  start() { main.hidden = false; void advanced.refreshModels(); },
+  pause() { stop(); },
+  stop() {
+    stop();
+    advanced.close();
+    main.hidden = true;
+  }
+});

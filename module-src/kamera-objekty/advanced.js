@@ -16,6 +16,19 @@ export function createAdvanced({ status, drawing, showVideo, showFrame, capture 
   const cancel = get('cancel-analysis');
   const download = get('download-models');
   const modelState = get('model-state');
+  const names = get('show-names');
+  names.checked = window.ArcadeHost.storage.getItem('object-names') === 'on';
+  names.onchange = () => {
+    window.ArcadeHost.storage.setItem('object-names', names.checked ? 'on' : 'off');
+    drawing.repaint();
+    if (names.checked && image && candidates.length && !pending) {
+      const frame = image;
+      const selection = candidates;
+      void run('names', frame, { items: selection }).then(items => {
+        if (frame === image && selection === candidates && items) showCandidates(items);
+      });
+    }
+  };
   let downloadController;
   let image;
   let pair;
@@ -103,6 +116,8 @@ export function createAdvanced({ status, drawing, showVideo, showFrame, capture 
           renewTimeout();
           if (data.phase === 'download') {
             setMessage('Stahuji model' + (Number.isFinite(data.progress) ? ' · ' + Math.round(data.progress) + ' %' : '') + '…');
+          } else if (data.phase === 'naming' || data.phase === 'naming-error') {
+            setMessage(data.phase === 'naming' ? 'Odhaduji názvy objektů…' : 'Pojmenování je nedostupné. Obrysy zůstávají.');
           } else if (data.phase === 'analysis') {
             const percent = Number.isFinite(data.progress) ? ' · ' + Math.round(data.progress * 100) + ' %' : '';
             setMessage('Analyzuji snímek v telefonu' + percent + '…');
@@ -118,7 +133,7 @@ export function createAdvanced({ status, drawing, showVideo, showFrame, capture 
           worker = null;
           fail(event.message);
         };
-        worker.postMessage({ kind, frame, ...options });
+        worker.postMessage({ kind, frame, names: names.checked, ...options });
       } catch (error) {
         fail(error);
       }
@@ -156,6 +171,10 @@ export function createAdvanced({ status, drawing, showVideo, showFrame, capture 
     if (frame !== image || !frame || pending || (automatically && drawing.hasDraft())) return;
     const items = await run('sam', frame, { prompts: gridPrompts(frame) });
     if (frame !== image || !items || (automatically && drawing.hasDraft())) return;
+    showCandidates(items);
+  }
+
+  function showCandidates(items) {
     candidates = items;
     objects.replaceChildren(...items.map((_, i) => new Option('Objekt ' + (i + 1), String(i))));
     drawing.setPreview(items);
@@ -181,7 +200,7 @@ export function createAdvanced({ status, drawing, showVideo, showFrame, capture 
       if (downloadController) return;
       const count = Object.values(available).filter(Boolean).length;
       download.disabled = count === Object.keys(models).length;
-      modelState.textContent = download.disabled ? 'AI modely připravené offline' : 'Uloženo ' + count + ' ze 3 modelů';
+      modelState.textContent = download.disabled ? 'AI modely připravené offline' : 'Uloženo ' + count + ' ze ' + Object.keys(models).length + ' modelů';
     } catch {
       modelState.textContent = 'Úložiště modelů je nedostupné.';
     }
