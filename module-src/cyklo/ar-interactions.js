@@ -33,7 +33,7 @@ class Controls{
  activity(){this.last=Date.now()}
  cancel(){clearTimeout(this.timer);this.timer=null;this.start=null}
  click(id){this.activity();if(id==='lookPhoto'&&this.photo.click())return true;if(this.suppressed===id){this.suppressed=null;return true}this.suppressed=null;if(document.getElementById('lookSetup').open&&this.view.panelOwner===id){this.view.closePanel();return true}return false}
- tick(now=Date.now()){const v=this.view;if(v.options.hideMode==='auto'&&!v.hiddenUI&&!v.heightPanelOpen&&!document.getElementById('lookSetup').open&&!v.cameraPending&&!v.photoBusy&&!v.photoMoving&&!v.probes?.gesture&&!v.probes?.infoOpen&&!v.abort&&!v.detailAbort&&now-this.last>=(v.options.hideAfter||5)*1000)v.hideControls(true)}
+ tick(now=Date.now()){const v=this.view;if(v.options.hideMode==='auto'&&!v.hiddenUI&&!v.heightPanelOpen&&!document.getElementById('lookSetup').open&&!v.cameraPending&&!v.photoBusy&&!v.photoMoving&&!v.calibration?.enabled&&!v.probes?.gesture&&!v.probes?.infoOpen&&!v.abort&&!v.detailAbort&&now-this.last>=(v.options.hideAfter||5)*1000)v.hideControls(true)}
  destroy(){this.cancel();this.photo.destroy();for(const [el,event,fn,capture]of this.listeners)el.removeEventListener(event,fn,capture);this.listeners=[]}
 }
 root.GeoLookPhotoPlacement=PhotoPlacement;Controls.PhotoPlacement=PhotoPlacement;root.GeoLookControls=Controls;if(typeof module!=='undefined')module.exports=Controls;
