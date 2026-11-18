@@ -68,3 +68,21 @@
 @keyframes look-photo-move{50%{outline-color:#d6fa8099}}
 @media(prefers-reduced-motion:reduce){#lookDialog #lookPhoto[data-moving=true]{animation:none}}
 #lookPhotoSave{right:76px;bottom:120px;max-width:110px}
+
+/* Point-query overlay. Unresolved markers never invent a place label. */
+#lookProbeLayer{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:3}
+#lookDialog .look-probe-point{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;touch-action:none;user-select:none;width:44px;height:44px;min-height:44px;border:0;background:transparent;color:#d6fa80;box-shadow:none;padding:6px}
+#lookDialog .look-probe-point svg{width:30px;height:30px;filter:drop-shadow(0 1px 2px #000);stroke-width:2}
+.look-probe-point span{position:absolute;right:0;top:0;min-width:16px;height:16px;border-radius:8px;background:#16372d;color:#d6fa80;border:1px solid currentColor;font-size:10px;line-height:14px;text-align:center}
+#lookDialog .look-probe-point[data-state=unresolved]{color:#fff}#lookDialog .look-probe-point[data-state=unresolved] svg{stroke-dasharray:3 2}#lookDialog .look-probe-point[data-state=moving]{color:#fff;outline:1px dashed #d6fa80;border-radius:50%}
+#lookProbeBar,#lookProbeInfo{box-sizing:border-box;position:absolute;z-index:9;border:1px solid #d6fa8055;border-radius:12px;background:#102f22f5;color:#f0f7f3;box-shadow:0 3px 12px #0003}
+#lookProbeBar{left:70px;right:70px;bottom:48px;width:fit-content;max-width:calc(100% - 140px);display:flex;align-items:center;gap:6px;padding:3px 5px;font-size:11px}
+#lookProbeBar span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#lookDialog #lookProbeBar .look-icon{width:34px;height:34px;min-height:34px;padding:7px;flex:none}#lookProbeBar svg{width:20px;height:20px}
+#lookProbeInfo{left:12px;bottom:96px;width:min(340px,calc(100% - 82px));max-height:calc(100dvh - 168px);overflow:auto;padding:10px 12px;font-size:12px}
+#lookProbeInfo strong{display:block;overflow-wrap:anywhere;font-size:13px;color:#d6fa80}#lookProbeInfo p{font-size:11px;line-height:1.4;margin:6px 0}
+#lookDialog #lookProbeChoice{box-sizing:border-box;width:100%;max-width:100%;font-size:12px;min-width:0}#lookProbeInfo .look-actions{margin-bottom:0;gap:7px}
+#lookDialog.look-probing .look-poi{border-color:#d6fa80}#lookProbeToggle[aria-pressed=true]{box-shadow:0 0 0 1px #d6fa80}
+@media(orientation:landscape) and (max-height:430px){#lookProbeInfo{left:12px;bottom:92px;width:300px;max-height:calc(100dvh - 120px)}}
+
+.look-probing #lookPick,.look-probing #lookTargetBar,.look-probing #lookTargetArrow{display:none!important}

@@ -1,4 +1,19 @@
-# Rozhlédnout se – CYKLO 1.27.0
+# Rozhlédnout se – CYKLO 1.28.0
+
+## 1.28.0 — Dotaz pomocí přesouvatelných zaměřovacích bodů
+
+Nová ikona špendlíku s plusem v pravé liště zapíná režim Zaměřovací body. Klepnutí do mapy či obrazu kamery přidá číslovaný bod, přetažení existujícího bodu provede dotaz v nové poloze. Podporováno je osm současných bodů. Jednotlivý bod lze odstranit v jeho detailu, všechny body košem v malé liště. Křížek ukončí režim a obnoví obvyklé popisky; dosavadní body zůstávají do zavření výhledu. Zavření či přechod na pozadí je smaže, nejde o trvale uložené cíle nebo odesílání poloh na server.
+
+V mapě se přednostně dotazuje pojmenovaný vykreslený prvek pod bodem. U linií a ploch se jako kotva použije místo dotazu; u bodových prvků poloha objektu. Doplňkový výběr porovnává projekce již načtených katalogových názvů a blízkých vektorových objektů v malém okolí bodu. V kameře jde o geometrickou shodu s mapovými daty a orientací telefonu, nikoli rozpoznávání obsahu fotografie. Ze směrového výběru v kameře se vyřazují objekty, které model zakrývá nebo jsou za horizontem. Neznámá výška/viditelnost vyžaduje ruční potvrzení. Dostupnost názvů, GPS a kalibrace senzorů omezují přesnost.
+
+Jediná jednoznačná shoda se zvolí přímo. Při více možnostech, malé vzájemné vzdálenosti či nejisté viditelnosti se nabídne nejvýše šest kandidátů se vzdáleností a označením shody. Uživatel vybere a potvrdí jeden. Nenalezený objekt zůstává neurčený, s možností doplnění podkladů; jméno se nevymýšlí. Klepnutí na neurčený bod opakuje dotaz také nad nově načtenými daty. Neurčená poloha v mapě má zeměpisnou kotvu, neurčená poloha v kameře zatím zůstává v relativním místě obrazu.
+
+Potvrzené body jsou zeměpisně ukotvené a jejich značky i popisky se promítají podle aktuálního pohledu. Značka mimo obraz se skryje. Drag přechodně zruší staré určení daného bodu; zrušené gesto je obnoví. Kliknutí na popisek otevírá detail příslušného bodu. Stejný objekt vybraný více body má jeden popisek. V režimu se do rozmísťování dostanou pouze potvrzené dotazy, bez přimíchání ostatních automatických či připnutých názvů. Explicitní dotaz má přednost před běžnými kategoriálními filtry. Dočasně jsou skryté také nativní textové vrstvy mapy včetně vrstevnicových názvů; po ukončení se obnoví jejich původní průhlednost. Obvyklý výběr cíle a připnutí se nezmění.
+
+Malá lišta s počtem bodů a ukončením zůstává dostupná při skrytých ovladačích. Automatické skrývání se pozastaví při otevřeném detailu nebo aktivním přesunu. Spoušť fotografie se vyhýbá i nové liště a detailu. Fotoexport obsahuje právě viditelné vybrané popisky; samotné editovací terčíky a ovládání se do PNG nepřidávají. Body podporují klávesnici: Enter otevře detail, šipky změní místo dotazu, Delete/Backspace odstraní bod. Odstranění a zavření uklidí posluchače i rozehraná gesta.
+
+Ověření: 50 sestavovacích a regresních kontrol. Nové testy pokrývají více bodů, změnu určení při drag, zrušení gesta, nejistotu v kameře, žádné vymyšlené názvy, opakování nad novými podklady, odstranění/limit osmi bodů, deduplikaci, skutečný vstup řadiče pro výhradně vybrané popisky a úklid. Druhá sada ověřuje výběr vykreslené mapové geometrie a obnovení původních textových vrstev. V prohlížeči nad syntetickým videem ověřeno přidání, nabídka kandidátů, potvrzení, tažení na jiný objekt, prázdný dotaz a návrat mezi pěti běžnými a dvěma vybranými popisky. Fyzická kamera/senzory a WebGL mapa se v tomto prostředí přímo neověřovaly.
+
 
 ## 1.27.0 — Kompaktní panel, načítání 360° a přesouvatelná spoušť
 
