@@ -1,9 +1,9 @@
 import { refineOutline } from './outline.js';
 
-export function createDrawing(overlay, status, redraw) {
+export function createDrawing(overlay, status, redraw, aiRefine) {
   const panel = document.getElementById('drawing');
   const modes = ['trace', 'add', 'subtract'];
-  const buttons = Object.fromEntries([...modes, 'undo', 'refine', 'next'].map(id => [id, document.getElementById(id)]));
+  const buttons = Object.fromEntries([...modes, 'undo', 'refine', 'refine-ai', 'next'].map(id => [id, document.getElementById(id)]));
   const stencil = document.createElement('canvas');
   const raster = stencil.getContext('2d', { willReadFrequently: true });
   const tint = document.createElement('canvas');
@@ -16,21 +16,26 @@ export function createDrawing(overlay, status, redraw) {
   let accepted;
   let dirty;
   let attempted;
+  let busy = false;
+  let preview = [];
 
   function sync(message) {
     panel.hidden = !frame;
     overlay.classList.toggle('drawing', Boolean(frame));
     for (const tool of modes) buttons[tool].setAttribute('aria-pressed', String(tool === mode));
-    buttons.add.disabled = buttons.subtract.disabled = !strokes?.length;
-    buttons.undo.disabled = !strokes?.length && !accepted?.length;
-    buttons.refine.disabled = !strokes?.length || !dirty;
-    buttons.next.disabled = !result?.box || dirty;
+    buttons.add.disabled = buttons.subtract.disabled = busy || !strokes?.length;
+    buttons.undo.disabled = busy || !strokes?.length && !accepted?.length;
+    buttons['refine-ai'].disabled = busy || !strokes?.length;
+    buttons.refine.disabled = busy || !strokes?.length || !dirty;
+    buttons.next.disabled = busy || !result?.box || dirty;
     if (message) status.textContent = message;
     redraw();
   }
 
   function reset(image) {
     frame = image;
+    preview = [];
+    busy = false;
     mode = 'trace';
     strokes = [];
     active = null;
@@ -51,8 +56,7 @@ export function createDrawing(overlay, status, redraw) {
     for (const point of points.slice(1)) ctx.lineTo(point.x * width, point.y * height);
   }
 
-  function refine() {
-    if (!frame || !strokes.length || !dirty) return;
+  function rasterize() {
     const { width, height } = frame;
     raster.clearRect(0, 0, width, height);
     raster.fillStyle = '#fff';
@@ -83,11 +87,47 @@ export function createDrawing(overlay, status, redraw) {
       const p = 4 * i;
       return edits[p + 3] < 128 ? 0 : edits[p] >= edits[p + 2] ? 1 : 2;
     });
-    result = refineOutline(frame, outline, marks);
+    return { outline, marks };
+  }
+
+  function apply(selection) {
+    result = selection;
     dirty = false;
     attempted = true;
     mode = 'add';
     sync(result.box ? 'Výběr můžeš opravit nebo označit další objekt.' : 'Výběr je prázdný. Přidej část objektu nebo nakresli nový obrys.');
+  }
+
+  function refine() {
+    if (!frame || !strokes.length || !dirty || busy) return;
+    const seed = rasterize();
+    if (seed) apply(refineOutline(frame, seed.outline, seed.marks));
+  }
+
+  buttons['refine-ai'].onclick = async () => {
+    const seed = rasterize();
+    if (!seed) return;
+    const image = frame;
+    busy = true;
+    sync();
+    try {
+      const selection = await aiRefine(image, seed);
+      if (image === frame && selection) apply(selection);
+    } finally {
+      if (image === frame) {
+        busy = false;
+        sync();
+      }
+    }
+  };
+
+  function setPreview(items) {
+    preview = items;
+    redraw();
+  }
+
+  function selected() {
+    return result?.box ? result : accepted.at(-1)?.result ?? preview[0];
   }
 
   function point(event, clamp) {
@@ -102,7 +142,7 @@ export function createDrawing(overlay, status, redraw) {
   }
 
   overlay.addEventListener('pointerdown', event => {
-    if (!frame || active || event.button !== 0) return;
+    if (!frame || busy || active || event.button !== 0) return;
     const start = point(event, false);
     if (!start) return;
     overlay.setPointerCapture(event.pointerId);
@@ -119,6 +159,7 @@ export function createDrawing(overlay, status, redraw) {
     active.points.push(point(event, true));
     if (active.tool !== 'trace' || active.points.length >= 3) {
       if (active.tool === 'trace') {
+        preview = [];
         strokes = [];
         result = null;
         attempted = false;
@@ -144,6 +185,7 @@ export function createDrawing(overlay, status, redraw) {
   };
   buttons.refine.onclick = refine;
   buttons.undo.onclick = () => {
+    if (busy) return;
     if (!strokes.length) {
       const previous = accepted.pop();
       if (previous) {
@@ -165,6 +207,7 @@ export function createDrawing(overlay, status, redraw) {
     }
   };
   buttons.next.onclick = () => {
+    if (busy) return;
     accepted.push({ strokes, result });
     strokes = [];
     result = null;
@@ -175,7 +218,7 @@ export function createDrawing(overlay, status, redraw) {
 
   function paint(ctx, width, height) {
     if (!frame) return null;
-    const selections = [...accepted.map(item => item.result), result].filter(item => item?.box);
+    const selections = [...preview, ...accepted.map(item => item.result), result].filter(item => item?.box);
     if (selections.length) {
       const image = tintContext.createImageData(frame.width, frame.height);
       for (const { mask } of selections) {
@@ -203,7 +246,7 @@ export function createDrawing(overlay, status, redraw) {
       }
     }
     ctx.restore();
-    return active || strokes.length || accepted.length ? selections.map(item => item.box) : null;
+    return active || strokes.length || accepted.length || preview.length ? selections.map(item => item.box) : null;
   }
-  return { reset, paint };
+  return { reset, paint, selected, setPreview };
 }
