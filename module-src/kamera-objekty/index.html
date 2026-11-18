@@ -15,6 +15,7 @@
     <div id="view">
       <video playsinline muted></video>
       <canvas id="still" hidden></canvas>
+      <canvas id="depth-layer" hidden aria-hidden="true"></canvas>
       <canvas id="overlay" aria-hidden="true"></canvas>
       <p id="empty">Zapni kameru a namiř ji na předměty s dobře viditelnými okraji.</p>
     </div>
@@ -29,10 +30,23 @@
       <button id="subtract" aria-pressed="false" disabled>Ubrat</button>
       <button id="undo" disabled>Zpět tah</button>
       <button id="refine" disabled>Zpřesnit</button>
+      <button id="refine-ai" disabled>Zpřesnit AI</button>
       <button id="next" disabled>Další objekt</button>
     </div>
+    <div id="advanced" class="controls" hidden aria-label="Rozšířené metody">
+      <button id="automatic">Najít objekty AI</button>
+      <select id="object-target" aria-label="Objekt pro sledování" hidden></select>
+      <button id="depth" aria-pressed="false">Mapa hloubky</button>
+      <button id="compare">Paralaxa</button>
+      <button id="track">Sledovat SAM 2</button>
+      <button id="cancel-analysis" hidden>Zrušit analýzu</button>
+    </div>
+    <div id="pair" class="controls" hidden>
+      <button id="second">Pořídit další pohled</button>
+      <button id="cancel-pair">Zrušit</button>
+    </div>
     <p id="status" role="status">Kamera je vypnutá.</p>
-    <p class="note">Experimentální detekce podle barev a hran. Obraz zůstává v telefonu.</p>
+    <p class="note">Obraz zůstává v telefonu. První spuštění každého AI modelu vyžaduje stažení přes internet.</p>
   </main>
   <script src="./bridge.js"></script>
   <script type="module" src="./camera.js"></script>

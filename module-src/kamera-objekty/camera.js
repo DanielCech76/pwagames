@@ -1,3 +1,4 @@
+import { createAdvanced } from './advanced.js';
 import { createDrawing } from './drawing.js';
 import { detectRegions, smoothRegions } from './regions.js';
 
@@ -20,7 +21,36 @@ let timer;
 let generation = 0;
 let frozen = false;
 let boxes = [];
-const drawing = createDrawing(overlay, status, paint);
+const drawing = createDrawing(overlay, status, paint, (...args) => advanced.refine(...args));
+const advanced = createAdvanced({ status, drawing, showVideo, showFrame, capture });
+
+function showVideo(value) {
+  still.hidden = value;
+  video.hidden = !value;
+}
+
+function capture() {
+  if (!stream || video.readyState < 2) return null;
+  const scale = Math.min(1, 384 / Math.max(video.videoWidth, video.videoHeight));
+  sample.width = Math.max(1, Math.round(video.videoWidth * scale));
+  sample.height = Math.max(1, Math.round(video.videoHeight * scale));
+  const photo = document.createElement('canvas');
+  photo.width = video.videoWidth;
+  photo.height = video.videoHeight;
+  photo.getContext('2d').drawImage(video, 0, 0);
+  pixels.drawImage(photo, 0, 0, sample.width, sample.height);
+  return { image: pixels.getImageData(0, 0, sample.width, sample.height), photo };
+}
+
+function showFrame({ image, photo }) {
+  still.width = overlay.width = photo.width;
+  still.height = overlay.height = photo.height;
+  still.getContext('2d').drawImage(photo, 0, 0);
+  setFrozen(true);
+  boxes = detectRegions(image);
+  drawing.reset(image);
+  advanced.reset(image);
+}
 
 function paint() {
   ink.clearRect(0, 0, overlay.width, overlay.height);
@@ -64,9 +94,11 @@ function scan() {
 
 function setFrozen(value) {
   frozen = value;
-  if (!value) drawing.reset();
-  still.hidden = !value;
-  video.hidden = value;
+  if (!value) {
+    advanced.reset();
+    drawing.reset();
+  }
+  showVideo(!value);
   live.setAttribute('aria-pressed', String(!value));
   snapshot.setAttribute('aria-pressed', String(value));
 }
@@ -79,6 +111,7 @@ function stop(message = 'Kamera je vypnutá.') {
   previous?.getTracks().forEach(track => track.stop());
   video.srcObject = null;
   setFrozen(false);
+  advanced.dispose();
   still.width = 1;
   still.height = 1;
   boxes = [];
@@ -138,20 +171,9 @@ live.onclick = () => {
   scan();
 };
 snapshot.onclick = () => {
-  if (frozen || video.readyState < 2) return;
-  still.width = video.videoWidth;
-  still.height = video.videoHeight;
-  still.getContext('2d').drawImage(video, 0, 0);
-  setFrozen(true);
-  overlay.width = still.width;
-  overlay.height = still.height;
-  const scale = Math.min(1, 384 / Math.max(still.width, still.height));
-  sample.width = Math.max(1, Math.round(still.width * scale));
-  sample.height = Math.max(1, Math.round(still.height * scale));
-  pixels.drawImage(still, 0, 0, sample.width, sample.height);
-  const image = pixels.getImageData(0, 0, sample.width, sample.height);
-  boxes = detectRegions(image);
-  drawing.reset(image);
+  if (frozen) return;
+  const image = capture();
+  if (image) showFrame(image);
 };
 byId('back').onclick = () => window.ArcadeHost.back();
 document.addEventListener('visibilitychange', () => {

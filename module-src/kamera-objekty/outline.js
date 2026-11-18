@@ -76,7 +76,7 @@ export function refineOutline({ data, width, height }, outline, marks) {
   return { mask, box: maskBounds(mask, width, height) };
 }
 
-function maskBounds(mask, width, height) {
+export function maskBounds(mask, width, height) {
   let minX = width;
   let minY = height;
   let maxX = -1;

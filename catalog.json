@@ -77,22 +77,22 @@
     },
     {
       "id": "kamera-objekty",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "apiVersion": 1,
       "minCoreVersion": "2.0.0",
       "maxCoreMajor": 2,
       "dataSchema": 1,
       "name": "Objekty v kameře",
-      "description": "Živá detekce a ruční obkreslení se zpřesněním na snímku.",
+      "description": "Živá detekce, obrysy, AI masky, hloubka a porovnání pohledů.",
       "icon": "▣",
       "theme": "blue",
       "permissions": [
         "Kamera (až po zapnutí)"
       ],
       "fullscreen": false,
-      "manifest": "modules/kamera-objekty/1.1.0/manifest.json",
-      "manifestSha256": "eab143578bde4e2ab14c93d635ac635320d6ff6648adbd7b4df71517e1ce983c",
-      "size": 24109
+      "manifest": "modules/kamera-objekty/1.2.0/manifest.json",
+      "manifestSha256": "99a98f101321cf098fbd02e96f51a409c892d0464b1483d3227bfc0281902bb4",
+      "size": 49075
     },
     {
       "id": "letadlo",
