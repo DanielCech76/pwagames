@@ -1,0 +1,45 @@
+{
+  "format": 1,
+  "id": "kamera-objekty",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.0.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Objekty v kameře",
+  "description": "Označení oblastí v živém obrazu nebo na snímku bez názvů kategorií.",
+  "icon": "▣",
+  "theme": "blue",
+  "permissions": [
+    "Kamera (až po zapnutí)"
+  ],
+  "fullscreen": false,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "bridge.js",
+      "size": 1994,
+      "sha256": "274714f9194d58b1c8f24f5d0357981e316ba77242bf47ad9063fd8163aae433"
+    },
+    {
+      "path": "camera.js",
+      "size": 4671,
+      "sha256": "921a574a22c9c921d6b1c4a3421616b0e65aed6882f7cb654cae9748805a5300"
+    },
+    {
+      "path": "index.html",
+      "size": 1167,
+      "sha256": "d8dfa71066d9f6f1c2a0e9e3e6946432c0ecc4680287f4d9853b0f894ab96bf3"
+    },
+    {
+      "path": "regions.js",
+      "size": 2719,
+      "sha256": "3fce5423c7bb1187f7c7bd43c2d931e53c49cfe5b0b9da333735a871fb3f5aff"
+    },
+    {
+      "path": "style.css",
+      "size": 1224,
+      "sha256": "82e9cb869f7242b67fb81a7ce289f8087f20a9768193fbd0ff4decdaa4046211"
+    }
+  ]
+}
