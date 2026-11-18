@@ -51,7 +51,8 @@ async function download(center,radius,signal,progress=()=>{},options={}){
  let done=0,cached=0,bytes=0;const total=cells.size;
  const emit=(text,extra={})=>progress({phase:'terrain',percent:Math.floor(done/total*80),done,total,cached,bytes,text,...extra});
  emit('Připravuji '+total+' výškových dlaždic…');
- for(const [key,points]of cells){
+ const ordered=[...cells];if(options.priority){const px=(options.priority.lon+180)/360*extent,py=(1-Math.asinh(Math.tan(options.priority.lat*G.D))/Math.PI)/2*extent;ordered.sort((a,b)=>{const [ax,ay]=a[0].split('/').map(Number),[bx,by]=b[0].split('/').map(Number);return Math.hypot(ax+.5-px,ay+.5-py)-Math.hypot(bx+.5-px,by+.5-py)})}
+ for(const [key,points]of ordered){
   checkAbort(signal);let image=null,source=null;
   try{const record=await options.cache?.get(key);if(record?.blob){image=await pixels(record.blob);source=record.source||'Místní cache';cached++}}catch{}checkAbort(signal);
   if(!image){const errors=[],providers=preferredTerrain?[preferredTerrain,...terrainProviders.filter(p=>p!==preferredTerrain)]:terrainProviders;for(const [attempt,provider]of providers.entries()){

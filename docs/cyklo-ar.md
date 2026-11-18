@@ -1,4 +1,19 @@
-# Rozhlédnout se – CYKLO 1.26.0
+# Rozhlédnout se – CYKLO 1.27.0
+
+## 1.27.0 — Kompaktní panel, načítání 360° a přesouvatelná spoušť
+
+Celý panel používá border-box a jeho flex/grid prvky mají skutečně zmenšitelnou šířku. Záložky mají nulový flex-basis, menší ikony a mezery; přepínače mají 18 px (16 px v úzkém panelu), text kategorií se může zalomit. Tři sloupce používají minmax(0,1fr), pod šířkou panelu 255 px přecházejí kategorie do dvou. Posuvníky, hodnoty a výběry nepřesahují vlastní řádek. Vertikální posouvání zůstává pouze pod pevnými záložkami. V prohlížeči byly všechny záložky ověřeny také v malém zobrazení 700 × 320: obsah i záložky mají shodnou scrollWidth a clientWidth, tedy žádný vodorovný ořez.
+
+Automatika zůstává volitelná a vyžaduje otevřený výhled, online připojení a skutečnou GPS do 30 s s přesností do 50 m. Nově běží také při ruční výšce a v kameře. Má jediný postup: (1) výšky a názvy odhadovaného aktuálního záběru s rezervou, (2) jeho blízké pojmenované objekty, (3) výšky a názvy v celém okolí pozorovatele pro otočení 360°, (4) podrobné objekty celého blízkého okolí. U pohledu k horizontu používá omezený výsek ve směru pohledu, s úhlovou i prostorovou rezervou; u nadhledu přednostně odhad průsečíku se zemí. Výškové dlaždice se řadí podle prioritní oblasti. Celé okolí má uživatelem zvolený dosah 10/30/60 km, blízké objekty nastavených 500 m až 10 km. Při pouhém otočení se plán neruší ani znovu nezačíná; nová poloha nebo výrazná změna výšky jej přepočítá.
+
+Průběh rozlišuje Záběr 1/2 a Okolí 360° 2/2. Připravené 360° hlásí až po ověření pokrytí celého rozsahu včetně dokončených názvů a nezkrácených detailů. Při chybě, neúplných datech nebo dosažení limitu zůstává neúplnost označená a opakování má odstup. Zrušení zastaví i následující fáze, zavření zruší přenosy, vypnutí automatiky přeruší její právě probíhající fázi. Hotové oblasti a dlaždice se znovu použijí. Přetrvává limit čtyř uložených oblastí, 48 výškových a 64 detailních dlaždic a 12 000 prvků jedné detailní oblasti.
+
+Toto přednačítání pokrývá vlastní výšky, katalogové názvy a pojmenované vektorové objekty. Není to úplný offline balíček nativního mapového podkladu MapLibre/OpenFreeMap, jeho stylu a všech úrovní přiblížení. Nativní podrobná mapa se stále načítá online. Za nastaveným dosahem nebo při výpadku zdroje se úplnost neslibuje.
+
+Spoušť fotografie má bezpečné výchozí umístění oddělené od tlačítka s okem. Podržení 550 ms zapne viditelně označený režim přesunu. Tažení mění polohu bez fotografie; uvolnění po podržení či tažení je potlačené. Následující samostatné krátké klepnutí spoušť zafixuje a zapíše souřadnice do předvoleb. Teprve další krátké klepnutí fotografuje. Poloha je relativní a ukládá se zvlášť pro výšku/šířku; po změně velikosti se omezí do obrazu a vyhne se ovládací liště, oku, informační liště, odkazu PNG i otevřenému nastavení. Dočasné odsunutí při otevření panelu nemění uloženou polohu. Během přesouvání neběží automatické skrývání; šipky klávesnice přesouvají, Escape ruší neuloženou změnu. Uzavření výhledu vyčistí časovače a gesta.
+
+Ověření: 48 sestavovacích a regresních kontrol. Nové testy ověřují pořadí všech čtyř fází, 360° pokrytí, ruční výšku, opakované otočení bez přenosu, jeden probíhající postup, zrušení a starou/offline GPS; další test ověřuje podržení/tažení/zafixování, nulové nechtěné fotografie, hranice, kolizi s okem, předvolby obou orientací a úklid. V prohlížeči ověřen panel 700 × 320 a 390 × 844, skutečné tažení spouště a návrat uložené polohy po přepnutí režimu, nad syntetickým videem. Fyzická kamera, senzory a WebGL mapa se v tomto prostředí neověřovaly.
+
 
 ## 1.26.0 — Schválená grafika, vzdálenostní řady a nové objekty
 
