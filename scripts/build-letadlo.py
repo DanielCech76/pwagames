@@ -42,12 +42,11 @@ html = html.replace('<p id="routeDescription"', '''
 <p id="routeDescription"''')
 index.write_text(html, encoding='utf-8')
 
-for asset in sorted((root / 'letadlo').iterdir()):
-    if asset.name != 'sw.js':
-        shutil.copy2(asset, out / asset.name)
-        files.append(asset.name)
+for asset in ('icon-192.png', 'icon-512.png', 'icon-maskable.png', 'install.js', 'manifest.webmanifest'):
+    shutil.copy2(root / 'letadlo' / asset, out / asset)
+    files.append(asset)
 
-worker = (root / 'letadlo' / 'sw.js').read_text(encoding='utf-8')
+worker = (root / 'scripts' / 'letadlo-sw.js').read_text(encoding='utf-8')
 worker = worker.replace('__SHELL_FILES__', json.dumps(sorted(files)))
 digest = hashlib.sha256(worker.encode())
 for file in sorted(files):
