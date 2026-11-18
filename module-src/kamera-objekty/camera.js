@@ -1,6 +1,7 @@
 import { createAdvanced } from './advanced.js';
 import { createDrawing } from './drawing.js';
-import { detectRegions, smoothRegions } from './regions.js';
+import { detectRegions } from './regions.js';
+import { strokeContours } from './contours.js';
 
 const byId = id => document.getElementById(id);
 const main = document.querySelector('main');
@@ -20,7 +21,7 @@ let stream;
 let timer;
 let generation = 0;
 let frozen = false;
-let boxes = [];
+let regions = [];
 const drawing = createDrawing(overlay, status, paint, (...args) => advanced.refine(...args));
 const advanced = createAdvanced({ status, drawing, showVideo, showFrame, capture });
 
@@ -47,7 +48,7 @@ function showFrame({ image, photo }) {
   still.height = overlay.height = photo.height;
   still.getContext('2d').drawImage(photo, 0, 0);
   setFrozen(true);
-  boxes = detectRegions(image);
+  regions = detectRegions(image);
   drawing.reset(image);
   advanced.reset(image);
 }
@@ -59,12 +60,11 @@ function paint() {
   ink.shadowBlur = ink.lineWidth;
   ink.strokeStyle = '#6dffbd';
   const selections = drawing.paint(ink, overlay.width, overlay.height);
-  for (const { x, y, w, h } of selections ?? boxes) {
-    ink.strokeRect(x * overlay.width, y * overlay.height, w * overlay.width, h * overlay.height);
-  }
+  ink.lineCap = 'round';
+  strokeContours(ink, selections ?? regions, overlay.width, overlay.height);
 }
 
-function analyze(source, width, height, smooth) {
+function analyze(source, width, height) {
   const scale = Math.min(1, 224 / Math.max(width, height));
   const w = Math.max(1, Math.round(width * scale));
   const h = Math.max(1, Math.round(height * scale));
@@ -75,20 +75,19 @@ function analyze(source, width, height, smooth) {
   if (overlay.width !== width || overlay.height !== height) {
     overlay.width = width;
     overlay.height = height;
-    boxes = [];
+    regions = [];
   }
   pixels.drawImage(source, 0, 0, w, h);
-  const found = detectRegions(pixels.getImageData(0, 0, w, h));
-  boxes = smooth ? smoothRegions(boxes, found) : found;
+  regions = detectRegions(pixels.getImageData(0, 0, w, h));
   paint();
-  const message = 'Živě · Označené oblasti ' + boxes.length;
+  const message = 'Živě · Označené oblasti ' + regions.length;
   if (status.textContent !== message) status.textContent = message;
 }
 
 function scan() {
   if (!frozen && stream && video.readyState >= 2) {
     snapshot.disabled = false;
-    analyze(video, video.videoWidth, video.videoHeight, true);
+    analyze(video, video.videoWidth, video.videoHeight);
   }
 }
 
@@ -114,7 +113,7 @@ function stop(message = 'Kamera je vypnutá.') {
   advanced.dispose();
   still.width = 1;
   still.height = 1;
-  boxes = [];
+  regions = [];
   paint();
   empty.hidden = false;
   camera.textContent = 'Zapnout kameru';
@@ -165,7 +164,7 @@ camera.onclick = () => {
   else stop();
 };
 live.onclick = () => {
-  boxes = [];
+  regions = [];
   paint();
   setFrozen(false);
   scan();
@@ -173,17 +172,21 @@ live.onclick = () => {
 snapshot.onclick = () => {
   if (frozen) return;
   const image = capture();
-  if (image) showFrame(image);
+  if (image) {
+    showFrame(image);
+    void advanced.analyzeNewFrame();
+  }
 };
 byId('back').onclick = () => window.ArcadeHost.back();
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) stop();
 });
 window.ArcadeHost.register({
-  start() { main.hidden = false; },
+  start() { main.hidden = false; void advanced.refreshModels(); },
   pause() { stop(); },
   stop() {
     stop();
+    advanced.close();
     main.hidden = true;
   }
 });

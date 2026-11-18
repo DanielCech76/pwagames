@@ -1,0 +1,85 @@
+{
+  "format": 1,
+  "id": "kamera-objekty",
+  "version": "1.3.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.0.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Objekty v kameře",
+  "description": "Obrysy objektů, automatická analýza snímků a AI modely pro offline použití.",
+  "icon": "▣",
+  "theme": "blue",
+  "permissions": [
+    "Kamera (až po zapnutí)"
+  ],
+  "fullscreen": false,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "advanced.js",
+      "size": 11481,
+      "sha256": "39e446a2ef8885565484bc9d779ded10e8fe16f4f82ef872df8aa0d9e0d6f3b0"
+    },
+    {
+      "path": "ai-worker.js",
+      "size": 7123,
+      "sha256": "dcaf5b838bd51825bfb5f90d86a3d676d27faf769b77a7eca67e939dd137dd39"
+    },
+    {
+      "path": "bridge.js",
+      "size": 1994,
+      "sha256": "274714f9194d58b1c8f24f5d0357981e316ba77242bf47ad9063fd8163aae433"
+    },
+    {
+      "path": "camera.js",
+      "size": 5894,
+      "sha256": "304a5ceac557845743ac12bfec9dff7b42b6cf383a341b68546faa3a64c3571e"
+    },
+    {
+      "path": "contours.js",
+      "size": 1061,
+      "sha256": "2662010dfd8dfc95413590dd6965541b6a898821e3a98037829c5e39cbed1c8f"
+    },
+    {
+      "path": "drawing.js",
+      "size": 8758,
+      "sha256": "610456963bc1ae0f44f1d4110e89fbcb159b25526f09fc5e8dcbc1d0afbb5e9e"
+    },
+    {
+      "path": "index.html",
+      "size": 2589,
+      "sha256": "f16defc1121dd1b786de134a9cf3e5d6a3b81fa5b1adb0655c3294500e040b97"
+    },
+    {
+      "path": "model-storage.js",
+      "size": 2146,
+      "sha256": "f9189c6477cda527a3e1a9307dcc1fcc4f3b87ea2351873965365b002005dd9b"
+    },
+    {
+      "path": "outline.js",
+      "size": 3573,
+      "sha256": "99304678dc66c0f7a712f3b8c1a3d5c5f2f7902e3b81e76f0f1b5d574987aca0"
+    },
+    {
+      "path": "prompts.js",
+      "size": 2069,
+      "sha256": "d4e11a841c59ba44392552654d36fa8079d5d15d6de2ae6ad4d456baa2c3fa7c"
+    },
+    {
+      "path": "regions.js",
+      "size": 2468,
+      "sha256": "dd31c7d72ef08a22f87e0a619e298569164d4482a8bf3b3ce9bc59c1a4dd3dc5"
+    },
+    {
+      "path": "style.css",
+      "size": 1777,
+      "sha256": "11fcd6cbd42b0e94da7edd4212f510661b53bfb20c143d445938b2d7a74fdf93"
+    },
+    {
+      "path": "views.js",
+      "size": 4757,
+      "sha256": "46a05bda533d010ccd9564e6a54f1d6d0c0272144e807ae57b5380d4284bbe55"
+    }
+  ]
+}

@@ -42,14 +42,17 @@ export function detectRegions({ data, width, height }) {
     const h = bottom - top + 1;
     if (count < size * 0.004 || w * h > size * .72 || count < w * h * .24
       || border > Math.min(w, h) || w < 5 || h < 5) continue;
-    regions.push({ x: left / width, y: top / height, w: w / width, h: h / height });
+    regions.push({ x: left / width, y: top / height, w: w / width, h: h / height, pixels: queue.slice(0, count) });
   }
   regions.sort((a, b) => b.w * b.h - a.w * a.h);
   const boxes = [];
   for (const region of regions) {
     if (boxes.length === 12) break;
     if (boxes.some(box => overlap(box, region) > .62)) continue;
-    boxes.push(region);
+    const { pixels, ...bounds } = region;
+    const mask = new Uint8Array(size);
+    for (const pixel of pixels) mask[pixel] = 1;
+    boxes.push({ ...bounds, mask, width, height });
   }
   return boxes;
 }
@@ -58,19 +61,4 @@ function overlap(a, b) {
   const width = Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x));
   const height = Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y));
   return width * height / Math.min(a.w * a.h, b.w * b.h);
-}
-
-export function smoothRegions(previous, current) {
-  const available = new Set(previous);
-  return current.map(box => {
-    const match = [...available].find(candidate => overlap(candidate, box) > .65);
-    if (!match) return box;
-    available.delete(match);
-    return {
-      x: match.x * .25 + box.x * .75,
-      y: match.y * .25 + box.y * .75,
-      w: match.w * .25 + box.w * .75,
-      h: match.h * .25 + box.h * .75
-    };
-  });
 }
