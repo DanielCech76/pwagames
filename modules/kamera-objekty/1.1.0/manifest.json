@@ -1,0 +1,55 @@
+{
+  "format": 1,
+  "id": "kamera-objekty",
+  "version": "1.1.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.0.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Objekty v kameře",
+  "description": "Živá detekce a ruční obkreslení se zpřesněním na snímku.",
+  "icon": "▣",
+  "theme": "blue",
+  "permissions": [
+    "Kamera (až po zapnutí)"
+  ],
+  "fullscreen": false,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "bridge.js",
+      "size": 1994,
+      "sha256": "274714f9194d58b1c8f24f5d0357981e316ba77242bf47ad9063fd8163aae433"
+    },
+    {
+      "path": "camera.js",
+      "size": 5263,
+      "sha256": "de07f4c4766174982ba05f7b888a301e13e6e1c5121e506cc4124b3ba5604e29"
+    },
+    {
+      "path": "drawing.js",
+      "size": 7585,
+      "sha256": "7dd511b0a98b894fbfc77dd5cda956df3fe822ea363c48e70b62591a605e6239"
+    },
+    {
+      "path": "index.html",
+      "size": 1625,
+      "sha256": "796fe2b53580ffb185b84e4ae99bcee019cb5311b387303b5ff0a7bc3d3c6b94"
+    },
+    {
+      "path": "outline.js",
+      "size": 3566,
+      "sha256": "1b1e6dfaf1b7c6d883e2ba031577c7fb464d33901b136956e993b61a3e89a7f5"
+    },
+    {
+      "path": "regions.js",
+      "size": 2719,
+      "sha256": "3fce5423c7bb1187f7c7bd43c2d931e53c49cfe5b0b9da333735a871fb3f5aff"
+    },
+    {
+      "path": "style.css",
+      "size": 1357,
+      "sha256": "2fff175bfaa27392c8cb9c577ba8ad1f0ab54983562e4e78fc52a87c228660a9"
+    }
+  ]
+}

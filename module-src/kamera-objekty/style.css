@@ -13,3 +13,6 @@ button:disabled { opacity: .48; }
 [hidden] { display: none !important; }
 #status, .note { margin: 8px 0 0; font-size: .85rem; }
 .note { color: #bdcbde; }
+#drawing { margin-top: 8px; }
+#overlay.drawing { touch-action: none; cursor: crosshair; }
+#refine:enabled { border-color: #aeead2; }
