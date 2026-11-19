@@ -1,0 +1,14 @@
+{
+  "id": "vanocni-dilna",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.1.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Vánoční dílna",
+  "description": "Skládání zimních scén ze siluet, vlastní motivy a SVG export pro laserové řezání.",
+  "icon": "🎄",
+  "theme": "green",
+  "permissions": ["Místní úložiště a import/export souborů"],
+  "fullscreen": false
+}
