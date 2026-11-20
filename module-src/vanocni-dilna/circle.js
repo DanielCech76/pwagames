@@ -28,28 +28,33 @@ function drawHangers(c, scale, circle) {
  }
 }
 
-function completeCircle(c,scale,circle) {
+function circleEye({y,radius,rim}) {
+ const outer=Math.max(rim*1.45,radius*.065);
+ return {outer,y:y-radius-outer+rim*.6};
+}
+
+function drawCircleFrame(c,scale,circle,color) {
  const {x,y,radius,rim}=circle;
- c.save();
- c.scale(scale,scale);
- c.globalCompositeOperation='destination-in';
- c.beginPath();c.arc(x,y,radius,0,Math.PI*2);c.fill();
- c.globalCompositeOperation='source-over';
- c.fillStyle='#000';
- c.beginPath();
- c.arc(x,y,radius,0,Math.PI*2);
- c.moveTo(x+radius-rim,y);
- c.arc(x,y,radius-rim,0,Math.PI*2,true);
- c.fill();
+ c.save();c.scale(scale,scale);c.fillStyle=color;
+ c.beginPath();c.arc(x,y,radius,0,Math.PI*2);
+ c.moveTo(x+radius-rim,y);c.arc(x,y,radius-rim,0,Math.PI*2,true);c.fill();
  if(frame==='eye'){
-  const outer=Math.max(rim*1.45,radius*.065);
-  const eyeY=y-radius-outer+rim*.6;
-  c.beginPath();c.arc(x,eyeY,outer,0,Math.PI*2);
-  c.moveTo(x+outer-rim*.75,eyeY);
-  c.arc(x,eyeY,outer-rim*.75,0,Math.PI*2,true);
-  c.fill();
+  const eye=circleEye(circle);
+  c.beginPath();c.arc(x,eye.y,eye.outer,0,Math.PI*2);
+  c.moveTo(x+eye.outer-rim*.75,eye.y);
+  c.arc(x,eye.y,eye.outer-rim*.75,0,Math.PI*2,true);c.fill();
  }
  c.restore();
+}
+
+function clipCircleScene(c,scale,circle) {
+ c.save();c.scale(scale,scale);c.globalCompositeOperation='destination-in';
+ c.beginPath();c.arc(circle.x,circle.y,circle.radius,0,Math.PI*2);
+ if(frame==='eye'){
+  const eye=circleEye(circle);
+  c.moveTo(circle.x+eye.outer,eye.y);c.arc(circle.x,eye.y,eye.outer,0,Math.PI*2);
+ }
+ c.fill();c.restore();
 }
 
 function applyCirclePreset(name) {
@@ -76,7 +81,7 @@ function applyCirclePreset(name) {
  };
  if(!Object.hasOwn(designs,name))return;
  clearTimeout(validationTimer);
- frame='eye';sceneLocked=false;base=name==='empty'?0:28;
+ frame='eye';sceneLocked=false;moveComposition=false;horizon=0;flatInset=45;base=name==='empty'?0:28;
  outputMm=200;pageHeightMm=200;fullPage=true;
  syncCanvasDimensions(960,960);
  objects=[];nextId=1;
@@ -93,7 +98,7 @@ function setSceneLock(locked) {
  sceneLocked=locked;
  if(drag){clearTimeout(drag.timer);drag=null;}
  $('context').hidden=true;$('size-panel').hidden=true;
- if(locked)selected=null;
+ if(locked){selected=null;moveComposition=false;}
  refresh();
 }
 
@@ -104,7 +109,7 @@ function syncCircleControls() {
  $('frame-settings').hidden=frame==='none';
  $('scene-lock').setAttribute('aria-pressed',sceneLocked);
  $('scene-lock').textContent=sceneLocked?'Odemknout':'Zamknout';
- for(const id of ['setup-open','project-new','page-open','toggle-base','project-load','frame','circle-preset','rim-width','minimum-width','library','scene-layers','empty-building','wide-inspector','scene-tools']){
+ for(const id of ['setup-open','project-new','page-open','toggle-base','project-load','frame','circle-preset','rim-width','minimum-width','library','layers','empty-building','wide-inspector','scene-tools']){
   const el=$(id);
   el.inert=sceneLocked;
   if(el instanceof HTMLButtonElement||el instanceof HTMLSelectElement||el instanceof HTMLInputElement)el.disabled=sceneLocked;
