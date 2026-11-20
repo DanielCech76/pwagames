@@ -1,0 +1,45 @@
+{
+  "format": 1,
+  "id": "vanocni-dilna",
+  "version": "1.4.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.1.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "name": "Vánoční dílna",
+  "description": "Skládání zimních scén ze siluet, vlastní motivy a SVG export pro laserové řezání.",
+  "icon": "🎄",
+  "theme": "green",
+  "permissions": [
+    "Místní úložiště a import/export souborů"
+  ],
+  "fullscreen": false,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "bridge.js",
+      "size": 1994,
+      "sha256": "274714f9194d58b1c8f24f5d0357981e316ba77242bf47ad9063fd8163aae433"
+    },
+    {
+      "path": "circle.js",
+      "size": 6192,
+      "sha256": "e6b98933078208d1d33ebc06b3d6e6b152059603b767411fff62544353944481"
+    },
+    {
+      "path": "index.html",
+      "size": 2141663,
+      "sha256": "a0615f05d5cbf64c779e5b287c95c87175219d4a4702ffd8b94a08c3a1924707"
+    },
+    {
+      "path": "snow-motifs.js",
+      "size": 337913,
+      "sha256": "71d9b5bb35d14ef0fd916607d48c1e5bc7b7bdcf79198f9276065783a77ff19f"
+    },
+    {
+      "path": "winter-motifs.js",
+      "size": 12014,
+      "sha256": "5cfd6cbbd252755b5967667f9344e99b3cf52c893b344d2b2870ea66e4c3a907"
+    }
+  ]
+}
