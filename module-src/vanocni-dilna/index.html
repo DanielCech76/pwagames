@@ -133,6 +133,30 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  .scene-viewport .zoom-tools{position:absolute;top:4px;right:6px;display:flex;gap:5px;align-items:center}
  .scene-viewport .zoom-tools button{min-height:29px;padding:1px 8px}
 }
+.scene-controls{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0}
+.scene-controls svg,.scene-tools svg{width:20px;height:20px;vertical-align:middle}
+#layers button canvas{width:38px;height:24px;vertical-align:middle}
+.layer-strip{display:flex;align-items:center;gap:6px}.layer-strip #layers{min-width:0;flex:1}.layer-strip #motif-open{flex:none}
+#layers button[aria-pressed=true]{outline:2px solid #008369;outline-offset:-2px}
+#motif-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;max-height:55vh;overflow:auto;padding:3px}
+#motif-grid button{display:grid;justify-items:center;padding:6px;gap:4px}
+#motif-grid canvas{width:66px;height:40px;max-width:100%}
+.dialog-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#object-detail-settings{margin:6px 0}
+#diameter-help{font-size:.85rem}
+#appearance-dialog .segments{margin-bottom:8px}
+#move-composition[aria-pressed=true]{background:var(--pine);color:white}
+@media(max-width:650px) and (orientation:portrait){
+ .scene-library,.scene-panel-tabs{display:none}
+ #scene-mode .scene-extra{display:block;margin:0}
+ #scene-mode .scene-extra summary,#scene-mode #layers-arrows{display:none}
+ #scene-mode #scene-tools{gap:4px;justify-content:center}
+ #layers button{min-width:43px;font-size:0;padding:3px}
+ #layers button canvas{width:36px;height:29px}
+ #scene-mode .composition-stage{min-height:0;padding:0}
+ #scene-mode .scene-viewport{padding-top:34px}
+ #motif-dialog{margin:auto auto 0;width:min(100%,430px);max-width:100%;border-radius:16px 16px 0 0}
+}
 </style>
 <script src="./bridge.js"></script>
 <script src="./winter-motifs.js"></script>
@@ -142,7 +166,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 <header class="masthead">
  <button id="setup-open" class="header-icon" aria-label="Nastavení řezu" title="Nastavení řezu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
  <svg class="winter left" viewBox="0 0 88 64" aria-hidden="true"><path d="M25 10l3 7 7 3-7 3-3 7-3-7-7-3 7-3zm24-8 10 15h-5l11 12h-8l13 13H53v12h-8V42H29l13-13h-8l11-12h-6zm27 27 7 11h-3l7 10h-8v9h-5v-9h-8l7-10h-3z" fill="currentColor"/></svg>
- <h1>Vánoční dílna <small class="app-version">1.1.0</small></h1>
+ <h1>Vánoční dílna <small class="app-version">1.2.0</small></h1>
  <svg class="winter right-winter" viewBox="0 0 88 64" aria-hidden="true"><path d="M18 27l8 13h-4l9 10H20v9h-5v-9H5l9-10h-4zm29-25 10 15h-5l11 12h-8l13 13H51v12h-8V42H27l13-13h-8l11-12h-6zm28 8 3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="currentColor"/></svg>
  <svg class="snow-edge" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 13Q45-4 82 11T158 13T236 10T311 15T400 12V22H0Z" fill="currentColor"/></svg>
 </header>
@@ -160,7 +184,13 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
    <label>Y (mm) <input id="frame-y" type="number" step=".5"></label>
    <label id="frame-cord-label">Provázek (mm) <input id="frame-cord" type="number" min=".4" max="10" step=".1"></label>
   </span>
- </div></div>
+ </div>
+ <div class="scene-controls">
+  <button id="move-composition" type="button" aria-pressed="false">Posun kompozice</button>
+  <label id="horizon-control" hidden>Horizont <input id="horizon" type="range" min="-80" max="25" value="0" aria-describedby="horizon-value"> <output id="horizon-value">0 %</output></label>
+  <button id="appearance-open">Vzhled</button>
+ </div>
+ </div>
  <div class="scene-viewport"><div class="scene-scroll"><section class="composition-stage" aria-label="Kompozice">
   <canvas class="art" id="stage" width="1000" height="520" aria-label="Náhled kompozice. Podržením objektu otevřeš jeho nabídku."></canvas>
   <div id="context" class="popover" hidden><strong>Přetažením přesuneš</strong><div class="popover-actions"><button id="edit-object" class="primary">Upravit</button><button id="remove" class="primary">Smazat</button></div>
@@ -168,13 +198,14 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  </section>
  </div><div class="zoom-tools" aria-label="Přiblížení plátna"><button id="zoom-out" aria-label="Oddálit">−</button><button id="zoom-fit" aria-label="Přizpůsobit plátno">100 %</button><button id="zoom-in" aria-label="Přiblížit">+</button></div></div>
  <div id="scene-tools" class="scene-tools" hidden>
-  <button id="quick-edit">Upravit</button><button id="quick-mirror">Zrcadlit</button><button id="quick-layer">Vrstvy</button><button id="quick-size">Velikost</button><button id="quick-remove">Smazat</button>
+  <button id="quick-edit">Upravit</button><button id="quick-rotate" aria-label="Otočit o 15°" title="Otočit o 15°"></button><button id="quick-copy" aria-label="Duplikovat" title="Duplikovat"></button><button id="quick-detail">Detaily</button><button id="quick-mirror">Zrcadlit</button><button id="quick-layer">Vrstvy</button><button id="quick-size">Velikost</button><button id="quick-remove">Smazat</button>
  </div>
  <div class="segments scene-panel-tabs" role="group" aria-label="Panel vpravo"><button id="panel-palette" aria-pressed="true">Paleta</button><button id="panel-object" aria-pressed="false">Objekt</button></div>
  <aside class="wide-inspector" aria-label="Vybraný objekt" id="wide-inspector">
   <h3 class="panel-title">Vybraný objekt</h3><p id="inspector-empty">Vyber objekt na plátně.</p>
   <div id="inspector-fields" hidden>
    <strong id="inspector-name"></strong>
+   <div class="inspector-actions"><button id="inspector-rotate">Otočit o 15°</button><button id="inspector-copy">Duplikovat</button><button id="inspector-detail">Detaily</button></div>
    <label>Šířka (mm) <input type="number" id="inspector-x" step="0.1" min="0.1"></label>
    <label>Výška (mm) <input type="number" id="inspector-y" step="0.1" min="0.1"></label>
    <label>Šířka <input id="inspector-scale-x" type="range" min="20" max="200" step="1" aria-label="Šířka objektu v procentech"></label>
@@ -196,14 +227,34 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
   <div class="strip-arrows" id="library-arrows" hidden><span>Paleta objektů</span><button id="library-left" aria-label="Paleta objektů doleva" aria-controls="library">‹</button><button id="library-right" aria-label="Paleta objektů doprava" aria-controls="library">›</button></div><div id="library" class="library tile-strip"></div>
  </section>
  <footer class="scene-footer"><div class="connection">Napojení <span id="status" role="status" aria-live="polite"></span></div><div class="export-actions"><button id="png" class="primary">PNG</button><button id="svg" class="primary">SVG</button></div></footer>
- <details class="scene-extra" id="scene-layers"><summary>Objekty v kompozici</summary><div class="strip-arrows" id="layers-arrows" hidden><span>Objekty v kompozici</span><button id="layers-left" aria-label="Objekty v kompozici doleva" aria-controls="layers">‹</button><button id="layers-right" aria-label="Objekty v kompozici doprava" aria-controls="layers">›</button></div><nav class="layers" id="layers" aria-label="Objekty v kompozici"></nav></details>
+ <details class="scene-extra" id="scene-layers"><summary>Objekty v kompozici</summary><div class="strip-arrows" id="layers-arrows" hidden><span>Objekty v kompozici</span><button id="layers-left" aria-label="Objekty v kompozici doleva" aria-controls="layers">‹</button><button id="layers-right" aria-label="Objekty v kompozici doprava" aria-controls="layers">›</button></div><div class="layer-strip"><nav class="layers" id="layers" aria-label="Objekty v kompozici"></nav><button id="motif-open" class="primary" aria-label="Přidat objekt" title="Přidat objekt">+</button></div></details>
 </main>
 <dialog id="page-dialog" aria-labelledby="page-title"><h2 id="page-title">Rozměry kompozice</h2>
+ <label>Předvolba <select id="page-preset"><option value="">Vlastní rozměr</option><option value="80">Ozdoba na stromek · Ø 80 mm</option><option value="100">Podtácek · Ø 100 mm</option><option value="250">Kruh do okna · Ø 250 mm</option></select></label>
+ <p id="diameter-help" hidden>Předvolba udává vnější průměr kruhu. Rozměry plochy níže zahrnují okraj a případné ouško.</p>
  <div class="page-fields"><label>Šířka (mm)<input id="page-width" type="number" min="30" max="1500" step="0.1"></label>
  <label>Výška (mm)<input id="page-height" type="number" min="20" max="1000" step="0.1"></label></div>
- <label class="page-scale"><input id="page-scale" type="checkbox"> Přizpůsobit i všechny objekty</label>
- <p>Objekty se zvětší nebo zmenší společně se zachováním proporcí. Bez zaškrtnutí si ponechají velikost v milimetrech.</p>
+ <p>Při změně rozměrů motivy zachovají polohu vůči rámu nebo podstavě.</p>
  <p id="page-error" role="alert"></p><div class="page-actions"><button id="page-cancel">Zrušit</button><button id="page-apply" class="primary">Použít rozměry</button></div>
+</dialog>
+<dialog id="motif-dialog" aria-labelledby="motif-title">
+ <div class="dialog-heading"><button id="motif-back" aria-label="Zpět na kategorie" hidden>←</button><h2 id="motif-title">Přidat objekt</h2><button id="motif-close" aria-label="Zavřít">×</button></div>
+ <div id="motif-grid"></div>
+</dialog>
+<dialog id="appearance-dialog" aria-labelledby="appearance-title">
+ <div class="dialog-heading"><h2 id="appearance-title">Vzhled projektu</h2><button id="appearance-close" aria-label="Zavřít">×</button></div>
+ <div class="segments" id="appearance-modes"><button value="normal">Běžný</button><button value="inverse">Inverzní</button><button value="hairline">Vlasové čáry</button></div>
+ <label>Barevná dvojice <select id="color-preset"><option value="">Vlastní</option><option value="#000000,#fbf3e3">Černá a krémová</option><option value="#ffffff,#202526">Bílá a antracitová</option><option value="#104737,#fbf3e3">Zelená a krémová</option><option value="#922e39,#fbf3e3">Vínová a krémová</option></select></label>
+ <div class="page-fields">
+  <label>Popředí <input id="foreground" type="text" maxlength="7" pattern="#[0-9a-fA-F]{6}" aria-label="HEX barva popředí"><input id="foreground-picker" type="color" aria-label="Vybrat barvu popředí"></label>
+  <label>Pozadí <input id="background" type="text" maxlength="7" pattern="#[0-9a-fA-F]{6}" aria-label="HEX barva pozadí"><input id="background-picker" type="color" aria-label="Vybrat barvu pozadí"></label>
+ </div>
+ <p id="color-error" role="status"></p>
+</dialog>
+<dialog id="detail-dialog" aria-labelledby="detail-title">
+ <div class="dialog-heading"><h2 id="detail-title">Uzavřené detaily</h2><button id="detail-close" aria-label="Zavřít">×</button></div>
+ <label id="object-detail-settings"><span id="detail-label"></span> <select id="detail-treatment"><option value="transparent">Průhledné</option><option value="background">Krycí výplň pozadím</option></select></label>
+ <p>SVG řeže podle výsledného překrytí. Krycí výplň odebere materiál i z motivů pod detailem.</p>
 </dialog>
 <main id="object-mode" hidden>
  <div class="screen-title"><button id="back-object" class="back" aria-label="Zpět do kompozice">←</button><h2 class="screen-heading" id="selection">Editace objektu</h2></div>
@@ -335,6 +386,34 @@ function fixedMotifModels(type){
 function finishedHouseModels(type){
  return type?fixedMotifModels(type):[...fixedMotifModels('house'),...fixedMotifModels('church')];
 }
+const filledLineCache=new Map();
+function filledLine(data,width){
+ const key=width+' '+data;
+ if(filledLineCache.has(key))return filledLineCache.get(key);
+ const path=new Path2D(),radius=width/2;
+ if(radius>0)for(const segment of data.match(/[Mm][^Mm]*/g)||[]){
+  const curve=document.createElementNS('http://www.w3.org/2000/svg','path');
+  curve.setAttribute('d',segment);
+  const length=curve.getTotalLength(),steps=Math.max(1,Math.ceil(length/1.5));
+  let previous=null;
+  for(let i=0;i<=steps;i++){
+   const {x,y}=curve.getPointAtLength(length*i/steps);
+   path.moveTo(x+radius,y);path.arc(x,y,radius,0,Math.PI*2);path.closePath();
+   if(previous){
+    const dx=x-previous.x,dy=y-previous.y,d=Math.hypot(dx,dy);
+    if(d>0){
+     const nx=-dy*radius/d,ny=dx*radius/d;
+     path.moveTo(previous.x+nx,previous.y+ny);path.lineTo(previous.x-nx,previous.y-ny);
+     path.lineTo(x-nx,y-ny);path.lineTo(x+nx,y+ny);path.closePath();
+    }
+   }
+   previous={x,y};
+  }
+ }
+ if(filledLineCache.size>=256)filledLineCache.clear();
+ filledLineCache.set(key,path);
+ return path;
+}
 const approvedPaths=approvedBuildings.map(([w,h,d])=>[w,h,new Path2D(d),new Path2D(d.split('Z',1)[0]+'Z')]);
 function approvedGeometry(asset){
  const [w,h,shape,outer]=approvedPaths[asset];
@@ -441,8 +520,9 @@ function buildingGeometry(item){
      'M45 96C52 81 38 69 53 54C65 42 88 42 88 29C88 19 68 22 67 31Q55 16 76 9'
     ][style];
     const scale=Math.min(w,h)/100;
-    const path=new Path2D();path.addPath(new Path2D(swirl),new DOMMatrix([w/100,0,0,h/100,x-w/2,y-h/2]));
-    strokes.push([path,scale*thickness*1.4]);break;
+    const path=new Path2D();
+    path.addPath(filledLine(swirl,scale*thickness*1.4*100/Math.min(w,h)),new DOMMatrix([w/100,0,0,h/100,x-w/2,y-h/2]));
+    strokes.push([path,0]);break;
    }
    case 'tiles':case 'trim':{
     const repeat=type==='trim'?1:rows,n=type==='trim'?Math.max(4,count):count;
@@ -479,7 +559,7 @@ function template(type){
  return {type,variant:0,x:500,y:floor+4,height:{house:285,spruce:250,bare:260,lamp:155,lantern:67,snow:56,church:278,fence:78,bench:63,bridge:100,well:118,stack:79,mailbox:82,person:100,animal:83,shrub:75,sign:105,sled:48,gate:135,needle:170,bell:150,bauble:140}[type],floors:2,windows:3,door:true,dormer:true,waves:true,arcs:6,rows:2,chimney:true,smoke:true};
 }
 function add(type, overrides={}){
- const item={...template(type),id:nextId++,...overrides};
+ const item={...template(type),detailTreatment:'transparent',id:nextId++,...overrides};
  if(item.village!=null)item.fixedHouse=true;
  if(item.asset==null&&item.village==null&&['house','church'].includes(type)){
   item.parts=overrides.parts?overrides.parts.map(part=>({...part})):buildingPreset(type,item.variant);
@@ -488,7 +568,9 @@ function add(type, overrides={}){
  objects.push(item);selected=item.id;componentIndex=0;return item;
 }
 function reset(){
- frame='none';sceneLocked=false;fullPage=false;pageHeightMm=null;syncCanvasDimensions(defaultW,defaultH);
+ frame='none';sceneLocked=false;fullPage=false;pageHeightMm=null;
+ horizon=0;flatInset=45;moveComposition=false;appearance='normal';[foreground,background]=paletteDefaults.normal;
+ $('base').max=45;syncCanvasDimensions(defaultW,defaultH);
  objects=[];nextId=1;base=28;$('base').value=base;$('base-value').textContent=base;
  const windows=(y,x)=>component('window',x,y,25,23,{vertical:true,horizontal:true});
  const common=[component('wall',0,-38,92,76),windows(-52,-22),windows(-52,22),
@@ -574,13 +656,15 @@ function geometry(item){
  if(item.village!=null||item.type==='needle'){
   const [width,height,path]=item.village!=null?winterMotifs.village[item.village]:winterMotifs.needle[item.variant];
   const ink=new Path2D();ink.addPath(new Path2D(path),new DOMMatrix().translate(-width/2,-height));
-  return {ink,holes:new Path2D(),inset:[],strokes:[],top:-height,half:width/2,evenOdd:true};
+  const back=item.village!=null?new Path2D():null;
+  if(back)back.addPath(new Path2D(path.split('Z',1)[0]+'Z'),new DOMMatrix().translate(-width/2,-height));
+  return {ink,back,holes:new Path2D(),inset:[],strokes:[],top:-height,half:width/2,evenOdd:true};
  }
  const ink=new Path2D(), holes=new Path2D(), inset=[];
  const rect=(x,y,w,h,path=ink)=>path.rect(x,y,w,h);
  const polygon=(points,path=ink)=>{path.moveTo(...points[0]);for(const p of points.slice(1))path.lineTo(...p);path.closePath()};
  const path=(d,to=ink)=>{if(to===holes)inset.push(new Path2D(d));else ink.addPath(new Path2D(d));};
- const line=(d,width)=>strokes.push([new Path2D(d),width]);
+ const line=(d,width)=>strokes.push([filledLine(d,width),0]);
  const strokes=[];
  if(item.type==='bell'){
   path(item.variant===0?'M-7-100H7Q12-99 13-91Q29-84 31-63Q33-42 48-28Q54-22 45-13Q32-4 12-3Q8 7 0 7Q-8 7-12-3Q-32-4-45-13Q-54-22-48-28Q-33-42-31-63Q-29-84-13-91Q-12-99-7-100Z':'M-8-100H8L14-89Q33-82 34-62Q35-44 48-31L53-18Q40-5 10-5Q7 6 0 6Q-7 6-10-5Q-40-5-53-18L-48-31Q-35-44-34-62Q-33-82-14-89Z');
@@ -751,8 +835,7 @@ function drawObject(c,item,g,scale=1,cut=true,color='#000',reinforce=0){
   c.stroke(silhouette);c.restore();
  }
  for(const solid of g.solids||[])c.fill(solid);
- c.strokeStyle=color;c.lineCap='round';c.lineJoin='round';
- for(const [path,width] of g.strokes){if(width===0)c.fill(path);else{c.lineWidth=width;c.stroke(path);}}
+ for(const [path] of g.strokes)c.fill(path);
  if(cut){
   c.resetTransform();c.globalCompositeOperation='destination-out';
   for(const opening of [g.holes,...g.inset]){
@@ -762,35 +845,44 @@ function drawObject(c,item,g,scale=1,cut=true,color='#000',reinforce=0){
  c.restore();
 }
 const canvasBackground='#fbf3e3';
-function compose(scale,houseBacking='#fff'){
+const paletteDefaults={normal:['#000000',canvasBackground],inverse:['#ffffff','#202526']};
+const isHex=value=>typeof value==='string'&&/^#[0-9a-f]{6}$/i.test(value);
+let appearance='normal',foreground='#000000',background=canvasBackground;
+let moveComposition=false,horizon=0,flatInset=45,hairlinePath=null;
+function compose(scale,ink='#000',paper='#fff'){
  const width=W*scale,height=H*scale;
  if(whiteBack.width!==width||whiteBack.height!==height){whiteBack.width=width;whiteBack.height=height;}
  if(scene.width!==width||scene.height!==height){scene.width=width;scene.height=height;scratch.width=width;scratch.height=height;}
  composition.clearRect(0,0,width,height);
  const circle=frame==='none'?null:circleGeometry();
- composition.fillStyle='#000';
+ composition.fillStyle=ink;
  if(circle){
-  if(base)composition.fillRect(0,(circle.y+circle.radius*(.63-base*.007))*scale,width,height);
+  if(base)composition.fillRect(0,(circle.y+circle.radius*(.63-base*.007+horizon/100))*scale,width,height);
   drawHangers(composition,scale,circle);
+  drawCircleFrame(composition,scale,circle,ink);
  }else if(base)composition.fillRect(16*scale,floor*scale,(W-32)*scale,base*scale);
  for(const item of objects){
   const g=geometry(item);
-  if(g.snow){
-   const factor=scale*item.height/-g.top;
-   const sx=factor*(item.scaleX??1)*(item.mirrored?-1:1),sy=factor*(item.scaleY??1);
-   const opening=new Path2D();
-   opening.addPath(g.snow,new DOMMatrix([sx,0,0,sy,item.x*scale,item.y*scale]));
-   composition.save();composition.fillStyle=houseBacking;composition.fill(opening);composition.restore();
-  }
   sc.clearRect(0,0,width,height);
   const reinforce=circle&&(item.village!=null||item.type==='needle')?mmToUnits(minimumMm)*scale*.82:0;
-  drawObject(sc,item,g,scale,true,'#000',reinforce);
-  if(item.parts||g.back||g.snow||g.inset.length||['lamp','lantern'].includes(item.type)){
-   whiteCtx.clearRect(0,0,width,height);drawObject(whiteCtx,item,g,scale,false,houseBacking);
+  drawObject(sc,item,g,scale,true,ink,reinforce);
+  if(item.detailTreatment==='background'||(item.detailTreatment==null&&legacyBacking(item,g))){
+   whiteCtx.clearRect(0,0,width,height);
+   drawObject(whiteCtx,item,g,scale,false,paper);
    whiteCtx.drawImage(scratch,0,0);composition.drawImage(whiteBack,0,0);
   }else composition.drawImage(scratch,0,0);
  }
- if(circle)completeCircle(composition,scale,circle);
+ if(circle)clipCircleScene(composition,scale,circle);
+}
+function legacyBacking(item,g){
+ return item.asset!=null||!!item.parts||g.inset.length>0||['lamp','lantern'].includes(item.type);
+}
+function detailLabel(item){
+ if(!item)return '';
+ const g=geometry(item);
+ if(item.type==='snow')return 'Sníh';
+ if(g.back||g.inset.length||item.parts)return ['house','church'].includes(item.type)?'Okna a další uzavřené detaily':'Uzavřené detaily';
+ return '';
 }
 function bounds(item){
  const g=geometry(item),r=item.height/(item.unitTop??g.reference??-g.top);
@@ -801,9 +893,22 @@ function bounds(item){
  return {left:Math.min(...corners.map(p=>p[0])),top:Math.min(...corners.map(p=>p[1])),right:Math.max(...corners.map(p=>p[0])),bottom:Math.max(...corners.map(p=>p[1]))};
 }
 function paint(){
- compose(1,canvasBackground);ctx.clearRect(0,0,W,H);
- ctx.drawImage(scene,0,0);
- if(lastCheck?.problem && lastCheck.scale===1){
+ ctx.clearRect(0,0,W,H);
+ stage.style.backgroundColor=background;
+ if(appearance==='hairline'){
+  const scale=cutScale();
+  if(!hairlinePath){
+   const {mask,w,h}=cutMask(scale);
+   hairlinePath=new Path2D(contourSVG(mask,w,h));
+  }
+  ctx.save();ctx.scale(1/scale,1/scale);
+  ctx.strokeStyle=foreground;ctx.lineWidth=scale*W/Math.max(1,stage.clientWidth);
+  ctx.stroke(hairlinePath);ctx.restore();
+ }else{
+  compose(1,foreground,background);
+  ctx.drawImage(scene,0,0);
+ }
+ if(appearance!=='hairline'&&lastCheck?.problem && lastCheck.scale===1){
   const {problem,keeper}=lastCheck,overlay=ctx.createImageData(W,H);
   for(let i=0;i<problem.length;i++)if(problem[i]&&problem[i]!==keeper){overlay.data[i*4]=205;overlay.data[i*4+1]=48;overlay.data[i*4+2]=38;overlay.data[i*4+3]=255;}
   const c=document.createElement('canvas');c.width=W;c.height=H;c.getContext('2d').putImageData(overlay,0,0);ctx.drawImage(c,0,0);
@@ -811,16 +916,24 @@ function paint(){
  const item=objects.find(o=>o.id===selected);
  if(item){
   const b=bounds(item);
-  ctx.strokeStyle='#fff1cd';ctx.lineWidth=8;ctx.strokeRect(b.left-3,b.top-3,b.right-b.left+6,b.bottom-b.top+6);
-  ctx.strokeStyle='#c58516';ctx.lineWidth=4;ctx.setLineDash([13,8]);ctx.strokeRect(b.left-3,b.top-3,b.right-b.left+6,b.bottom-b.top+6);ctx.setLineDash([]);
+  if(appearance!=='hairline'){
+   ctx.save();ctx.globalAlpha=.22;ctx.fillStyle='#00a589';
+   ctx.fillRect(b.left,b.top,b.right-b.left,b.bottom-b.top);ctx.restore();
+   ctx.strokeStyle='#008369';ctx.lineWidth=3;ctx.strokeRect(b.left,b.top,b.right-b.left,b.bottom-b.top);
+  }
   if(!$('context').hidden)positionMenu(item);
  }
 }
-function analyze(scale){
+function cutScale(){return Math.min(3,Math.max(1,Math.floor(Math.sqrt(6500000/(W*H)))));}
+function cutMask(scale){
  compose(scale);
  const w=scene.width,h=scene.height,count=w*h,rgba=composition.getImageData(0,0,w,h).data;
  const mask=new Uint8Array(count);
  for(let i=0;i<count;i++)mask[i]=rgba[i*4+3]>=128&&rgba[i*4]<128;
+ return {mask,w,h};
+}
+function analyze(scale){
+ const {mask,w,h}=cutMask(scale);
  return labelMask(mask,w,h,scale);
 }
 function labelMask(mask,w,h,scale){
@@ -845,7 +958,7 @@ function check(){
  if(lastCheck.components){
   let lo=W,hi=-1;
   for(let i=0;i<lastCheck.mask.length;i++)if(lastCheck.mask[i]){const x=i%W;lo=Math.min(lo,x);hi=Math.max(hi,x);}
-  if(!fullPage&&hi>=lo&&Math.abs(hi-lo+1-cutWidth)>1){cutWidth=hi-lo+1;lastCheck=analyze(1);syncInspector(selectedObject());}
+  if(!fullPage&&hi>=lo&&Math.abs(hi-lo+1-cutWidth)>1){cutWidth=hi-lo+1;hairlinePath=null;lastCheck=analyze(1);syncInspector(selectedObject());}
  }
  const n=lastCheck.components;
  const narrow=n===1&&frame!=='none'&&!hasStrongConnections(lastCheck);
@@ -853,7 +966,7 @@ function check(){
  $('status').classList.toggle('bad',n!==1||narrow);
  $('png').disabled=$('svg').disabled=n!==1||narrow;paint();
 }
-function schedule(){lastCheck=null;paint();clearTimeout(validationTimer);validationTimer=setTimeout(check,110);}
+function schedule(){lastCheck=null;hairlinePath=null;paint();clearTimeout(validationTimer);validationTimer=setTimeout(check,110);}
 const typeName=o=>o.village!=null?villageNames[o.village]:['needle','bell','bauble'].includes(o.type)?catalog[o.type][1][o.variant]:o.asset!=null?approvedNames[o.asset]:o.custom?'Vlastní domek':o.parts?catalog[o.type][1][o.variant]:catalog[o.type][0];
 function keepOnCanvas(item){
  const b=bounds(item),left=item.x-b.left,right=b.right-item.x;
@@ -1088,6 +1201,11 @@ function renderObjectForm(){
 }
 function refresh(){
  syncCircleControls();
+ $('horizon-control').hidden=frame==='none';
+ $('horizon').disabled=sceneLocked;$('horizon').value=horizon;$('horizon-value').textContent=horizon+' %';
+ $('move-composition').disabled=sceneLocked||!objects.length;
+ $('move-composition').setAttribute('aria-pressed',moveComposition&&!sceneLocked);
+ $('motif-open').disabled=sceneLocked;
  const baseButton=$('toggle-base');
  baseButton.textContent=base?'Odebrat podstavu':'Přidat podstavu';
  baseButton.setAttribute('aria-pressed',Boolean(base));
@@ -1101,9 +1219,12 @@ function refresh(){
  refreshSceneControls(item,index);
  $('layer-down').disabled=index<=0;$('layer-up').disabled=index<0||index===objects.length-1;
  if(!item)$('size-panel').hidden=true;
+ $('scene-layers').open=true;
  $('layers').replaceChildren(...objects.map((o,i)=>{
-  const b=document.createElement('button');b.textContent=`${typeName(o)} ${i+1}`;b.setAttribute('aria-pressed',o.id===selected);
-  b.onclick=()=>{selected=o.id;$('size-panel').hidden=true;$('context').hidden=false;refresh();};return b;
+  const b=document.createElement('button');
+  b.append(motifThumbnail(o),typeName(o));b.setAttribute('aria-label',typeName(o)+' '+(i+1));
+  b.setAttribute('aria-pressed',o.id===selected);
+  b.onclick=()=>{selected=o.id;$('size-panel').hidden=true;$('context').hidden=true;refresh();};return b;
  }));
  schedule();
 }
@@ -1149,6 +1270,10 @@ const pc=pick.getContext('2d',{willReadFrequently:true});
 stage.addEventListener('pointerdown',e=>{
  if(e.button!==0||drag||sceneLocked)return;
  const [x,y]=canvasPoint(e,stage);
+ if(moveComposition){
+  drag={group:objects.map(item=>({item,x:item.x,y:item.y})),x,y,clientX:e.clientX,clientY:e.clientY,id:e.pointerId};
+  stage.setPointerCapture(e.pointerId);return;
+ }
  const candidates=[...objects].reverse().filter(o=>{const b=bounds(o);return x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom;});
  const hit=candidates.find(o=>{pc.clearRect(0,0,W,H);drawObject(pc,o,geometry(o),1,!o.parts&&o.asset==null);return pc.getImageData(Math.floor(x),Math.floor(y),1,1).data[3]>127;})||candidates[0];
  $('context').hidden=true;$('size-panel').hidden=true;
@@ -1162,7 +1287,20 @@ stage.addEventListener('pointermove',e=>{
  if(drag?.id!==e.pointerId||drag.held)return;
  if(!drag.moved&&Math.hypot(e.clientX-drag.clientX,e.clientY-drag.clientY)<7)return;
  drag.moved=true;clearTimeout(drag.timer);
- const [x,y]=canvasPoint(e,stage),o=drag.item;o.x=x-drag.dx;o.y=y-drag.dy;keepOnCanvas(o);
+ const [x,y]=canvasPoint(e,stage);
+ if(drag.group){
+  const dx=x-drag.x,dy=y-drag.y;
+  const minDx=Math.max(...drag.group.map(entry=>-W*2-entry.x));
+  const maxDx=Math.min(...drag.group.map(entry=>W*3-entry.x));
+  const minDy=Math.max(...drag.group.map(entry=>-H*2-entry.y));
+  const maxDy=Math.min(...drag.group.map(entry=>H*3-entry.y));
+  for(const entry of drag.group){
+   entry.item.x=entry.x+clamp(dx,minDx,maxDx);
+   entry.item.y=entry.y+clamp(dy,minDy,maxDy);
+  }
+  syncFramePosition(selectedObject());schedule();return;
+ }
+ const o=drag.item;o.x=x-drag.dx;o.y=y-drag.dy;keepOnCanvas(o);
  if(frame==='none'&&base&&Math.abs(o.y-(floor+4))<11)o.y=floor+4;
  syncFramePosition(o);schedule();
 });
@@ -1238,6 +1376,55 @@ function categoryModels(type){
   (i===1)===(type==='church')?[[name,{...template(type),village:i,fixedHouse:true}]]:[]):[];
  return [...village,...originals,...standard,...recent];
 }
+let thumbnails=new WeakMap();
+function motifThumbnail(model){
+ let source=thumbnails.get(model);
+ if(!source){
+  source=document.createElement('canvas');source.width=112;source.height=64;
+  const g=geometry(model),factor=Math.min(50/Math.max(1,(g.bottom||0)-g.top),100/(2*g.half));
+  drawObject(source.getContext('2d'),{...model,rotation:0,scaleX:1,scaleY:1,x:56,y:58-(g.bottom||0)*factor,height:factor*(model.unitTop??g.reference??-g.top)},g);
+  thumbnails.set(model,source);
+ }
+ const icon=document.createElement('canvas');icon.width=112;icon.height=64;
+ icon.setAttribute('aria-hidden','true');icon.getContext('2d').drawImage(source,0,0);
+ return icon;
+}
+function placeMotif(model,point){
+ if(sceneLocked)return;
+ const x=point?.[0]??W*(.35+(objects.length*7)%30/100);
+ const circle=frame==='none'?null:circleGeometry();
+ const y=point?.[1]??(circle?(hangingTypes.has(model.type)?circle.y:circle.y+circle.radius*(.60+horizon/100)):floor+4);
+ const {id,label,...config}=structuredClone(model);
+ const placed=add(model.type,{...config,x,y:!circle&&base&&Math.abs(y-floor)<18?floor+4:y});
+ keepOnCanvas(placed);moveComposition=false;$('context').hidden=true;refresh();
+}
+const motifCategories=[
+ ['Domky',['house','church']],['Jehličí',['needle']],['Zvonky',['bell']],
+ ['Ozdoby',['bauble']],['Sníh',['snow']],['Stromy',['spruce','bare']],
+ ['Další motivy',Object.keys(catalog).filter(type=>!['house','church','needle','bell','bauble','snow','spruce','bare'].includes(type))],
+ ['Vlastní předlohy',[]]
+];
+function showMotifCategory(group){
+ $('motif-back').hidden=!group;$('motif-title').textContent=group?.[0]??'Přidat objekt';
+ const entries=group
+  ? group[1].length?group[1].flatMap(categoryModels):savedTemplates.map(item=>[item.label,item])
+  : motifCategories.filter(([,types])=>types.length||savedTemplates.length).map(category=>[category[0],category[1].length?categoryModels(category[1][0])[0]?.[1]:savedTemplates[0],category]);
+ if(group?.[0]==='Domky')entries.push(['Vlastní dům',null]);
+ $('motif-grid').replaceChildren(...entries.map(([name,model,category])=>{
+  const button=document.createElement('button');
+  if(model)button.append(motifThumbnail(model));
+  button.append(name);
+  button.onclick=()=>{
+   if(category){showMotifCategory(category);$('motif-grid').querySelector('button')?.focus();return;}
+   $('motif-dialog').close();
+   if(model)placeMotif(model);else $('empty-building').onclick();
+  };
+  return button;
+ }));
+}
+$('motif-open').onclick=()=>{showMotifCategory(null);$('motif-dialog').showModal();};
+$('motif-back').onclick=()=>{showMotifCategory(null);$('motif-grid').querySelector('button')?.focus();};
+$('motif-close').onclick=()=>$('motif-dialog').close();
 function library(){
  const type=category.value;
  const saved=savedTemplates.map(item=>[item.label,item]);
@@ -1251,20 +1438,12 @@ function library(){
  $('palette-all').setAttribute('aria-pressed',paletteMode==='all');
  if($('library').classList.toggle)$('library').classList.toggle('all-objects',paletteMode!=='filtered');
  $('library').replaceChildren(...variants.map(([name,model])=>{
-  const button=document.createElement('button'),icon=document.createElement('canvas');
-  icon.width=112;icon.height=64;icon.setAttribute('aria-hidden','true');
+  const button=document.createElement('button');
   if(!model){button.innerHTML=partIcon('wall');button.append(name);button.onclick=$('empty-building').onclick;return button;}
-  const g=geometry(model),factor=Math.min(50/Math.max(1,(g.bottom||0)-g.top),100/(2*g.half));
-  drawObject(icon.getContext('2d'),{...model,scaleX:1,scaleY:1,x:56,y:58-(g.bottom||0)*factor,height:factor*(model.unitTop??g.reference??-g.top)},g);
-  button.append(icon,name);
+  const thumbnail=motifThumbnail(model);
+  button.append(thumbnail,name);
   paletteDrag(button,name,stage,point=>{
-   const x=point?.[0]??W*(.35+(objects.length*7)%30/100);
-   if(sceneLocked)return;
-   const circle=frame==='none'?null:circleGeometry();
-   const y=point?.[1]??(circle?(hangingTypes.has(model.type)?circle.y:circle.y+circle.radius*.60):floor+4);
-   const {id,label,...config}=model;
-   const placed=add(model.type,{...config,x,y:!circle&&base&&Math.abs(y-floor)<18?floor+4:y});
-   keepOnCanvas(placed);$('context').hidden=true;refresh();
+   placeMotif(model,point);
   });
   return button;
  }));
@@ -1370,6 +1549,7 @@ function syncInspector(item){
 function refreshSceneControls(item,index){
  syncFramePosition(item);
  $('scene-tools').hidden=!item;
+ for(const id of ['quick-detail','inspector-detail'])$(id).hidden=!detailLabel(item);
  $('inspector-empty').hidden=!!item;
  $('inspector-fields').hidden=!item;
  if(!item)return;
@@ -1396,6 +1576,64 @@ for(const [id,key,other] of [['inspector-x','scaleX','scaleY'],['inspector-y','s
 for(const [id,key,other] of [['inspector-scale-x','scaleX','scaleY'],['inspector-scale-y','scaleY','scaleX']]){
  $(id).addEventListener('input',()=>{const item=selectedObject();if(item)resizeSceneItem(item,key,other,$(id).valueAsNumber/100);});
 }
+$('quick-rotate').innerHTML=uiIcon('M20 7v5h-5M20 12a8 8 0 1 0-2.3 5.7');
+$('quick-copy').innerHTML=uiIcon('M8 8h12v12H8zM16 8V4H4v12h4');
+$('move-composition').innerHTML=uiIcon('M12 2v20M2 12h20M9 5l3-3 3 3M9 19l3 3 3-3M5 9l-3 3 3 3M19 9l3 3-3 3')+' Posun kompozice';
+$('quick-rotate').onclick=$('inspector-rotate').onclick=()=>{
+ const item=selectedObject();if(!item||sceneLocked)return;
+ item.rotation=(((item.rotation??0)+195)%360)-180;keepOnCanvas(item);refresh();
+};
+$('quick-copy').onclick=$('inspector-copy').onclick=()=>{
+ const item=selectedObject();if(!item||sceneLocked)return;
+ const copy={...structuredClone(item),id:nextId++,x:item.x+W*.025,y:item.y-H*.025};
+ keepOnCanvas(copy);objects.splice(objects.indexOf(item)+1,0,copy);
+ selected=copy.id;refresh();
+};
+$('move-composition').onclick=()=>{
+ moveComposition=!moveComposition;$('context').hidden=true;refresh();
+};
+$('horizon').oninput=()=>{
+ horizon=$('horizon').valueAsNumber;$('horizon-value').textContent=horizon+' %';schedule();
+};
+$('quick-detail').onclick=$('inspector-detail').onclick=()=>{
+ const item=selectedObject(),label=detailLabel(item);if(!label||sceneLocked)return;
+ $('detail-label').textContent=label;
+ $('detail-treatment').value=item.detailTreatment??(legacyBacking(item,geometry(item))?'background':'transparent');
+ $('detail-dialog').showModal();
+};
+$('detail-close').onclick=()=>$('detail-dialog').close();
+$('detail-treatment').onchange=()=>{
+ const item=selectedObject();if(!item||sceneLocked)return;
+ item.detailTreatment=$('detail-treatment').value;schedule();
+};
+function syncAppearance(){
+ $('color-error').textContent='';
+ for(const button of $('appearance-modes').querySelectorAll('button'))button.setAttribute('aria-pressed',button.value===appearance);
+ for(const [name,value] of [['foreground',foreground],['background',background]]){
+  $(name).value=$(name+'-picker').value=value;
+ }
+ $('color-preset').value=foreground+','+background;
+}
+$('appearance-open').onclick=()=>{syncAppearance();$('appearance-dialog').showModal();};
+$('appearance-close').onclick=()=>$('appearance-dialog').close();
+$('appearance-modes').onclick=event=>{
+ const mode=event.target.value;
+ if(!['normal','inverse','hairline'].includes(mode))return;
+ appearance=mode;
+ if(mode!=='hairline')[foreground,background]=paletteDefaults[mode];
+ syncAppearance();paint();
+};
+$('color-preset').onchange=()=>{
+ const value=$('color-preset').value;if(!value)return;
+ [foreground,background]=value.split(',');syncAppearance();paint();
+};
+for(const [name,apply] of [['foreground',value=>foreground=value],['background',value=>background=value]]){
+ for(const input of [$(name),$(name+'-picker')])input.onchange=()=>{
+  const value=input.value.trim().toLowerCase();
+  if(!isHex(value)){$('color-error').textContent='Zadej HEX barvu ve formátu #RRGGBB.';return;}
+  apply(value);syncAppearance();paint();
+ };
+}
 let sceneZoom=1;
 function zoomScene(step){
  sceneZoom=clamp(sceneZoom+step,0.75,2.5);
@@ -1403,6 +1641,7 @@ function zoomScene(step){
  $('zoom-fit').textContent=Math.round(sceneZoom*100)+' %';
  $('zoom-out').disabled=sceneZoom<=.75;
  $('zoom-in').disabled=sceneZoom>=2.5;
+ if(appearance==='hairline')paint();
  if(!$('context').hidden&&selectedObject())positionMenu(selectedObject());
 }
 $('zoom-out').onclick=()=>zoomScene(-.25);
@@ -1466,7 +1705,7 @@ for(const [id,value,label,change] of [
  });
 }
 function syncCanvasDimensions(width,height){
- W=width;H=height;floor=H-45;
+ W=width;H=height;floor=H-flatInset;
  stage.width=W;stage.height=H;pick.width=W;pick.height=H;
  cutWidth=fullPage?W:W-32;
 }
@@ -1477,52 +1716,68 @@ function resizePage(widthMm,heightMm,scaleScene){
  // Limit working raster size while preserving the requested physical aspect ratio.
  const fit=Math.min(1,2200/width,1500/height);
  const targetW=Math.round(width*fit),targetH=Math.round(height*fit);
- const oldDensity=fullPage?W/outputMm:cutWidth/outputMm;
- const priorFloor=floor, priorW=W;
- const physicalFit=scaleScene?Math.min(widthMm/(W/oldDensity),heightMm/(H/oldDensity)):1;
- const multiplier=(targetW/widthMm)/oldDensity*physicalFit;
+ const priorW=W,priorH=H,priorFloor=floor;
+ const priorCircle=frame==='none'?null:circleGeometry();
+ const priorScale=priorCircle?priorCircle.radius:Math.min(priorW,priorH);
+ const multiplier=scaleScene?Math.min(targetW,targetH)/Math.min(priorW,priorH):targetW/priorW;
+ if(scaleScene&&!priorCircle){
+  base=clamp(base*multiplier,0,1500);
+  flatInset=clamp(flatInset*multiplier,1,targetH*.8);
+ }
  fullPage=true;outputMm=widthMm;pageHeightMm=heightMm;
  syncCanvasDimensions(targetW,targetH);
+ const circle=priorCircle?circleGeometry():null;
+ const sizeScale=circle?circle.radius/priorScale:multiplier;
  for(const item of objects){
-  item.x=item.x*multiplier+(scaleScene?(W-priorW*multiplier)/2:0);
-  item.y=floor+(item.y-priorFloor)*multiplier;
-  item.height*=multiplier;
-  if(item.poleHeight!=null)item.poleHeight*=multiplier;
-  if(item.headSize!=null)item.headSize*=multiplier;
+  item.x=circle?circle.x+(item.x-priorCircle.x)*sizeScale:base?16+(item.x-16)*(W-32)/(priorW-32):item.x*W/priorW;
+  item.y=circle?circle.y+(item.y-priorCircle.y)*sizeScale:floor+(item.y-priorFloor)*sizeScale;
+  item.height*=sizeScale;
+  if(item.poleHeight!=null)item.poleHeight*=sizeScale;
+  if(item.headSize!=null)item.headSize*=sizeScale;
  }
- base=clamp(Math.round(base*multiplier),0,45);
  $('mm').value=outputMm;$('mm-value').textContent=outputMm+' mm';
- $('base').value=base;$('base-value').textContent=base;
+ $('base').max=Math.max(45,Math.ceil(base));$('base').value=base;$('base-value').textContent=base;
  refresh();check();return true;
 }
 $('page-open').onclick=()=>{
  const dialog=$('page-dialog');
  $('page-width').value=outputMm;
  $('page-height').value=Number((pageHeightMm??outputMm*H/(cutWidth||W)).toFixed(1));
- $('page-error').textContent='';
- dialog.showModal();
+ $('page-preset').value='';$('diameter-help').hidden=frame==='none';
+ $('page-error').textContent='';dialog.showModal();
 };
+$('page-preset').onchange=()=>{
+ const diameter=Number($('page-preset').value);if(!diameter)return;
+ const ratio=frame==='eye'?.87:.94;
+ const size=frame==='none'?diameter:Number((diameter/ratio).toFixed(1));
+ $('page-width').value=$('page-height').value=size;
+};
+for(const id of ['page-width','page-height'])$(id).oninput=()=>$('page-preset').value='';
 $('page-cancel').onclick=()=>$('page-dialog').close();
 $('page-apply').onclick=()=>{
- if(!resizePage($('page-width').valueAsNumber,$('page-height').valueAsNumber,$('page-scale').checked)){
+ if(!resizePage($('page-width').valueAsNumber,$('page-height').valueAsNumber,true)){
   $('page-error').textContent='Zadej šířku 30–1500 mm a výšku 20–1000 mm.';return;
  }
  $('page-dialog').close();
 };
 
 function snapshotProject(){
- return {format:'vanocni-dilna',version:1,base,outputMm,mullionMm,frame,rimMm,minimumMm,sceneLocked,canvasWidth:W,canvasHeight:H,pageHeightMm,fullPage,objects:structuredClone(objects)};
+ return {format:'vanocni-dilna',version:2,base,outputMm,mullionMm,frame,rimMm,minimumMm,sceneLocked,horizon,flatInset,appearance,foreground,background,canvasWidth:W,canvasHeight:H,pageHeightMm,fullPage,objects:structuredClone(objects)};
 }
 function readProject(text){
  const fail=()=>{throw new Error('Soubor neobsahuje platnou kompozici Vánoční dílny.');};
  const data=JSON.parse(text);
  const between=(v,min,max)=>Number.isFinite(v)&&v>=min&&v<=max;
  const index=(v,count)=>Number.isInteger(v)&&v>=0&&v<count;
- if(data?.format!=='vanocni-dilna'||data.version!==1||!Array.isArray(data.objects)||data.objects.length>1000||
-    !between(data.base,0,45)||!between(data.outputMm,30,1500)||!between(data.mullionMm,.4,5))fail();
+ if(data?.format!=='vanocni-dilna'||![1,2].includes(data.version)||!Array.isArray(data.objects)||data.objects.length>1000||
+    !between(data.base,0,data.version===1?45:1500)||!between(data.outputMm,30,1500)||!between(data.mullionMm,.4,5))fail();
  if((data.frame!=null&&!circleOptions.includes(data.frame))||
     (data.rimMm!=null&&!between(data.rimMm,1,18))||(data.minimumMm!=null&&!between(data.minimumMm,.4,5))||
     (data.sceneLocked!=null&&typeof data.sceneLocked!=='boolean'))fail();
+ if((data.horizon!=null&&!between(data.horizon,-80,25))||
+    (data.flatInset!=null&&!between(data.flatInset,1,1500))||
+    (data.appearance!=null&&!['normal','inverse','hairline'].includes(data.appearance))||
+    (data.foreground!=null&&!isHex(data.foreground))||(data.background!=null&&!isHex(data.background)))fail();
  const pageW=data.canvasWidth??defaultW,pageH=data.canvasHeight??defaultH;
  if(!Number.isInteger(pageW)||!Number.isInteger(pageH)||!between(pageW,40,2200)||!between(pageH,40,1500)||
     (data.fullPage&&!between(data.pageHeightMm,20,1000)))fail();
@@ -1535,6 +1790,7 @@ function readProject(text){
   ids.add(o.id);
   if((o.village!=null&&(!index(o.village,villageNames.length)||(o.village===1?'church':'house')!==o.type||o.asset!=null||o.parts!=null))||
      (o.rotation!=null&&!between(o.rotation,-180,180))||
+     (o.detailTreatment!=null&&!['transparent','background'].includes(o.detailTreatment))||
      (o.cordMm!=null&&!between(o.cordMm,.4,10))||(o.hanging!=null&&typeof o.hanging!=='boolean'))fail();
   if(o.village!=null)o.fixedHouse=true;
   if(o.asset!=null&&(!index(o.asset,approvedBuildings.length)||o.type!==assetType(o.asset)))fail();
@@ -1558,8 +1814,11 @@ function openProject(data){
  objects=data.objects;
  frame=data.frame??'none';rimMm=data.rimMm??5;minimumMm=data.minimumMm??1.6;sceneLocked=data.sceneLocked??false;
  base=data.base;outputMm=data.outputMm;mullionMm=data.mullionMm;
+ horizon=data.horizon??0;flatInset=data.flatInset??45;moveComposition=false;
+ appearance=data.appearance??'normal';foreground=data.foreground??'#000000';background=data.background??canvasBackground;
+ $('base').max=Math.max(45,Math.ceil(base));
  nextId=objects.reduce((last,o)=>Math.max(last,o.id+1),1);
- selected=null;draft=null;componentIndex=0;fullPage=!!data.fullPage;pageHeightMm=data.pageHeightMm??null;
+ thumbnails=new WeakMap();selected=null;draft=null;componentIndex=0;fullPage=!!data.fullPage;pageHeightMm=data.pageHeightMm??null;
  syncCanvasDimensions(data.canvasWidth??defaultW,data.canvasHeight??defaultH);
  $('context').hidden=true;$('size-panel').hidden=true;
  for(const [id,value,unit] of [['base',base,''],['mm',outputMm,' mm'],['mullion',mullionMm,' mm']]){
@@ -1632,14 +1891,7 @@ function download(blob,name){
  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),30000);
 }
 function exportFile(type){
- const exportScale=Math.min(3,Math.max(1,Math.floor(Math.sqrt(6500000/(W*H)))));
- let result=analyze(exportScale);
- for(let pass=0;!fullPage&&pass<2;pass++){
-  let lo=result.w,hi=-1;
-  for(let y=0;y<result.h;y++)for(let x=0;x<result.w;x++)if(result.mask[y*result.w+x]){lo=Math.min(lo,x);hi=Math.max(hi,x);}
-  if(hi<lo||Math.abs((hi-lo+1)/exportScale-cutWidth)<.01)break;
-  cutWidth=(hi-lo+1)/exportScale;result=analyze(exportScale);
- }
+ const result=analyze(cutScale());
  if(result.components!==1){
   $('status').textContent='Export zastaven: ve vysokém rozlišení nejsou všechny části spojené.';
   $('status').classList.add('bad');return;
