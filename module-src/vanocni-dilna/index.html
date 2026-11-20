@@ -227,16 +227,79 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  #zoom-range{--range-fill:14.3%}
  #scene-mode .scene-footer{display:flex;order:10;padding:3px 0}
 }
+#object-tools{display:grid;gap:9px}
+#object-tools-home:empty{display:none}
+#object-tools-home:has(#scene-tools[hidden]){display:none}
+#snow-picker{padding:8px;border:1px solid var(--line);border-radius:10px;background:#fffaef}
+#snow-picker h3{font-size:15px;margin:0}
+#snow-picker .dialog-heading button{min-width:36px;padding:4px}
+#snow-options{margin:7px 0;gap:4px}
+#snow-options button{display:grid;justify-items:center;min-height:65px}
+#snow-options canvas{width:100%;height:auto;max-width:112px}
+#snow-insert{width:100%}
+#motif-dialog:has(#snow-picker:not([hidden])) #motif-grid,#motif-dialog:has(#snow-picker:not([hidden])) #motif-back{display:none}
+#mobile-export-formats .export-actions{display:flex!important;gap:8px}
+@media (min-width:761px) and (orientation:portrait), (orientation:landscape) and (min-height:501px), (orientation:landscape) and (min-width:1001px){
+ .masthead,#scene-mode{max-width:none;margin:0;border-radius:0}
+ #scene-mode{display:grid;grid-template-columns:minmax(0,1fr) minmax(235px,31%);grid-template-rows:auto minmax(0,1fr) auto auto;gap:9px;padding:9px 12px 12px;min-height:calc(100svh - 60px)}
+ #scene-mode > .composition-head{grid-column:1;grid-row:1;display:grid;justify-content:start;gap:6px;padding:0!important}
+ #mobile-files,#mobile-project{display:flex;gap:6px}
+ #mobile-files button,#mobile-project button,.zoom-tools button,#scene-mode .scene-tools button,#motif-open,#motifs-left,#motifs-right{display:grid;place-items:center;min-width:44px;min-height:42px;padding:4px}
+ #mobile-files svg,#mobile-project svg,.zoom-tools svg,#scene-mode .scene-tools svg,#scene-mode .option-grid svg,.layer-strip button svg{display:block;width:23px;height:23px;margin:0}
+ #mobile-project button[aria-pressed=true]:not(#mobile-base),#scene-mode .scene-tools button[aria-expanded=true]{background:var(--pine);color:white}
+ .project-tools{display:contents!important}.project-tools > button,#project-message:empty{display:none}
+ .frame-tools,.scene-controls{display:none!important}
+ [data-mobile-project=frame] .frame-tools,[data-mobile-project=template] .frame-tools,[data-mobile-project=frame] .scene-controls{display:flex!important}
+ [data-mobile-project=frame] #template-choice,[data-mobile-project=template] #frame-choice,[data-mobile-project=template] #frame-settings,[data-mobile-project=template] #frame-position,.scene-controls #appearance-open,.scene-controls #move-composition{display:none!important}
+ #scene-mode .scene-viewport{grid-column:1;grid-row:2;display:flex;flex-direction:column-reverse;justify-content:flex-end;align-items:stretch;min-height:0;background:#fffcf5;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+ #scene-mode .scene-scroll{align-self:stretch;overflow:auto;max-height:62svh;overscroll-behavior:contain}
+ #scene-mode .composition-stage{display:block;width:calc(100% * var(--scene-zoom,1));min-height:0;padding:0}
+ #stage.scene-locked{touch-action:none}
+ #scene-mode .zoom-tools{position:static;display:flex;align-items:center;gap:8px;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:4px 8px}
+ #zoom-out{order:0}#zoom-range{display:block;flex:1;order:1}#zoom-value{display:block;order:2;white-space:nowrap}#zoom-in{order:3}#mobile-fit{order:4}#scene-mode #zoom-fit{display:none}
+ #scene-mode .zoom-tools button{min-width:38px;min-height:36px}
+ #scene-mode .scene-extra{display:block!important;grid-column:1;grid-row:3;padding:0;margin:0;border:0;overflow:hidden}
+ #scene-mode .scene-extra summary,#scene-mode #layers-arrows,#context{display:none!important}
+ #scene-mode #layers{display:flex;gap:7px;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+ #scene-mode #layers button{width:64px;flex:none;min-height:44px;scroll-snap-align:start;padding:4px;font-size:0}
+ #scene-mode #layers button canvas{width:49px;height:31px}
+ #scene-mode .scene-footer{display:flex;grid-column:1;grid-row:4;margin:0;padding:0}
+ #scene-mode .scene-panel-tabs{display:flex;grid-column:2;grid-row:1;align-self:start}
+ #scene-mode .scene-library,#scene-mode .wide-inspector{grid-column:2;grid-row:2/5;margin:0;padding:9px;max-height:none;min-height:0;align-self:stretch;overflow:auto;border:1px solid var(--line);border-radius:10px;background:#faf4e8}
+ #scene-mode[data-panel=palette] .wide-inspector,#scene-mode[data-panel=object] .scene-library{display:none}
+ #scene-mode[data-panel=object] .wide-inspector{display:block}
+ #scene-mode .scene-library .tile-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:auto}
+ #scene-mode .scene-library .tile-strip button{min-width:0;max-width:none}
+ #scene-mode .scene-library .tile-strip canvas{width:62px;height:39px}
+ #scene-mode .scene-library:has(#snow-picker:not([hidden])) > :not(.panel-title,#wide-snow-mount){display:none!important}
+ #scene-mode .scene-tools{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:0}
+ #scene-mode .scene-tools[hidden]{display:none!important}
+ #scene-mode .scene-tools button{font-size:0;min-width:0}
+ #scene-mode .object-options:not([hidden]),#scene-mode #size-panel:not([hidden]){display:grid;gap:7px;border:1px solid var(--line);border-radius:9px;padding:8px;background:#fff9ee}
+ #scene-mode #size-panel strong{display:block}
+ #scene-mode .option-grid,.rotate-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+ #scene-mode .option-grid button{display:grid;place-items:center;padding:4px}
+ #scene-mode .rotate-row{grid-template-columns:minmax(44px,.55fr) 1fr 1fr;align-items:center}
+ #inspector-fields{display:none!important}
+}
+@media (min-width:1080px) and (min-height:601px){
+ #scene-mode{grid-template-columns:minmax(180px,19%) minmax(0,1fr) minmax(215px,21%)}
+ #scene-mode > .composition-head,#scene-mode .scene-viewport,#scene-mode .scene-extra,#scene-mode .scene-footer{grid-column:2}
+ #scene-mode .scene-panel-tabs{display:none}
+ #scene-mode .scene-library{display:block!important;grid-column:1;grid-row:1/5}
+ #scene-mode .wide-inspector{display:block!important;grid-column:3;grid-row:1/5}
+}
 </style>
 <script src="./bridge.js"></script>
 <script src="./winter-motifs.js"></script>
 <script src="./circle.js"></script>
+<script src="./snow-motifs.js"></script>
 </head>
 <body>
 <header class="masthead">
  <button id="setup-open" class="header-icon" aria-label="Nastavení řezu" title="Nastavení řezu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
  <svg class="winter left" viewBox="0 0 88 64" aria-hidden="true"><path d="M25 10l3 7 7 3-7 3-3 7-3-7-7-3 7-3zm24-8 10 15h-5l11 12h-8l13 13H53v12h-8V42H29l13-13h-8l11-12h-6zm27 27 7 11h-3l7 10h-8v9h-5v-9h-8l7-10h-3z" fill="currentColor"/></svg>
- <h1>Vánoční dílna <small class="app-version">1.3.2</small></h1>
+ <h1>Vánoční dílna <small class="app-version">1.4.0</small></h1>
  <svg class="winter right-winter" viewBox="0 0 88 64" aria-hidden="true"><path d="M18 27l8 13h-4l9 10H20v9h-5v-9H5l9-10h-4zm29-25 10 15h-5l11 12h-8l13 13H51v12h-8V42H27l13-13h-8l11-12h-6zm28 8 3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="currentColor"/></svg>
  <svg class="snow-edge" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 13Q45-4 82 11T158 13T236 10T311 15T400 12V22H0Z" fill="currentColor"/></svg>
 </header>
@@ -274,23 +337,9 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  </section>
  </div><div class="zoom-tools" aria-label="Přiblížení plátna"><button id="zoom-out" aria-label="Oddálit">−</button><input class="mobile-only" id="zoom-range" type="range" min="75" max="250" step="1" value="100" aria-label="Přiblížení v procentech"><output class="mobile-only" id="zoom-value">100 %</output><button id="zoom-fit" aria-label="Přizpůsobit plátno">100 %</button><button id="zoom-in" aria-label="Přiblížit">+</button><button id="mobile-fit" class="mobile-only" aria-label="Přizpůsobit plátno"></button></div></div>
  <details class="scene-extra" id="scene-layers"><summary>Objekty v kompozici</summary><div class="strip-arrows" id="layers-arrows" hidden><span>Objekty v kompozici</span><button id="layers-left" aria-label="Objekty v kompozici doleva" aria-controls="layers">‹</button><button id="layers-right" aria-label="Objekty v kompozici doprava" aria-controls="layers">›</button></div><div class="layer-strip"><button id="motif-open" class="primary" aria-label="Přidat objekt" title="Přidat objekt">+</button><button id="motifs-left" class="mobile-only" aria-label="Předchozí objekty" hidden>‹</button><nav class="layers" id="layers" aria-label="Objekty v kompozici"></nav><button id="motifs-right" class="mobile-only" aria-label="Další objekty" hidden>›</button></div></details>
- <div id="scene-tools" class="scene-tools" hidden>
+ <div id="object-tools-home"><div id="object-tools"> <div id="scene-tools" class="scene-tools" hidden>
   <button id="quick-edit">Upravit</button><button id="quick-rotate" aria-label="Otočit o 15°" title="Otočit o 15°"></button><button id="quick-copy" aria-label="Duplikovat" title="Duplikovat"></button><button id="quick-detail">Detaily</button><button id="quick-mirror">Zrcadlit</button><button id="quick-layer">Vrstvy</button><button id="quick-size">Velikost</button><button id="quick-remove">Smazat</button>
  </div>
- <div class="segments scene-panel-tabs" role="group" aria-label="Panel vpravo"><button id="panel-palette" aria-pressed="true">Paleta</button><button id="panel-object" aria-pressed="false">Objekt</button></div>
- <aside class="wide-inspector" aria-label="Vybraný objekt" id="wide-inspector">
-  <h3 class="panel-title">Vybraný objekt</h3><p id="inspector-empty">Vyber objekt na plátně.</p>
-  <div id="inspector-fields" hidden>
-   <strong id="inspector-name"></strong>
-   <div class="inspector-actions"><button id="inspector-rotate">Otočit o 15°</button><button id="inspector-copy">Duplikovat</button><button id="inspector-detail">Detaily</button></div>
-   <label>Šířka (mm) <input type="number" id="inspector-x" step="0.1" min="0.1"></label>
-   <label>Výška (mm) <input type="number" id="inspector-y" step="0.1" min="0.1"></label>
-   <label>Šířka <input id="inspector-scale-x" type="range" min="20" max="200" step="1" aria-label="Šířka objektu v procentech"></label>
-   <label>Výška <input id="inspector-scale-y" type="range" min="20" max="200" step="1" aria-label="Výška objektu v procentech"></label>
-   <label><input type="checkbox" id="inspector-lock"> Zamknout poměr</label>
-   <div class="inspector-actions"><button id="inspector-edit">Upravit</button><button id="inspector-mirror">Zrcadlit</button><button id="inspector-up">Dopředu</button><button id="inspector-down">Dozadu</button><button id="inspector-remove">Smazat</button></div>
-  </div>
- </aside>
  <section id="mobile-layer-panel" class="mobile-only object-options" hidden aria-label="Vrstvy">
   <strong>Vrstvy</strong><div class="option-grid">
    <button value="front">Úplně vpřed</button><button value="forward">O krok vpřed</button><button value="backward">O krok vzad</button><button value="back">Úplně vzad</button>
@@ -308,10 +357,32 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
   <label><input id="lock-aspect" type="checkbox" checked> Zamknout poměr stran</label>
   <label>Šířka <input id="scale-x" type="range" min="20" max="200" step="1"><output id="scale-x-value"></output></label>
   <label>Výška <input id="scale-y" type="range" min="20" max="200" step="1"><output id="scale-y-value"></output></label>
+    <div id="placed-snow-sizes" class="segments" role="group" aria-label="Velikost sněhového motivu" hidden><button value="0">Malá</button><button value="1">Střední</button><button value="2">Velká</button></div>
   <button id="size-done" aria-label="Sbalit nastavení velikosti">Hotovo</button>
  </section>
+ </div></div>
+ <div class="segments scene-panel-tabs" role="group" aria-label="Panel vpravo"><button id="panel-palette" aria-pressed="true">Motivy</button><button id="panel-object" aria-pressed="false">Objekt</button></div>
+ <aside class="wide-inspector" aria-label="Vybraný objekt" id="wide-inspector">
+  <h3 class="panel-title">Vybraný objekt</h3><div id="wide-tools-mount"></div><p id="inspector-empty">Vyber objekt na plátně.</p>
+  <div id="inspector-fields" hidden>
+   <strong id="inspector-name"></strong>
+   <div class="inspector-actions"><button id="inspector-rotate">Otočit o 15°</button><button id="inspector-copy">Duplikovat</button><button id="inspector-detail">Detaily</button></div>
+   <label>Šířka (mm) <input type="number" id="inspector-x" step="0.1" min="0.1"></label>
+   <label>Výška (mm) <input type="number" id="inspector-y" step="0.1" min="0.1"></label>
+   <label>Šířka <input id="inspector-scale-x" type="range" min="20" max="200" step="1" aria-label="Šířka objektu v procentech"></label>
+   <label>Výška <input id="inspector-scale-y" type="range" min="20" max="200" step="1" aria-label="Výška objektu v procentech"></label>
+   <label><input type="checkbox" id="inspector-lock"> Zamknout poměr</label>
+   <div class="inspector-actions"><button id="inspector-edit">Upravit</button><button id="inspector-mirror">Zrcadlit</button><button id="inspector-up">Dopředu</button><button id="inspector-down">Dozadu</button><button id="inspector-remove">Smazat</button></div>
+  </div>
+ </aside>
  <section class="scene-library" aria-label="Paleta objektů">
-  <h3 class="panel-title">Paleta</h3>
+  <h3 class="panel-title">Motivy</h3><div id="wide-snow-mount">
+  <section id="snow-picker" hidden aria-labelledby="snow-name">
+   <div class="dialog-heading"><h3 id="snow-name"></h3><button id="snow-cancel" aria-label="Zavřít výběr velikosti">×</button></div>
+   <div id="snow-options" class="segments" role="group" aria-label="Velikost motivu"></div>
+   <button id="snow-insert" class="primary">＋ Vložit</button>
+  </section>
+ </div>
   <div class="segments palette-modes" role="group" aria-label="Zobrazení palety"><button id="palette-filtered" aria-pressed="false">Podle kategorií</button><button id="palette-all" aria-pressed="true">Všechny objekty</button></div>
   <details id="library-details"><summary>Vybrat kategorii</summary><label class="category">Druh objektu <select id="library-category"></select></label><button id="empty-building">Prázdná skupina domku</button></details>
   <div class="strip-arrows" id="library-arrows" hidden><span>Paleta objektů</span><button id="library-left" aria-label="Paleta objektů doleva" aria-controls="library">‹</button><button id="library-right" aria-label="Paleta objektů doprava" aria-controls="library">›</button></div><div id="library" class="library tile-strip"></div>
@@ -333,7 +404,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 </dialog>
 <dialog id="motif-dialog" aria-labelledby="motif-title">
  <div class="dialog-heading"><button id="motif-back" aria-label="Zpět na kategorie" hidden>←</button><h2 id="motif-title">Přidat objekt</h2><button id="motif-close" aria-label="Zavřít">×</button></div>
- <div id="motif-grid"></div>
+ <div id="motif-grid"></div><div id="mobile-snow-mount"></div>
 </dialog>
 <dialog id="appearance-dialog" aria-labelledby="appearance-title">
  <div class="dialog-heading"><h2 id="appearance-title">Vzhled projektu</h2><button id="appearance-close" aria-label="Zavřít">×</button></div>
@@ -745,14 +816,37 @@ function treeFromReference(item){
  const root=new Path2D();root.rect(-1.8,-2.5,3.6,2.6);
  return {ink,holes:new Path2D(),inset:[],strokes:[],solids:[root],top:-100,half:Math.max(anchor,w-anchor)*Math.abs(xScale)+2};
 }
+function snowMotifKey(item){
+ if(item.village!=null)return 'V'+(item.village+1);
+ if(item.asset!=null)return item.asset<tracedStart?'P'+(item.asset+1):tracedMotifs[item.asset-tracedStart]?.[0];
+}
+const snowPaths=new Map();
+function applySnowGeometry(item,g){
+ const key=snowMotifKey(item),index=item.snowSize;
+ const patch=snowMotifPatches[key]?.[index];
+ if(!patch)return g;
+ const cacheKey=key+':'+index;
+ if(!snowPaths.has(cacheKey)){
+  const path=new Path2D();
+  path.addPath(new Path2D(patch),new DOMMatrix().translate(-g.half-2,g.top-2));
+  snowPaths.set(cacheKey,path);
+ }
+ return {...g,solids:[...(g.solids||[]),snowPaths.get(cacheKey)]};
+}
 function geometry(item){
- if(item.asset!=null)return approvedGeometry(item.asset);
+ if(item.winterSpruce!=null){
+  const [,width,height,path]=snowySpruces[item.winterSpruce],ink=new Path2D(),back=new Path2D();
+  const matrix=new DOMMatrix().translate(-width/2,-height);
+  ink.addPath(new Path2D(path),matrix);back.addPath(new Path2D(path.split('Z',1)[0]+'Z'),matrix);
+  return {ink,back,holes:new Path2D(),inset:[],strokes:[],top:-height,half:width/2};
+ }
+ if(item.asset!=null)return applySnowGeometry(item,approvedGeometry(item.asset));
  if(item.village!=null||item.type==='needle'){
   const [width,height,path]=item.village!=null?winterMotifs.village[item.village]:winterMotifs.needle[item.variant];
   const ink=new Path2D();ink.addPath(new Path2D(path),new DOMMatrix().translate(-width/2,-height));
   const back=item.village!=null?new Path2D():null;
   if(back)back.addPath(new Path2D(path.split('Z',1)[0]+'Z'),new DOMMatrix().translate(-width/2,-height));
-  return {ink,back,holes:new Path2D(),inset:[],strokes:[],top:-height,half:width/2,evenOdd:true};
+  return applySnowGeometry(item,{ink,back,holes:new Path2D(),inset:[],strokes:[],top:-height,half:width/2,evenOdd:true});
  }
  const ink=new Path2D(), holes=new Path2D(), inset=[];
  const rect=(x,y,w,h,path=ink)=>path.rect(x,y,w,h);
@@ -1061,7 +1155,7 @@ function check(){
  $('png').disabled=$('svg').disabled=n!==1||narrow;paint();
 }
 function schedule(){lastCheck=null;hairlinePath=null;paint();clearTimeout(validationTimer);validationTimer=setTimeout(check,110);}
-const typeName=o=>o.village!=null?villageNames[o.village]:['needle','bell','bauble'].includes(o.type)?catalog[o.type][1][o.variant]:o.asset!=null?approvedNames[o.asset]:o.custom?'Vlastní domek':o.parts?catalog[o.type][1][o.variant]:catalog[o.type][0];
+const typeName=o=>o.winterSpruce!=null?snowySpruces[o.winterSpruce][0]:o.village!=null?villageNames[o.village]:['needle','bell','bauble'].includes(o.type)?catalog[o.type][1][o.variant]:o.asset!=null?approvedNames[o.asset]:o.custom?'Vlastní domek':o.parts?catalog[o.type][1][o.variant]:catalog[o.type][0];
 function keepOnCanvas(item){
  const b=bounds(item),left=item.x-b.left,right=b.right-item.x;
  item.x=clamp(item.x,Math.min(W/2,left+2),Math.max(W/2,W-right-2));
@@ -1372,11 +1466,11 @@ stage.addEventListener('pointerdown',e=>{
  }
  const candidates=[...objects].reverse().filter(o=>{const b=bounds(o);return x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom;});
  const hit=candidates.find(o=>{pc.clearRect(0,0,W,H);drawObject(pc,o,geometry(o),1,!o.parts&&o.asset==null);return pc.getImageData(Math.floor(x),Math.floor(y),1,1).data[3]>127;})||candidates[0];
- $('context').hidden=true;if(!mobileUI.matches)$('size-panel').hidden=true;
+ $('context').hidden=true;
  if(!hit){selected=null;refresh();return;}
  selected=hit.id;
  drag={item:hit,dx:x-hit.x,dy:y-hit.y,clientX:e.clientX,clientY:e.clientY,id:e.pointerId,moved:false,held:false};
- if(!mobileUI.matches)drag.timer=setTimeout(()=>{if(drag&&!drag.moved){drag.held=true;$('context').hidden=false;paint();}},475);
+
  stage.setPointerCapture(e.pointerId);refresh();
 });
 stage.addEventListener('pointermove',e=>{
@@ -1470,20 +1564,64 @@ function categoryModels(type){
  const standard=type==='house'?[]:catalog[type][1].map((name,variant)=>[name,{...template(type),variant}]);
  const village=type==='house'||type==='church'?villageNames.flatMap((name,i)=>
   (i===1)===(type==='church')?[[name,{...template(type),village:i,fixedHouse:true}]]:[]):[];
- return [...village,...originals,...standard,...recent];
+ const winter=type==='spruce'?snowySpruces.map(([name],winterSpruce)=>[name,{...template(type),winterSpruce,fixedHouse:true}]):[];
+ return [...village,...winter,...originals,...standard,...recent];
 }
 let thumbnails=new WeakMap();
-function motifThumbnail(model){
+function motifThumbnail(model,relativeSize=1){
  let source=thumbnails.get(model);
  if(!source){
   source=document.createElement('canvas');source.width=112;source.height=64;
-  const g=geometry(model),factor=Math.min(50/Math.max(1,(g.bottom||0)-g.top),100/(2*g.half));
+  const g=geometry(model),factor=relativeSize*Math.min(50/Math.max(1,(g.bottom||0)-g.top),100/(2*g.half));
   drawObject(source.getContext('2d'),{...model,rotation:0,scaleX:1,scaleY:1,x:56,y:58-(g.bottom||0)*factor,height:factor*(model.unitTop??g.reference??-g.top)},g);
   thumbnails.set(model,source);
  }
  const icon=document.createElement('canvas');icon.width=112;icon.height=64;
  icon.setAttribute('aria-hidden','true');icon.getContext('2d').drawImage(source,0,0);
  return icon;
+}
+function setSnowSize(item,index){
+ const scale=snowSizes[index][1]/(snowSizes[item.snowSize]?.[1]??1);
+ item.height*=scale;item.snowSize=index;
+ thumbnails.delete(item);
+}
+let pendingSnow=null;
+function showSnowPicker(model,point){
+ if(sceneLocked)return;
+ pendingSnow={model,point,size:1};
+ placeResponsiveControls();
+ if(!mobileUI.matches)setScenePanel('palette');
+ else if(!$('motif-dialog').open)$('motif-dialog').showModal();
+ $('snow-picker').hidden=false;
+ $('snow-name').textContent=typeName(model);
+ $('snow-options').replaceChildren(...snowSizes.map(([name,scale],i)=>{
+  const button=document.createElement('button');
+  button.append(motifThumbnail({...model,snowSize:i},scale),name);
+  button.setAttribute('aria-pressed',i===1);
+  button.onclick=()=>{
+   pendingSnow.size=i;
+   for(const [index,choice] of Array.from($('snow-options').children).entries())choice.setAttribute('aria-pressed',i===index);
+  };
+  return button;
+ }));
+ $('snow-options').children[1].focus?.();
+}
+function closeSnowPicker(){
+ pendingSnow=null;$('snow-picker').hidden=true;
+}
+$('snow-cancel').onclick=closeSnowPicker;
+$('snow-insert').onclick=()=>{
+ if(!pendingSnow||sceneLocked)return;
+ const {model,point,size}=pendingSnow,placed={...model};
+ setSnowSize(placed,size);closeSnowPicker();
+ if($('motif-dialog').open)$('motif-dialog').close();
+ placeMotif(placed,point);
+};
+$('motif-dialog').addEventListener('close',closeSnowPicker);
+function chooseMotif(model,point){
+ if(snowMotifPatches[snowMotifKey(model)]&&model.snowSize==null){showSnowPicker(model,point);return;}
+ if($('motif-dialog').open)$('motif-dialog').close();
+ placeMotif(model,point);
 }
 function placeMotif(model,point){
  if(sceneLocked)return;
@@ -1512,14 +1650,16 @@ function showMotifCategory(group){
   button.append(name);
   button.onclick=()=>{
    if(category){showMotifCategory(category);$('motif-grid').querySelector('button')?.focus();return;}
-   $('motif-dialog').close();
-   if(model)placeMotif(model);else $('empty-building').onclick();
+   if(model)chooseMotif(model);else{$('motif-dialog').close();$('empty-building').onclick();}
   };
   return button;
  }));
 }
-$('motif-open').onclick=()=>{showMotifCategory(null);$('motif-dialog').showModal();};
-$('motif-back').onclick=()=>{showMotifCategory(null);$('motif-grid').querySelector('button')?.focus();};
+$('motif-open').onclick=()=>{
+ if(!mobileUI.matches){setScenePanel('palette');closeSnowPicker();$('library').querySelector('button')?.focus();return;}
+ showMotifCategory(null);$('motif-dialog').showModal();
+};
+$('motif-back').onclick=()=>{closeSnowPicker();showMotifCategory(null);$('motif-grid').querySelector('button')?.focus();};
 $('motif-close').onclick=()=>$('motif-dialog').close();
 function library(){
  const type=category.value;
@@ -1539,7 +1679,7 @@ function library(){
   const thumbnail=motifThumbnail(model);
   button.append(thumbnail,name);
   paletteDrag(button,name,stage,point=>{
-   placeMotif(model,point);
+   chooseMotif(model,point);
   });
   return button;
  }));
@@ -1583,6 +1723,9 @@ $('mirror-object').onclick=()=>{
  item.mirrored=!item.mirrored;refresh();
 };
 function syncSize(item){
+ const options=$('placed-snow-sizes');
+ options.hidden=!snowMotifPatches[snowMotifKey(item)];
+ for(const button of options.querySelectorAll('button'))button.setAttribute('aria-pressed',item.snowSize===Number(button.value));
  $('lock-aspect').checked=item.aspectLocked!==false;
  for(const [axis,key] of [['x','scaleX'],['y','scaleY']]){
   const percent=Math.round((item[key]??1)*100);
@@ -1893,7 +2036,9 @@ function readProject(text){
      (o.rotation!=null&&!between(o.rotation,-180,180))||
      (o.detailTreatment!=null&&!['transparent','background'].includes(o.detailTreatment))||
      (o.cordMm!=null&&!between(o.cordMm,.4,10))||(o.hanging!=null&&typeof o.hanging!=='boolean'))fail();
-  if(o.village!=null)o.fixedHouse=true;
+  if(o.winterSpruce!=null&&(!index(o.winterSpruce,snowySpruces.length)||o.type!=='spruce'||o.asset!=null||o.parts!=null))fail();
+  if(o.snowSize!=null&&(!index(o.snowSize,snowSizes.length)||!Object.hasOwn(snowMotifPatches,snowMotifKey(o))))fail();
+  if(o.village!=null||o.winterSpruce!=null)o.fixedHouse=true;
   if(o.asset!=null&&(!index(o.asset,approvedBuildings.length)||o.type!==assetType(o.asset)))fail();
   if(o.parts!=null){
    if(!Array.isArray(o.parts)||o.parts.length>300)fail();
@@ -2077,7 +2222,6 @@ for(const key of ['frame','template'])$('mobile-'+key).onclick=()=>{
 };
 function syncMobileControls(item,index){
  syncMobileProject();
- if(!mobileUI.matches)return;
  if(!item||sceneLocked||mobileItem!==item.id||(mobilePanel==='detail'&&!detailLabel(item)))mobilePanel='';
  mobileItem=item?.id;
  for(const [key,id] of Object.entries(mobilePanels)){
@@ -2094,15 +2238,19 @@ function syncMobileControls(item,index){
  syncMotifArrows();
 }
 for(const key of Object.keys(mobilePanels)){
- const button=$('quick-'+key),prior=button.onclick;
+ const button=$('quick-'+key);
  button.onclick=()=>{
-  if(!mobileUI.matches){prior();return;}
   if(!selectedObject()||sceneLocked)return;
   mobilePanel=mobilePanel===key?'':key;
   syncMobileControls(selectedObject(),objects.indexOf(selectedObject()));
  };
  button.setAttribute('aria-controls',mobilePanels[key]);
 }
+$('placed-snow-sizes').onclick=e=>{
+ const button=e.target.closest('button'),item=selectedObject();
+ if(!button||!item||sceneLocked||!snowMotifPatches[snowMotifKey(item)])return;
+ setSnowSize(item,Number(button.value));keepOnCanvas(item);refresh();
+};
 const finishSize=$('size-done').onclick;
 $('size-done').onclick=()=>{mobilePanel='';finishSize();syncMobileControls(selectedObject(),objects.indexOf(selectedObject()));};
 for(const [i,button] of Array.from($('mobile-layer-panel').querySelectorAll('button')).entries()){
@@ -2132,7 +2280,6 @@ $('mobile-detail-panel').onclick=e=>{
  syncMobileControls(selectedObject(),objects.indexOf(selectedObject()));
 };
 function syncMotifArrows(){
- if(!mobileUI.matches)return;
  const strip=$('layers'),left=$('motifs-left'),right=$('motifs-right');
  const reserved=left.hidden?0:left.offsetWidth+right.offsetWidth+14;
  const overflow=strip.scrollWidth>strip.clientWidth+reserved+1;
@@ -2149,9 +2296,12 @@ for(const [key,direction] of [['left',-1],['right',1]])$('motifs-'+key).onclick=
  const page=Math.max(1,Math.floor(motifStrip.clientWidth/pitch))*pitch;
  motifStrip.scrollTo({left:Math.round((motifStrip.scrollLeft+page*direction)/pitch)*pitch,behavior:'smooth'});
 };
+function placeResponsiveControls(){
+ (mobileUI.matches?$('object-tools-home'):$('wide-tools-mount')).append($('object-tools'));
+ (mobileUI.matches?$('mobile-snow-mount'):$('wide-snow-mount')).append($('snow-picker'));
+}
 function placeExportActions(){
- const actions=document.querySelector('.export-actions');
- (mobileUI.matches?$('mobile-export-formats'):document.querySelector('.scene-footer')).append(actions);
+ $('mobile-export-formats').append(document.querySelector('.export-actions'));
 }
 $('mobile-export').onclick=()=>$('mobile-export-dialog').showModal();
 $('mobile-export-close').innerHTML=uiIcon(mobilePaths.close);
@@ -2167,14 +2317,14 @@ for(const [id,icon] of Object.entries({'page-cancel':'close','page-apply':'confi
  button.classList.add('mobile-action-icon');
  button.innerHTML=uiIcon(mobilePaths[icon]);button.append(text);
 }
-placeExportActions();
-mobileUI.addEventListener?.('change',()=>{if($('mobile-export-dialog').open)$('mobile-export-dialog').close();placeExportActions();mobilePanel='';mobileProject='';$('size-panel').hidden=true;refresh();});
-for(const [event,step] of [['zoom-out',-.05],['zoom-in',.05]])$(event).onclick=()=>zoomScene(mobileUI.matches?step:step*5);
+placeExportActions();placeResponsiveControls();
+mobileUI.addEventListener?.('change',()=>{if($('mobile-export-dialog').open)$('mobile-export-dialog').close();closeSnowPicker();placeResponsiveControls();mobilePanel='';mobileProject='';$('size-panel').hidden=true;refresh();});
+for(const [event,step] of [['zoom-out',-.05],['zoom-in',.05]])$(event).onclick=()=>zoomScene(step);
 
 const touchPoints=new Map();
 let pinch=null,pinched=false;
 stage.addEventListener('pointerdown',e=>{
- if(!mobileUI.matches||e.pointerType!=='touch')return;
+ if(e.pointerType!=='touch')return;
  if(!touchPoints.size)pinched=false;
  touchPoints.set(e.pointerId,e);stage.setPointerCapture(e.pointerId);
  if(touchPoints.size===2&&!pinched){
