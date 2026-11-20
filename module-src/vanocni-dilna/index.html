@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Vánoční dílna · verze 18</title>
+<title>Vánoční dílna · 1.1.0</title>
 <style>
 :root{color-scheme:light;--pine:#0d422f;--deep:#073525;--cream:#fbf3e3;--line:#d6c9b2;--gold:#ac6805;--gold-edge:#de951e;--ink:#171b17;--track:#d2c6af}
 *{box-sizing:border-box}
@@ -120,31 +120,58 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  .scene-library .tile-strip canvas{width:47px;height:27px}
 }
 .app-version{font:700 12px system-ui;white-space:nowrap;vertical-align:middle;background:#fff1cf;color:#443517;padding:3px 6px;border-radius:5px;display:inline-block}.palette-modes{flex-wrap:wrap}.palette-modes button{min-width:0}
+
+.frame-tools{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0;font-size:.82rem}
+.frame-tools label:not([hidden]){display:inline-flex;align-items:center;gap:4px}
+.frame-tools input{width:4.4rem}.frame-position{flex-wrap:wrap;gap:6px}.frame-position:not([hidden]){display:flex}.frame-tools #frame-settings:not([hidden]){display:flex;flex-wrap:wrap;gap:6px}
+#stage.scene-locked{touch-action:pan-x pan-y;cursor:default}
+.scene-viewport .zoom-tools{display:flex}
+@media(max-width:650px) and (orientation:portrait){
+ .scene-viewport{position:relative;padding-top:38px}
+ .scene-scroll{overflow:auto}
+ .composition-stage{width:calc(100% * var(--scene-zoom,1))}
+ .scene-viewport .zoom-tools{position:absolute;top:4px;right:6px;display:flex;gap:5px;align-items:center}
+ .scene-viewport .zoom-tools button{min-height:29px;padding:1px 8px}
+}
 </style>
 <script src="./bridge.js"></script>
+<script src="./winter-motifs.js"></script>
+<script src="./circle.js"></script>
 </head>
 <body>
 <header class="masthead">
  <button id="setup-open" class="header-icon" aria-label="Nastavení řezu" title="Nastavení řezu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
  <svg class="winter left" viewBox="0 0 88 64" aria-hidden="true"><path d="M25 10l3 7 7 3-7 3-3 7-3-7-7-3 7-3zm24-8 10 15h-5l11 12h-8l13 13H53v12h-8V42H29l13-13h-8l11-12h-6zm27 27 7 11h-3l7 10h-8v9h-5v-9h-8l7-10h-3z" fill="currentColor"/></svg>
- <h1>Vánoční dílna <small class="app-version">Verze 18</small></h1>
+ <h1>Vánoční dílna <small class="app-version">1.1.0</small></h1>
  <svg class="winter right-winter" viewBox="0 0 88 64" aria-hidden="true"><path d="M18 27l8 13h-4l9 10H20v9h-5v-9H5l9-10h-4zm29-25 10 15h-5l11 12h-8l13 13H51v12h-8V42H27l13-13h-8l11-12h-6zm28 8 3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="currentColor"/></svg>
  <svg class="snow-edge" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 13Q45-4 82 11T158 13T236 10T311 15T400 12V22H0Z" fill="currentColor"/></svg>
 </header>
 <main id="scene-mode">
  <div class="composition-head"><h2 class="screen-heading">Kompozice</h2>
- <div class="project-tools"><button id="project-new">Nová</button><button id="page-open">Rozměry plochy</button><button id="toggle-base" aria-pressed="true">Odebrat podstavu</button><button id="project-save">Uložit projekt</button><button id="project-load">Načíst projekt</button><input id="project-file" type="file" accept=".json,application/json" hidden><span id="project-message" role="status"></span></div></div>
+ <div class="project-tools"><button id="project-new">Nová</button><button id="scene-lock" type="button" aria-pressed="false">Zamknout</button><button id="page-open">Rozměry plochy</button><button id="toggle-base" aria-pressed="true">Odebrat podstavu</button><button id="project-save">Uložit projekt</button><button id="project-load">Načíst projekt</button><input id="project-file" type="file" accept=".json,application/json" hidden><span id="project-message" role="status"></span></div><div class="frame-tools">
+  <label>Rám <select id="frame"><option value="none">Rovná scéna</option><option value="circle">Kruh</option><option value="eye">Kruh s ouškem</option></select></label>
+  <label>Šablona <select id="circle-preset"><option value="">Vyber…</option><option value="empty">Prázdný kruh</option><option value="bells">Zavěšené zvonky</option><option value="village">Zimní vesnice</option><option value="wreath">Jehličnatý věnec</option></select></label>
+  <span id="frame-settings" hidden>
+   <label>Rám (mm) <input id="rim-width" type="number" min="1" max="18" step=".1" value="5"></label>
+   <label>Min. spoj (mm) <input id="minimum-width" type="number" min=".4" max="5" step=".1" value="1.6"></label>
+  </span>
+  <span id="frame-position" class="frame-position" hidden>
+   <label>X (mm) <input id="frame-x" type="number" step=".5"></label>
+   <label>Y (mm) <input id="frame-y" type="number" step=".5"></label>
+   <label id="frame-cord-label">Provázek (mm) <input id="frame-cord" type="number" min=".4" max="10" step=".1"></label>
+  </span>
+ </div></div>
  <div class="scene-viewport"><div class="scene-scroll"><section class="composition-stage" aria-label="Kompozice">
   <canvas class="art" id="stage" width="1000" height="520" aria-label="Náhled kompozice. Podržením objektu otevřeš jeho nabídku."></canvas>
   <div id="context" class="popover" hidden><strong>Přetažením přesuneš</strong><div class="popover-actions"><button id="edit-object" class="primary">Upravit</button><button id="remove" class="primary">Smazat</button></div>
  <div class="popover-actions"><button id="layer-down">Dozadu</button><button id="layer-up">Dopředu</button><button id="size-open">Velikost</button></div><div class="popover-actions"><button id="mirror-object" aria-pressed="false">Zrcadlit</button></div></div>
  </section>
- </div><div class="zoom-tools" aria-label="Přiblížení plátna"><button id="zoom-out" aria-label="Oddálit">−</button><output id="zoom-value">100 %</output><button id="zoom-in" aria-label="Přiblížit">+</button></div></div>
+ </div><div class="zoom-tools" aria-label="Přiblížení plátna"><button id="zoom-out" aria-label="Oddálit">−</button><button id="zoom-fit" aria-label="Přizpůsobit plátno">100 %</button><button id="zoom-in" aria-label="Přiblížit">+</button></div></div>
  <div id="scene-tools" class="scene-tools" hidden>
   <button id="quick-edit">Upravit</button><button id="quick-mirror">Zrcadlit</button><button id="quick-layer">Vrstvy</button><button id="quick-size">Velikost</button><button id="quick-remove">Smazat</button>
  </div>
  <div class="segments scene-panel-tabs" role="group" aria-label="Panel vpravo"><button id="panel-palette" aria-pressed="true">Paleta</button><button id="panel-object" aria-pressed="false">Objekt</button></div>
- <aside class="wide-inspector" aria-label="Vybraný objekt">
+ <aside class="wide-inspector" aria-label="Vybraný objekt" id="wide-inspector">
   <h3 class="panel-title">Vybraný objekt</h3><p id="inspector-empty">Vyber objekt na plátně.</p>
   <div id="inspector-fields" hidden>
    <strong id="inspector-name"></strong>
@@ -243,7 +270,9 @@ for(const [id,label,icon] of [['edit-object','Upravit','edit'],['remove','Smazat
  $(id).innerHTML=uiIcon(iconPaths[icon])+label;
 }
 
-const catalog={house:['Domek',['Nízká chalupa','Patrový dům s vikýřem','Štítový dům','Dům se dvěma komíny','Domek s oblým vikýřem']],spruce:['Smrk',['Horský štíhlý','Starý rozložitý','Lesní nepravidelný','Mladý hustý','Větrem ohnutý','Svěšené větve','Úzký severský','Podsaditý','Nesouměrný','Zasněžený']],bare:['Holý strom',['Dub','Bříza','Jabloň','Vrba','Lípa','Dvojkmen','Mladý strom']],lamp:['Lampa',['Litá','Čtyřboká','Oblouková','Viktoriánská','Dvojramenná']],lantern:['Lucerna',['Klasická','Oblá','Hranatá','Historická','S ozdobným držadlem','Starožitná závěsná','Kovaná se stříškou']],snow:['Závěj',['Dlouhá','Dvojitá','Nízká','Navátá u plotu','Sněhové jazyky','Závěj přes kameny']],
+const needleNames=['Smrk – jednoduchá větvička','Jedle – ploché jehlice','Borovice – jehlice ve svazcích','Jedle – krátký hustý vršek','Smrk – vidlicová větvička','Jedle – tři větvičky','Borovice – vějířovité větve','Smrk – hustý oblouk'];
+const villageNames=['Zasněžená chalupa – komín vlevo','Kaple s cibulovou věží','Zasněžená chalupa – komín vpravo'];
+const catalog={needle:['Jehličí',needleNames],bell:['Zvonky',['Oblý zvonek','Zvonek s lemem']],bauble:['Ozdoby',['Kulatá baňka','Prodloužená baňka']],house:['Domek',['Nízká chalupa','Patrový dům s vikýřem','Štítový dům','Dům se dvěma komíny','Domek s oblým vikýřem']],spruce:['Smrk',['Horský štíhlý','Starý rozložitý','Lesní nepravidelný','Mladý hustý','Větrem ohnutý','Svěšené větve','Úzký severský','Podsaditý','Nesouměrný','Zasněžený']],bare:['Holý strom',['Dub','Bříza','Jabloň','Vrba','Lípa','Dvojkmen','Mladý strom']],lamp:['Lampa',['Litá','Čtyřboká','Oblouková','Viktoriánská','Dvojramenná']],lantern:['Lucerna',['Klasická','Oblá','Hranatá','Historická','S ozdobným držadlem','Starožitná závěsná','Kovaná se stříškou']],snow:['Závěj',['Dlouhá','Dvojitá','Nízká','Navátá u plotu','Sněhové jazyky','Závěj přes kameny']],
  church:['Kaple a kostely',['Kostel s věží','Kostel s bočními loděmi']], fence:['Plot',['Laťkový','Trámový','Kovaný','Kovaný s oblouky','Rustikální plaňky']],
  bench:['Lavička',['Parková','Dřevěná','Litá se spirálami','S ozdobným opěradlem','Parková litinová','Horská s prkny']], bridge:['Mostek',['Obloukový','Trámový','Kamenný s parapetem','Dřevěný se zábradlím']],
  well:['Studna',['Se stříškou','S rumpálem','Kamenná s kovaným obloukem','Dřevěná se šindelem']], stack:['Dříví',['Hranice','Přístřešek']],
@@ -447,18 +476,19 @@ const scratch=document.createElement('canvas'), scene=document.createElement('ca
 const sc=scratch.getContext('2d'), composition=scene.getContext('2d',{willReadFrequently:true});
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 function template(type){
- return {type,variant:0,x:500,y:floor+4,height:{house:285,spruce:250,bare:260,lamp:155,lantern:67,snow:56,church:278,fence:78,bench:63,bridge:100,well:118,stack:79,mailbox:82,person:100,animal:83,shrub:75,sign:105,sled:48,gate:135}[type],floors:2,windows:3,door:true,dormer:true,waves:true,arcs:6,rows:2,chimney:true,smoke:true};
+ return {type,variant:0,x:500,y:floor+4,height:{house:285,spruce:250,bare:260,lamp:155,lantern:67,snow:56,church:278,fence:78,bench:63,bridge:100,well:118,stack:79,mailbox:82,person:100,animal:83,shrub:75,sign:105,sled:48,gate:135,needle:170,bell:150,bauble:140}[type],floors:2,windows:3,door:true,dormer:true,waves:true,arcs:6,rows:2,chimney:true,smoke:true};
 }
 function add(type, overrides={}){
  const item={...template(type),id:nextId++,...overrides};
- if(item.asset==null&&['house','church'].includes(type)){
+ if(item.village!=null)item.fixedHouse=true;
+ if(item.asset==null&&item.village==null&&['house','church'].includes(type)){
   item.parts=overrides.parts?overrides.parts.map(part=>({...part})):buildingPreset(type,item.variant);
   item.unitTop=overrides.unitTop??(item.parts.length?-buildingGeometry(item).top:105);
  }
  objects.push(item);selected=item.id;componentIndex=0;return item;
 }
 function reset(){
- fullPage=false;pageHeightMm=null;syncCanvasDimensions(defaultW,defaultH);
+ frame='none';sceneLocked=false;fullPage=false;pageHeightMm=null;syncCanvasDimensions(defaultW,defaultH);
  objects=[];nextId=1;base=28;$('base').value=base;$('base-value').textContent=base;
  const windows=(y,x)=>component('window',x,y,25,23,{vertical:true,horizontal:true});
  const common=[component('wall',0,-38,92,76),windows(-52,-22),windows(-52,22),
@@ -541,12 +571,27 @@ function treeFromReference(item){
 }
 function geometry(item){
  if(item.asset!=null)return approvedGeometry(item.asset);
+ if(item.village!=null||item.type==='needle'){
+  const [width,height,path]=item.village!=null?winterMotifs.village[item.village]:winterMotifs.needle[item.variant];
+  const ink=new Path2D();ink.addPath(new Path2D(path),new DOMMatrix().translate(-width/2,-height));
+  return {ink,holes:new Path2D(),inset:[],strokes:[],top:-height,half:width/2,evenOdd:true};
+ }
  const ink=new Path2D(), holes=new Path2D(), inset=[];
  const rect=(x,y,w,h,path=ink)=>path.rect(x,y,w,h);
  const polygon=(points,path=ink)=>{path.moveTo(...points[0]);for(const p of points.slice(1))path.lineTo(...p);path.closePath()};
  const path=(d,to=ink)=>{if(to===holes)inset.push(new Path2D(d));else ink.addPath(new Path2D(d));};
  const line=(d,width)=>strokes.push([new Path2D(d),width]);
  const strokes=[];
+ if(item.type==='bell'){
+  path(item.variant===0?'M-7-100H7Q12-99 13-91Q29-84 31-63Q33-42 48-28Q54-22 45-13Q32-4 12-3Q8 7 0 7Q-8 7-12-3Q-32-4-45-13Q-54-22-48-28Q-33-42-31-63Q-29-84-13-91Q-12-99-7-100Z':'M-8-100H8L14-89Q33-82 34-62Q35-44 48-31L53-18Q40-5 10-5Q7 6 0 6Q-7 6-10-5Q-40-5-53-18L-48-31Q-35-44-34-62Q-33-82-14-89Z');
+  path('M-36-22Q-26-31-8-32L-8-18L-11-12Q-27-14-36-22ZM36-22Q26-31 8-32L8-18L11-12Q27-14 36-22Z',holes);
+  return {ink,holes,inset,strokes,top:-100,half:53,bottom:7};
+ }
+ if(item.type==='bauble'){
+  path(item.variant===0?'M-9-100H9L13-83A44 42 0 1 1-13-83Z':'M-9-100H9L12-85Q79-40 0 5Q-79-40-12-85Z');
+  path('M-19-44H19L23-36H-23Z',holes);
+  return {ink,holes,inset,strokes,top:-100,half:45,bottom:5};
+ }
  if(item.type==='house'||item.type==='church')return buildingGeometry(item);
  if(realisticTreeVariants[item.type]&&item.treeStyle!==1)return treeFromReference(item);
  if(item.type==='spruce'){
@@ -693,16 +738,22 @@ function geometry(item){
  inset.push(snow);return {ink,holes,inset,strokes,snow,top:[-45,-43,-30,-44,-34,-43][item.variant],half:105};
 }
 const whiteBack=document.createElement('canvas'),whiteCtx=whiteBack.getContext('2d');
-function drawObject(c,item,g,scale=1,cut=true,color='#000'){
+function drawObject(c,item,g,scale=1,cut=true,color='#000',reinforce=0){
  c.save();
  const factor=scale*item.height/(item.unitTop??g.reference??-g.top);
- const sx=factor*(item.scaleX??1)*(item.mirrored?-1:1),sy=factor*(item.scaleY??1);c.setTransform(sx,0,0,sy,item.x*scale,item.y*scale);
- c.fillStyle=color;c.fill(!cut&&g.back?g.back:g.ink,g.back?'evenodd':'nonzero');
+ const sx=factor*(item.scaleX??1)*(item.mirrored?-1:1),sy=factor*(item.scaleY??1);
+ const transform=new DOMMatrix().translate(item.x*scale,item.y*scale).rotate(item.rotation??0).scale(sx,sy);
+ c.setTransform(transform);
+ c.fillStyle=color;c.fill(!cut&&g.back?g.back:g.ink,g.back||g.evenOdd?'evenodd':'nonzero');
+ if(reinforce){
+  const silhouette=new Path2D();silhouette.addPath(g.ink,transform);
+  c.save();c.resetTransform();c.strokeStyle=color;c.lineCap='round';c.lineJoin='round';c.lineWidth=reinforce;
+  c.stroke(silhouette);c.restore();
+ }
  for(const solid of g.solids||[])c.fill(solid);
  c.strokeStyle=color;c.lineCap='round';c.lineJoin='round';
  for(const [path,width] of g.strokes){if(width===0)c.fill(path);else{c.lineWidth=width;c.stroke(path);}}
  if(cut){
-  const transform=new DOMMatrix([sx,0,0,sy,item.x*scale,item.y*scale]);
   c.resetTransform();c.globalCompositeOperation='destination-out';
   for(const opening of [g.holes,...g.inset]){
    const transformed=new Path2D();transformed.addPath(opening,transform);c.fill(transformed);
@@ -716,7 +767,12 @@ function compose(scale,houseBacking='#fff'){
  if(whiteBack.width!==width||whiteBack.height!==height){whiteBack.width=width;whiteBack.height=height;}
  if(scene.width!==width||scene.height!==height){scene.width=width;scene.height=height;scratch.width=width;scratch.height=height;}
  composition.clearRect(0,0,width,height);
- if(base){composition.fillStyle='#000';composition.fillRect(16*scale,floor*scale,(W-32)*scale,base*scale);}
+ const circle=frame==='none'?null:circleGeometry();
+ composition.fillStyle='#000';
+ if(circle){
+  if(base)composition.fillRect(0,(circle.y+circle.radius*(.63-base*.007))*scale,width,height);
+  drawHangers(composition,scale,circle);
+ }else if(base)composition.fillRect(16*scale,floor*scale,(W-32)*scale,base*scale);
  for(const item of objects){
   const g=geometry(item);
   if(g.snow){
@@ -726,16 +782,23 @@ function compose(scale,houseBacking='#fff'){
    opening.addPath(g.snow,new DOMMatrix([sx,0,0,sy,item.x*scale,item.y*scale]));
    composition.save();composition.fillStyle=houseBacking;composition.fill(opening);composition.restore();
   }
-  sc.clearRect(0,0,width,height);drawObject(sc,item,g,scale);
+  sc.clearRect(0,0,width,height);
+  const reinforce=circle&&(item.village!=null||item.type==='needle')?mmToUnits(minimumMm)*scale*.82:0;
+  drawObject(sc,item,g,scale,true,'#000',reinforce);
   if(item.parts||g.back||g.snow||g.inset.length||['lamp','lantern'].includes(item.type)){
    whiteCtx.clearRect(0,0,width,height);drawObject(whiteCtx,item,g,scale,false,houseBacking);
    whiteCtx.drawImage(scratch,0,0);composition.drawImage(whiteBack,0,0);
   }else composition.drawImage(scratch,0,0);
  }
+ if(circle)completeCircle(composition,scale,circle);
 }
 function bounds(item){
  const g=geometry(item),r=item.height/(item.unitTop??g.reference??-g.top);
- return {left:item.x-g.half*r*(item.scaleX??1),top:item.y+g.top*r*(item.scaleY??1),right:item.x+g.half*r*(item.scaleX??1),bottom:item.y+(g.bottom||0)*r*(item.scaleY??1)};
+ const half=g.half*r*(item.scaleX??1),top=g.top*r*(item.scaleY??1),bottom=(g.bottom||0)*r*(item.scaleY??1);
+ if(!item.rotation)return {left:item.x-half,top:item.y+top,right:item.x+half,bottom:item.y+bottom};
+ const angle=item.rotation*Math.PI/180,cos=Math.cos(angle),sin=Math.sin(angle);
+ const corners=[[-half,top],[half,top],[-half,bottom],[half,bottom]].map(([x,y])=>[item.x+x*cos-y*sin,item.y+x*sin+y*cos]);
+ return {left:Math.min(...corners.map(p=>p[0])),top:Math.min(...corners.map(p=>p[1])),right:Math.max(...corners.map(p=>p[0])),bottom:Math.max(...corners.map(p=>p[1]))};
 }
 function paint(){
  compose(1,canvasBackground);ctx.clearRect(0,0,W,H);
@@ -756,8 +819,12 @@ function paint(){
 function analyze(scale){
  compose(scale);
  const w=scene.width,h=scene.height,count=w*h,rgba=composition.getImageData(0,0,w,h).data;
- const mask=new Uint8Array(count),problem=new Int32Array(count),queue=new Int32Array(count);
+ const mask=new Uint8Array(count);
  for(let i=0;i<count;i++)mask[i]=rgba[i*4+3]>=128&&rgba[i*4]<128;
+ return labelMask(mask,w,h,scale);
+}
+function labelMask(mask,w,h,scale){
+ const count=w*h,problem=new Int32Array(count),queue=new Int32Array(count);
  let components=0,largest=0,keeper=0;
  function enqueue(i){if(mask[i]&&!problem[i]){problem[i]=components;queue[tail++]=i;}}
  let tail=0;
@@ -781,15 +848,16 @@ function check(){
   if(!fullPage&&hi>=lo&&Math.abs(hi-lo+1-cutWidth)>1){cutWidth=hi-lo+1;lastCheck=analyze(1);syncInspector(selectedObject());}
  }
  const n=lastCheck.components;
- $('status').textContent=n===1?'✓ Jeden souvislý díl':n===0?'Kompozice je prázdná':`Oddělených částí: ${n-1}`;
- $('status').classList.toggle('bad',n!==1);
- $('png').disabled=$('svg').disabled=n!==1;paint();
+ const narrow=n===1&&frame!=='none'&&!hasStrongConnections(lastCheck);
+ $('status').textContent=narrow?'Zesil spoje nebo rám podle zvolené minimální šířky.':n===1?'✓ Jeden souvislý díl':n===0?'Kompozice je prázdná':`Oddělených částí: ${n-1}`;
+ $('status').classList.toggle('bad',n!==1||narrow);
+ $('png').disabled=$('svg').disabled=n!==1||narrow;paint();
 }
 function schedule(){lastCheck=null;paint();clearTimeout(validationTimer);validationTimer=setTimeout(check,110);}
-const typeName=o=>o.asset!=null?approvedNames[o.asset]:o.custom?'Vlastní domek':o.parts?catalog[o.type][1][o.variant]:catalog[o.type][0];
+const typeName=o=>o.village!=null?villageNames[o.village]:['needle','bell','bauble'].includes(o.type)?catalog[o.type][1][o.variant]:o.asset!=null?approvedNames[o.asset]:o.custom?'Vlastní domek':o.parts?catalog[o.type][1][o.variant]:catalog[o.type][0];
 function keepOnCanvas(item){
- const b=bounds(item),half=(b.right-b.left)/2;
- item.x=clamp(item.x,Math.min(W/2,half+2),Math.max(W/2,W-half-2));
+ const b=bounds(item),left=item.x-b.left,right=b.right-item.x;
+ item.x=clamp(item.x,Math.min(W/2,left+2),Math.max(W/2,W-right-2));
  const minY=item.y-b.top+2;
  item.y=clamp(item.y,Math.min(H-2,minY),Math.max(Math.min(H-2,minY),H-2-(b.bottom-item.y)));
 }
@@ -904,6 +972,14 @@ function renderObjectForm(){
  $('add-parts').hidden=!item.parts;
  const range=(key,title,min,max,initial,unit='',ratio=1)=>field(item,key,title,{min,max,initial,unit,ratio});
  const mm=outputMm/cutWidth;
+ if(item.type==='needle')range('rotation','Otočení',-180,180,item.rotation??0,'°');
+ if(frame!=='none'&&hangingTypes.has(item.type)){
+  field(item,'hanging','Zavěšení na rám',{initial:true});
+  range('cordMm','Tloušťka provázku',4,100,item.cordMm??3,'',10);
+  const cord=settings.lastElementChild.querySelector('input'),output=settings.lastElementChild.querySelector('output');
+  const showCord=()=>{output.textContent=(cord.valueAsNumber/10).toLocaleString('cs-CZ')+' mm';};
+  cord.addEventListener('input',showCord);showCord();
+ }
  if(item.type==='lamp'){
   const mode=item.lampType??(item.variant===2?1:item.variant===4?2:0);
   const head=item.headShape??(item.variant===2?1:item.variant===1||item.variant>=3?2:0);
@@ -1011,6 +1087,7 @@ function renderObjectForm(){
  palette.scrollLeft=offset;
 }
 function refresh(){
+ syncCircleControls();
  const baseButton=$('toggle-base');
  baseButton.textContent=base?'Odebrat podstavu':'Přidat podstavu';
  baseButton.setAttribute('aria-pressed',Boolean(base));
@@ -1070,7 +1147,7 @@ function paletteDrag(button,name,canvas,insert){
 const pick=document.createElement('canvas');pick.width=W;pick.height=H;
 const pc=pick.getContext('2d',{willReadFrequently:true});
 stage.addEventListener('pointerdown',e=>{
- if(e.button!==0||drag)return;
+ if(e.button!==0||drag||sceneLocked)return;
  const [x,y]=canvasPoint(e,stage);
  const candidates=[...objects].reverse().filter(o=>{const b=bounds(o);return x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom;});
  const hit=candidates.find(o=>{pc.clearRect(0,0,W,H);drawObject(pc,o,geometry(o),1,!o.parts&&o.asset==null);return pc.getImageData(Math.floor(x),Math.floor(y),1,1).data[3]>127;})||candidates[0];
@@ -1086,15 +1163,15 @@ stage.addEventListener('pointermove',e=>{
  if(!drag.moved&&Math.hypot(e.clientX-drag.clientX,e.clientY-drag.clientY)<7)return;
  drag.moved=true;clearTimeout(drag.timer);
  const [x,y]=canvasPoint(e,stage),o=drag.item;o.x=x-drag.dx;o.y=y-drag.dy;keepOnCanvas(o);
- if(base&&Math.abs(o.y-(floor+4))<11)o.y=floor+4;
- schedule();
+ if(frame==='none'&&base&&Math.abs(o.y-(floor+4))<11)o.y=floor+4;
+ syncFramePosition(o);schedule();
 });
 function finishDrag(e){
  if(drag?.id!==e.pointerId)return;
  clearTimeout(drag.timer);drag=null;check();
 }
 for(const event of ['pointerup','pointercancel','lostpointercapture'])stage.addEventListener(event,finishDrag);
-stage.addEventListener('contextmenu',e=>{e.preventDefault();if(selected!==null&&!drag?.moved){$('context').hidden=false;paint();}});
+stage.addEventListener('contextmenu',e=>{e.preventDefault();if(!sceneLocked&&selected!==null&&!drag?.moved){$('context').hidden=false;paint();}});
 
 const objectCanvas=$('object-stage');
 let partDrag=null;
@@ -1157,7 +1234,9 @@ function categoryModels(type){
  const originals=fixed.filter(([,model])=>model.asset<tracedStart);
  const recent=fixed.filter(([,model])=>model.asset>=tracedStart);
  const standard=type==='house'?[]:catalog[type][1].map((name,variant)=>[name,{...template(type),variant}]);
- return [...originals,...standard,...recent];
+ const village=type==='house'||type==='church'?villageNames.flatMap((name,i)=>
+  (i===1)===(type==='church')?[[name,{...template(type),village:i,fixedHouse:true}]]:[]):[];
+ return [...village,...originals,...standard,...recent];
 }
 function library(){
  const type=category.value;
@@ -1179,10 +1258,12 @@ function library(){
   drawObject(icon.getContext('2d'),{...model,scaleX:1,scaleY:1,x:56,y:58-(g.bottom||0)*factor,height:factor*(model.unitTop??g.reference??-g.top)},g);
   button.append(icon,name);
   paletteDrag(button,name,stage,point=>{
-   const x=point?.[0]??clamp(340+((objects.length*73)%340),190,810);
-   const y=point?.[1]??floor+4;
+   const x=point?.[0]??W*(.35+(objects.length*7)%30/100);
+   if(sceneLocked)return;
+   const circle=frame==='none'?null:circleGeometry();
+   const y=point?.[1]??(circle?(hangingTypes.has(model.type)?circle.y:circle.y+circle.radius*.60):floor+4);
    const {id,label,...config}=model;
-   const placed=add(model.type,{...config,x,y:base&&Math.abs(y-floor)<18?floor+4:y});
+   const placed=add(model.type,{...config,x,y:!circle&&base&&Math.abs(y-floor)<18?floor+4:y});
    keepOnCanvas(placed);$('context').hidden=true;refresh();
   });
   return button;
@@ -1287,6 +1368,7 @@ function syncInspector(item){
  $('inspector-lock').checked=item.aspectLocked!==false;
 }
 function refreshSceneControls(item,index){
+ syncFramePosition(item);
  $('scene-tools').hidden=!item;
  $('inspector-empty').hidden=!!item;
  $('inspector-fields').hidden=!item;
@@ -1318,13 +1400,37 @@ let sceneZoom=1;
 function zoomScene(step){
  sceneZoom=clamp(sceneZoom+step,0.75,2.5);
  $('scene-mode').style.setProperty('--scene-zoom',sceneZoom);
- $('zoom-value').textContent=Math.round(sceneZoom*100)+' %';
+ $('zoom-fit').textContent=Math.round(sceneZoom*100)+' %';
  $('zoom-out').disabled=sceneZoom<=.75;
  $('zoom-in').disabled=sceneZoom>=2.5;
  if(!$('context').hidden&&selectedObject())positionMenu(selectedObject());
 }
 $('zoom-out').onclick=()=>zoomScene(-.25);
 $('zoom-in').onclick=()=>zoomScene(.25);
+$('zoom-fit').onclick=()=>zoomScene(1-sceneZoom);
+for(const [id,key] of [['frame-x','x'],['frame-y','y'],['frame-cord','cordMm']]){
+ $(id).onchange=event=>updateFramePosition(key,event.currentTarget.valueAsNumber);
+}
+$('scene-lock').onclick=()=>setSceneLock(!sceneLocked);
+$('frame').onchange=()=>{
+ frame=$('frame').value;
+ if(frame!=='none'&&!fullPage){
+  resizePage(outputMm,outputMm,true);
+  for(const item of objects)item.y-=H*.15;
+ }
+ refresh();
+};
+$('circle-preset').onchange=event=>{
+ const select=event.currentTarget,name=select.value;select.value='';
+ if(name&&(!objects.length||confirm('Nahradit aktuální kompozici šablonou?')))applyCirclePreset(name);
+};
+for(const [id,min,max,apply] of [['rim-width',1,18,n=>rimMm=n],['minimum-width',.4,5,n=>minimumMm=n]]){
+ $(id).onchange=()=>{
+  const value=$(id).valueAsNumber;
+  if(Number.isFinite(value))apply(clamp(value,min,max));
+  refresh();
+ };
+}
 if(typeof matchMedia==='function'){
  const wide=matchMedia('(min-width:1060px) and (min-height:600px), (min-width:900px) and (min-height:650px)');
  const openWideLayers=()=>{if(wide.matches)$('scene-layers').open=true;};
@@ -1405,7 +1511,7 @@ $('page-apply').onclick=()=>{
 };
 
 function snapshotProject(){
- return {format:'vanocni-dilna',version:1,base,outputMm,mullionMm,canvasWidth:W,canvasHeight:H,pageHeightMm,fullPage,objects:structuredClone(objects)};
+ return {format:'vanocni-dilna',version:1,base,outputMm,mullionMm,frame,rimMm,minimumMm,sceneLocked,canvasWidth:W,canvasHeight:H,pageHeightMm,fullPage,objects:structuredClone(objects)};
 }
 function readProject(text){
  const fail=()=>{throw new Error('Soubor neobsahuje platnou kompozici Vánoční dílny.');};
@@ -1414,6 +1520,9 @@ function readProject(text){
  const index=(v,count)=>Number.isInteger(v)&&v>=0&&v<count;
  if(data?.format!=='vanocni-dilna'||data.version!==1||!Array.isArray(data.objects)||data.objects.length>1000||
     !between(data.base,0,45)||!between(data.outputMm,30,1500)||!between(data.mullionMm,.4,5))fail();
+ if((data.frame!=null&&!circleOptions.includes(data.frame))||
+    (data.rimMm!=null&&!between(data.rimMm,1,18))||(data.minimumMm!=null&&!between(data.minimumMm,.4,5))||
+    (data.sceneLocked!=null&&typeof data.sceneLocked!=='boolean'))fail();
  const pageW=data.canvasWidth??defaultW,pageH=data.canvasHeight??defaultH;
  if(!Number.isInteger(pageW)||!Number.isInteger(pageH)||!between(pageW,40,2200)||!between(pageH,40,1500)||
     (data.fullPage&&!between(data.pageHeightMm,20,1000)))fail();
@@ -1424,6 +1533,10 @@ function readProject(text){
     !between(o.scaleX??1,.2,2.01)||!between(o.scaleY??1,.2,2.01)||
     (o.unitTop!=null&&!between(o.unitTop,1,1000))||!index(o.variant,catalog[o.type][1].length))fail();
   ids.add(o.id);
+  if((o.village!=null&&(!index(o.village,villageNames.length)||(o.village===1?'church':'house')!==o.type||o.asset!=null||o.parts!=null))||
+     (o.rotation!=null&&!between(o.rotation,-180,180))||
+     (o.cordMm!=null&&!between(o.cordMm,.4,10))||(o.hanging!=null&&typeof o.hanging!=='boolean'))fail();
+  if(o.village!=null)o.fixedHouse=true;
   if(o.asset!=null&&(!index(o.asset,approvedBuildings.length)||o.type!==assetType(o.asset)))fail();
   if(o.parts!=null){
    if(!Array.isArray(o.parts)||o.parts.length>300)fail();
@@ -1443,6 +1556,7 @@ function readProject(text){
 }
 function openProject(data){
  objects=data.objects;
+ frame=data.frame??'none';rimMm=data.rimMm??5;minimumMm=data.minimumMm??1.6;sceneLocked=data.sceneLocked??false;
  base=data.base;outputMm=data.outputMm;mullionMm=data.mullionMm;
  nextId=objects.reduce((last,o)=>Math.max(last,o.id+1),1);
  selected=null;draft=null;componentIndex=0;fullPage=!!data.fullPage;pageHeightMm=data.pageHeightMm??null;
@@ -1455,7 +1569,7 @@ function openProject(data){
 }
 $('project-new').onclick=()=>{
  if(objects.length&&typeof confirm==='function'&&!confirm('Vytvořit novou kompozici? Neuložené úpravy aktuální kompozice se zahodí.'))return;
- openProject({...snapshotProject(),objects:[],base:0});
+ openProject({...snapshotProject(),objects:[],base:0,sceneLocked:false});
  $('project-message').textContent='Nová kompozice';
 };
 let lastBaseHeight=28;
@@ -1528,6 +1642,10 @@ function exportFile(type){
  }
  if(result.components!==1){
   $('status').textContent='Export zastaven: ve vysokém rozlišení nejsou všechny části spojené.';
+  $('status').classList.add('bad');return;
+ }
+ if(frame!=='none'&&!hasStrongConnections(result)){
+  $('status').textContent='Export zastaven: některý spoj je příliš úzký.';
   $('status').classList.add('bad');return;
  }
  const {mask,w,h}=result;
