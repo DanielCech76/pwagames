@@ -159,17 +159,18 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 }
 .mobile-only{display:none}
 @media(max-width:760px) and (orientation:portrait), (orientation:landscape) and (max-height:500px) and (max-width:1000px){
- .masthead{min-height:52px;grid-template-columns:44px 1fr 44px;padding:0 8px;align-items:center}
- .masthead h1{grid-column:2;font-size:clamp(22px,6vw,30px);text-align:center}
+ .masthead{min-height:60px;grid-template-columns:36px 24px 1fr 24px 12px;padding:0 10px 7px;align-items:center}
+ .masthead h1{grid-column:3;font-size:clamp(18px,5.6vw,31px);text-align:center}
  .masthead .winter{display:block;max-width:34px;height:28px}
- .masthead .left{display:none}.masthead .right-winter{grid-column:3}.masthead .snow-edge{height:6px}
- #scene-mode{display:flex;gap:6px;padding:0 8px 10px;min-height:calc(100svh - 52px)}
+ .masthead .left{grid-column:2}.masthead .right-winter{grid-column:4}.masthead .snow-edge{height:9px}
+ #scene-mode{display:flex;gap:11px;padding:0 clamp(10px,3.3vw,16px) 16px;min-height:calc(100svh - 60px);background:#f8f3e7}
  #scene-mode .scene-library,#scene-mode .scene-panel-tabs,#scene-mode .wide-inspector,#context{display:none!important}
- .composition-head h2{font-size:22px}
- #mobile-project{display:flex;gap:3px;margin:6px 0}
- #mobile-project button{flex:1;min-width:0;min-height:44px;padding:2px;font-size:clamp(8px,2.4vw,12px);display:grid;justify-items:center;align-content:center;gap:2px}
- #mobile-project svg,.scene-tools svg,.object-options svg,#mobile-fit svg{width:19px;height:19px;display:block}
- #mobile-project button[aria-pressed=true],#scene-mode .scene-tools button[aria-expanded=true]{background:var(--pine);color:white}
+ #scene-mode > .composition-head{display:grid;grid-template-columns:minmax(0,1fr);justify-content:stretch;align-items:start;gap:9px;padding:8px 0 0!important}
+ .composition-head h2{font-size:clamp(23px,6vw,30px);padding:0;line-height:1.12}
+ #mobile-project{display:grid;grid-template-columns:repeat(6,minmax(0,1fr)) minmax(30px,.66fr);gap:clamp(3px,1vw,6px);width:100%;margin:0 0 3px}
+ #mobile-project button{min-width:0;min-height:clamp(44px,11vw,57px);padding:0;font-size:21px;display:grid;place-items:center}
+ #mobile-project svg,#scene-mode .scene-tools svg,.object-options svg,#mobile-fit svg{width:clamp(19px,5vw,25px);height:auto;display:block}
+ #mobile-project button[aria-pressed=true]:not(#mobile-base),#scene-mode .scene-tools button[aria-expanded=true]{background:var(--pine);color:white}
  .project-tools,.frame-tools,.scene-controls,.export-actions{display:none!important}
  [data-mobile-project=more] .project-tools,[data-mobile-project=more] .project-tools .export-actions,[data-mobile-project=frame] .frame-tools,[data-mobile-project=template] .frame-tools,[data-mobile-project=frame] .scene-controls{display:flex!important}
  [data-mobile-project=frame] #template-choice,[data-mobile-project=template] #frame-choice,[data-mobile-project=template] #frame-settings,[data-mobile-project=template] #frame-position,.scene-controls #appearance-open,.scene-controls #move-composition{display:none!important}
@@ -177,27 +178,42 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  #scene-mode .scene-scroll{overflow:auto;width:100%;max-height:60svh;overscroll-behavior:contain}
  #scene-mode .composition-stage{width:calc(100% * var(--scene-zoom,1));display:block;min-height:0;padding:0}
  #stage,#stage.scene-locked{touch-action:none;margin:0}
- #scene-mode .zoom-tools{display:flex;position:static;align-items:center;gap:5px;padding:2px 0 6px;border:0;background:none}
- #scene-mode .zoom-tools button{min-height:40px;min-width:36px;padding:2px;flex:none}
- #zoom-out{order:0}#zoom-range{display:block;flex:1;order:1}#zoom-value{display:block;order:2;white-space:nowrap;font-size:12px}#zoom-in{order:3}#mobile-fit{display:grid;place-items:center;order:4}#scene-mode #zoom-fit{display:none}
+ #scene-mode .zoom-tools{display:flex;position:static;align-items:center;gap:8px;padding:2px 0 10px;border:0;background:none}
+ #scene-mode .zoom-tools button{min-height:36px;min-width:34px;padding:2px;flex:none}
+ #zoom-out{order:0}#zoom-range{display:block;flex:1;order:1}#zoom-value{display:block;order:2;white-space:nowrap;font-size:14px;min-width:53px;text-align:center;padding:5px 4px;border:1px solid var(--line);border-radius:8px;background:#fff9ec}#zoom-in{order:3}#mobile-fit{display:grid;place-items:center;order:4}#scene-mode #zoom-fit{display:none}
  #scene-mode .scene-extra{display:block!important;border:0;margin:0;padding:0;overflow:visible}
  #scene-mode .scene-extra summary,#scene-mode #layers-arrows{display:none!important}
- #scene-mode .layer-strip{gap:4px}
- #scene-mode #layers{display:flex;gap:4px;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
- #scene-mode #layers button{flex:none;min-width:46px;min-height:44px;scroll-snap-align:start;font-size:0;padding:3px}
+ #scene-mode .layer-strip{gap:7px}
+ #scene-mode #layers{display:flex;gap:7px;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+ #scene-mode #layers button{flex:none;width:clamp(48px,13vw,66px);min-height:44px;scroll-snap-align:start;font-size:0;padding:3px}
  #scene-mode #layers button canvas{width:36px;height:28px}
  #motif-open,#motifs-left,#motifs-right{flex:none;min-width:36px;min-height:44px;padding:3px;font-size:20px}
  #motifs-left:not([hidden]),#motifs-right:not([hidden]){display:block}
- #scene-mode .scene-tools{display:flex!important;gap:3px;margin:0}
+ #scene-mode .scene-tools{display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin:0}
  #scene-mode .scene-tools[hidden]{display:none!important}
- #scene-mode .scene-tools button{display:grid;place-items:center;flex:1;min-width:0;min-height:44px;padding:2px;font-size:0}
+ #scene-mode .scene-tools button{display:grid;place-items:center;flex:1;min-width:0;min-height:clamp(42px,10vw,50px);padding:2px;font-size:0}
  #scene-mode .scene-tools button[hidden]{display:none}
- .object-options:not([hidden]){display:grid;gap:8px;border:1px solid var(--line);border-radius:9px;padding:8px;background:#fff7e6}
+ .object-options:not([hidden]){display:grid;gap:8px;border:1px solid var(--line);border-radius:11px;padding:10px;background:#faf4e8}
  .option-grid,.rotate-row{display:grid;gap:4px;grid-template-columns:repeat(4,minmax(0,1fr))}
- .option-grid button{min-height:48px;font-size:11px;padding:3px;display:grid;justify-items:center;align-content:center}
+ .option-grid button{min-height:59px;padding:4px;display:grid;place-items:center}
+ .option-grid button svg{width:29px}
  .rotate-row{grid-template-columns:minmax(45px,.45fr) 1fr 1fr;align-items:center}
  .rotate-row button,.object-options .segments button{min-height:44px}
+ #scene-mode #size-panel{position:relative;gap:9px;padding:10px;background:#faf4e8;border-radius:11px}
  #size-panel .mobile-only{display:block}
+ #size-panel strong,.object-options strong{font-size:clamp(18px,5vw,23px);line-height:1.2;padding-right:37px}
+ #size-done{position:absolute;right:5px;top:4px;width:36px;min-height:36px;border:0;background:transparent;font-size:0;padding:0}
+ #size-done::before{content:'';display:inline-block;width:9px;height:9px;border:solid currentColor;border-width:0 2px 2px 0;transform:rotate(45deg)}
+ #size-panel output{font-size:14px;text-align:right}
+ #lock-aspect{appearance:none;width:38px;height:21px;flex:none;margin:0;border-radius:12px;background:#c9c4b6;position:relative}
+ #lock-aspect:checked{background:var(--pine)}
+ #lock-aspect::before{content:'';position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:#fff}
+ #lock-aspect:checked::before{left:20px}
+ #scene-mode .connection{font-size:14px;gap:7px}
+ #zoom-range,#size-panel input[type=range]{appearance:none;min-width:0;height:7px;border-radius:5px;background:linear-gradient(to right,var(--pine) 0 var(--range-fill,0%),#dcdad2 var(--range-fill,0%) 100%);border:1px solid #38382a22}
+ #zoom-range::-webkit-slider-thumb,#size-panel input[type=range]::-webkit-slider-thumb{appearance:none;width:15px;height:15px;border-radius:50%;background:var(--pine)}
+ #zoom-range::-moz-range-thumb,#size-panel input[type=range]::-moz-range-thumb{width:15px;height:15px;border:0;border-radius:50%;background:var(--pine)}
+ #zoom-range{--range-fill:14.3%}
  #scene-mode .scene-footer{display:flex;order:10;padding:3px 0}
 }
 </style>
@@ -209,7 +225,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 <header class="masthead">
  <button id="setup-open" class="header-icon" aria-label="Nastavení řezu" title="Nastavení řezu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
  <svg class="winter left" viewBox="0 0 88 64" aria-hidden="true"><path d="M25 10l3 7 7 3-7 3-3 7-3-7-7-3 7-3zm24-8 10 15h-5l11 12h-8l13 13H53v12h-8V42H29l13-13h-8l11-12h-6zm27 27 7 11h-3l7 10h-8v9h-5v-9h-8l7-10h-3z" fill="currentColor"/></svg>
- <h1>Vánoční dílna <small class="app-version">1.3.0</small></h1>
+ <h1>Vánoční dílna <small class="app-version">1.3.1</small></h1>
  <svg class="winter right-winter" viewBox="0 0 88 64" aria-hidden="true"><path d="M18 27l8 13h-4l9 10H20v9h-5v-9H5l9-10h-4zm29-25 10 15h-5l11 12h-8l13 13H51v12h-8V42H27l13-13h-8l11-12h-6zm28 8 3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="currentColor"/></svg>
  <svg class="snow-edge" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 13Q45-4 82 11T158 13T236 10T311 15T400 12V22H0Z" fill="currentColor"/></svg>
 </header>
@@ -278,7 +294,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
   <label><input id="lock-aspect" type="checkbox" checked> Zamknout poměr stran</label>
   <label>Šířka <input id="scale-x" type="range" min="20" max="200" step="1"><output id="scale-x-value"></output></label>
   <label>Výška <input id="scale-y" type="range" min="20" max="200" step="1"><output id="scale-y-value"></output></label>
-  <button id="size-done">Hotovo</button>
+  <button id="size-done" aria-label="Sbalit nastavení velikosti">Hotovo</button>
  </section>
  <section class="scene-library" aria-label="Paleta objektů">
   <h3 class="panel-title">Paleta</h3>
@@ -1552,7 +1568,7 @@ function syncSize(item){
  $('lock-aspect').checked=item.aspectLocked!==false;
  for(const [axis,key] of [['x','scaleX'],['y','scaleY']]){
   const percent=Math.round((item[key]??1)*100);
-  $('scale-'+axis).value=percent;$('scale-'+axis+'-value').textContent=percent+' %';
+  $('scale-'+axis).value=percent;paintRangeProgress($('scale-'+axis));$('scale-'+axis+'-value').textContent=percent+' %';
  }
 }
 $('size-open').onclick=()=>{
@@ -1696,6 +1712,10 @@ for(const [name,apply] of [['foreground',value=>foreground=value],['background',
   apply(value);syncAppearance();paint();
  };
 }
+function paintRangeProgress(input){
+ const percent=(Number(input.value)-Number(input.min))/(Number(input.max)-Number(input.min))*100;
+ input.style.setProperty('--range-fill',percent+'%');
+}
 let sceneZoom=1;
 function zoomScene(step){
  sceneZoom=clamp(sceneZoom+step,0.75,2.5);
@@ -1704,7 +1724,7 @@ function zoomScene(step){
  $('zoom-out').disabled=sceneZoom<=.75;
  $('zoom-in').disabled=sceneZoom>=2.5;
  if(appearance==='hairline')paint();
- $('zoom-range').value=Math.round(sceneZoom*100);$('zoom-value').textContent=Math.round(sceneZoom*100)+' %';
+ $('zoom-range').value=Math.round(sceneZoom*100);paintRangeProgress($('zoom-range'));$('zoom-value').textContent=Math.round(sceneZoom*100)+' %';
  if(!$('context').hidden&&selectedObject())positionMenu(selectedObject());
 }
 $('zoom-out').onclick=()=>zoomScene(-.25);
@@ -1998,7 +2018,9 @@ const mobilePaths={
 };
 for(const name of ['frame','template','page','base','move','appearance']){
  const button=$('mobile-'+name);
- button.innerHTML=uiIcon(mobilePaths[name])+'<span>'+button.textContent+'</span>';
+ const label=button.getAttribute('aria-label')??button.textContent;
+ button.title=label;button.setAttribute('aria-label',label);
+ button.innerHTML=uiIcon(mobilePaths[name]);
 }
 $('mobile-fit').innerHTML=uiIcon(mobilePaths.fit);
 $('mobile-fit').onclick=$('zoom-fit').onclick;
@@ -2054,7 +2076,9 @@ const finishSize=$('size-done').onclick;
 $('size-done').onclick=()=>{mobilePanel='';finishSize();syncMobileControls(selectedObject(),objects.indexOf(selectedObject()));};
 for(const [i,button] of Array.from($('mobile-layer-panel').querySelectorAll('button')).entries()){
  const path=i<2?'M12 12V2m-4 4 4-4 4 4M4 13l8 4 8-4M4 17l8 4 8-4':'M12 2v10m-4-4 4 4 4-4M4 14l8 4 8-4M4 18l8 4 8-4';
- button.innerHTML=uiIcon(path+(i===0?'M6 1h12':i===3?'M6 23h12':''))+button.textContent;
+ const label=['Úplně dopředu','O jednu dopředu','O jednu dozadu','Úplně dozadu'][i];
+ button.title=label;button.setAttribute('aria-label',label);
+ button.innerHTML=uiIcon(path+(i===0?'M6 1h12':i===3?'M6 23h12':''));
 }
 $('mobile-layer-panel').onclick=e=>{
  const item=selectedObject(),key=e.target.closest('button')?.value;
@@ -2079,7 +2103,7 @@ $('mobile-detail-panel').onclick=e=>{
 function syncMotifArrows(){
  if(!mobileUI.matches)return;
  const strip=$('layers'),left=$('motifs-left'),right=$('motifs-right');
- const reserved=left.hidden?0:left.offsetWidth+right.offsetWidth+8;
+ const reserved=left.hidden?0:left.offsetWidth+right.offsetWidth+14;
  const overflow=strip.scrollWidth>strip.clientWidth+reserved+1;
  left.hidden=right.hidden=!overflow;
  left.disabled=strip.scrollLeft<2;
@@ -2089,7 +2113,8 @@ const motifStrip=$('layers');
 motifStrip.addEventListener('scroll',syncMotifArrows,{passive:true});
 if(typeof ResizeObserver!=='undefined')new ResizeObserver(syncMotifArrows).observe(motifStrip);
 for(const [key,direction] of [['left',-1],['right',1]])$('motifs-'+key).onclick=()=>{
- const pitch=(motifStrip.firstElementChild?.offsetWidth??46)+4;
+ const first=motifStrip.firstElementChild,second=first?.nextElementSibling;
+ const pitch=second?second.offsetLeft-first.offsetLeft:(first?.offsetWidth??46);
  const page=Math.max(1,Math.floor(motifStrip.clientWidth/pitch))*pitch;
  motifStrip.scrollTo({left:Math.round((motifStrip.scrollLeft+page*direction)/pitch)*pitch,behavior:'smooth'});
 };
