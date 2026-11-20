@@ -158,6 +158,8 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  #motif-dialog{margin:auto auto 0;width:min(100%,430px);max-width:100%;border-radius:16px 16px 0 0}
 }
 .mobile-only{display:none}
+.mobile-action-icon > svg{display:none}
+#motif-open svg,#zoom-out svg,#zoom-in svg{width:21px;height:21px;display:block;margin:auto}
 @media(max-width:760px) and (orientation:portrait), (orientation:landscape) and (max-height:500px) and (max-width:1000px){
  .masthead{min-height:60px;grid-template-columns:36px 24px 1fr 24px 12px;padding:0 10px 7px;align-items:center}
  .masthead h1{grid-column:3;font-size:clamp(18px,5.6vw,31px);text-align:center}
@@ -168,11 +170,20 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  #scene-mode > .composition-head{display:grid;grid-template-columns:minmax(0,1fr);justify-content:stretch;align-items:start;gap:9px;padding:8px 0 0!important}
  .composition-head h2{font-size:clamp(23px,6vw,30px);padding:0;line-height:1.12}
  #mobile-project{display:grid;grid-template-columns:repeat(6,minmax(0,1fr)) minmax(30px,.66fr);gap:clamp(3px,1vw,6px);width:100%;margin:0 0 3px}
- #mobile-project button{min-width:0;min-height:clamp(44px,11vw,57px);padding:0;font-size:21px;display:grid;place-items:center}
- #mobile-project svg,#scene-mode .scene-tools svg,.object-options svg,#mobile-fit svg{width:clamp(19px,5vw,25px);height:auto;display:block}
+ #mobile-files{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(3px,1vw,6px);width:100%}
+ #mobile-files button,#mobile-project button{min-width:0;min-height:clamp(44px,11vw,57px);padding:0;font-size:21px;display:grid;place-items:center}
+ #mobile-files button svg,#mobile-project button svg,#scene-mode .scene-tools svg,.object-options button svg,.zoom-tools button svg,.layer-strip button svg,#mobile-export-dialog button svg,.mobile-action-icon svg{width:clamp(23px,6vw,29px);height:clamp(23px,6vw,29px);display:block;flex:none;margin:0}
+ #scene-mode .option-grid button svg{width:29px;height:29px}
+ .layer-strip > button,.zoom-tools > button,#mobile-export-close,.mobile-action-icon{display:grid;place-items:center;padding:2px;min-width:40px}
+ .mobile-action-icon > span{display:none}
+ #mobile-export-dialog button{min-height:44px}
+ #mobile-export-formats .export-actions{display:flex!important;gap:8px}
+ #mobile-export-formats .export-actions button{display:inline-flex;align-items:center;justify-content:center;gap:5px}
+ .project-tools{display:contents!important}
+ .project-tools > button,.project-tools > #project-message:empty{display:none}
  #mobile-project button[aria-pressed=true]:not(#mobile-base),#scene-mode .scene-tools button[aria-expanded=true]{background:var(--pine);color:white}
  .project-tools,.frame-tools,.scene-controls,.export-actions{display:none!important}
- [data-mobile-project=more] .project-tools,[data-mobile-project=more] .project-tools .export-actions,[data-mobile-project=frame] .frame-tools,[data-mobile-project=template] .frame-tools,[data-mobile-project=frame] .scene-controls{display:flex!important}
+ [data-mobile-project=frame] .frame-tools,[data-mobile-project=template] .frame-tools,[data-mobile-project=frame] .scene-controls{display:flex!important}
  [data-mobile-project=frame] #template-choice,[data-mobile-project=template] #frame-choice,[data-mobile-project=template] #frame-settings,[data-mobile-project=template] #frame-position,.scene-controls #appearance-open,.scene-controls #move-composition{display:none!important}
  #scene-mode .scene-viewport{display:flex;flex-direction:column-reverse;position:relative;padding:0;min-height:0;overflow:visible;border:0;background:none}
  #scene-mode .scene-scroll{overflow:auto;width:100%;max-height:60svh;overscroll-behavior:contain}
@@ -188,7 +199,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  #scene-mode #layers button{flex:none;width:clamp(48px,13vw,66px);min-height:44px;scroll-snap-align:start;font-size:0;padding:3px}
  #scene-mode #layers button canvas{width:36px;height:28px}
  #motif-open,#motifs-left,#motifs-right{flex:none;min-width:36px;min-height:44px;padding:3px;font-size:20px}
- #motifs-left:not([hidden]),#motifs-right:not([hidden]){display:block}
+ #motifs-left:not([hidden]),#motifs-right:not([hidden]){display:grid}
  #scene-mode .scene-tools{display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;margin:0}
  #scene-mode .scene-tools[hidden]{display:none!important}
  #scene-mode .scene-tools button{display:grid;place-items:center;flex:1;min-width:0;min-height:clamp(42px,10vw,50px);padding:2px;font-size:0}
@@ -225,14 +236,17 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 <header class="masthead">
  <button id="setup-open" class="header-icon" aria-label="Nastavení řezu" title="Nastavení řezu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
  <svg class="winter left" viewBox="0 0 88 64" aria-hidden="true"><path d="M25 10l3 7 7 3-7 3-3 7-3-7-7-3 7-3zm24-8 10 15h-5l11 12h-8l13 13H53v12h-8V42H29l13-13h-8l11-12h-6zm27 27 7 11h-3l7 10h-8v9h-5v-9h-8l7-10h-3z" fill="currentColor"/></svg>
- <h1>Vánoční dílna <small class="app-version">1.3.1</small></h1>
+ <h1>Vánoční dílna <small class="app-version">1.3.2</small></h1>
  <svg class="winter right-winter" viewBox="0 0 88 64" aria-hidden="true"><path d="M18 27l8 13h-4l9 10H20v9h-5v-9H5l9-10h-4zm29-25 10 15h-5l11 12h-8l13 13H51v12h-8V42H27l13-13h-8l11-12h-6zm28 8 3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="currentColor"/></svg>
  <svg class="snow-edge" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 13Q45-4 82 11T158 13T236 10T311 15T400 12V22H0Z" fill="currentColor"/></svg>
 </header>
 <main id="scene-mode">
  <div class="composition-head"><h2 class="screen-heading">Kompozice</h2>
+ <div id="mobile-files" class="mobile-only" role="group" aria-label="Soubory projektu">
+  <button id="mobile-new">Nový projekt</button><button id="mobile-save">Uložit projekt</button><button id="mobile-load">Načíst projekt</button><button id="mobile-export" aria-haspopup="dialog">Exportovat</button>
+ </div>
  <div id="mobile-project" class="mobile-only" aria-label="Nástroje kompozice">
-  <button id="mobile-frame">Rám</button><button id="mobile-template">Šablona</button><button id="mobile-page">Rozměry</button><button id="mobile-base">Podstava</button><button id="mobile-move" aria-label="Posun kompozice">Posun</button><button id="mobile-appearance">Vzhled</button><button id="mobile-more" aria-label="Další možnosti">⋮</button>
+  <button id="mobile-frame">Rám</button><button id="mobile-template">Šablona</button><button id="mobile-page">Rozměry</button><button id="mobile-base">Podstava</button><button id="mobile-move" aria-label="Posun kompozice">Posun</button><button id="mobile-appearance">Vzhled</button><button id="mobile-lock">Zamknout kompozici</button>
  </div>
  <div class="project-tools"><button id="project-new">Nová</button><button id="scene-lock" type="button" aria-pressed="false">Zamknout</button><button id="page-open">Rozměry plochy</button><button id="toggle-base" aria-pressed="true">Odebrat podstavu</button><button id="project-save">Uložit projekt</button><button id="project-load">Načíst projekt</button><input id="project-file" type="file" accept=".json,application/json" hidden><span id="project-message" role="status"></span></div><div class="frame-tools">
   <label id="frame-choice">Rám <select id="frame"><option value="none">Rovná scéna</option><option value="circle">Kruh</option><option value="eye">Kruh s ouškem</option></select></label>
@@ -305,6 +319,10 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  <footer class="scene-footer"><div class="connection">Napojení <span id="status" role="status" aria-live="polite"></span></div><div class="export-actions"><button id="png" class="primary">PNG</button><button id="svg" class="primary">SVG</button></div></footer>
 
 </main>
+<dialog id="mobile-export-dialog" aria-labelledby="mobile-export-title">
+ <div class="dialog-heading"><h2 id="mobile-export-title">Export</h2><button id="mobile-export-close" aria-label="Zavřít export">×</button></div>
+ <div id="mobile-export-formats"></div>
+</dialog>
 <dialog id="page-dialog" aria-labelledby="page-title"><h2 id="page-title">Rozměry kompozice</h2>
  <label>Předvolba <select id="page-preset"><option value="">Vlastní rozměr</option><option value="80">Ozdoba na stromek · Ø 80 mm</option><option value="100">Podtácek · Ø 100 mm</option><option value="250">Kruh do okna · Ø 250 mm</option></select></label>
  <p id="diameter-help" hidden>Předvolba udává vnější průměr kruhu. Rozměry plochy níže zahrnují okraj a případné ouško.</p>
@@ -2008,6 +2026,15 @@ const mobileUI=typeof matchMedia==='function'?matchMedia('(max-width:760px) and 
 let mobilePanel='',mobileItem=null,mobileProject='';
 const mobilePanels={rotate:'mobile-rotate-panel',layer:'mobile-layer-panel',size:'size-panel',detail:'mobile-detail-panel'};
 const mobilePaths={
+ new:'M13 2H5v20h14V8zM13 2v6h6M9 15h6m-3-3v6',
+ save:'M4 3h14l3 3v15H3V3zm3 0v7h10V3M7 21v-7h10v7',
+ load:'M2 19V5h8l3 3h8v3M2 19l4-8h17l-4 8z',
+ export:'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',
+ lock:'M5 10h14v11H5zM8 10V7a4 4 0 1 1 8 0v3M12 14v3',
+ unlock:'M5 10h14v11H5zM8 10V7a4 4 0 0 1 8 0M12 14v3',
+ plus:'M12 5v14M5 12h14',minus:'M5 12h14',close:'M6 6l12 12M18 6 6 18',
+ left:'m15 5-7 7 7 7',right:'m9 5 7 7-7 7',
+ confirm:'m4 12 5 5L20 6',reset:'M3 11a9 9 0 1 1 3 8m-3-8V4m0 7h7',
  frame:'M3 3h18v18H3zM7 7h10v10H7z',template:'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
  page:'M3 16 16 3l5 5L8 21zM10 11l2 2m1-5 2 2',base:'M4 16h16v4H4zM7 16v-5h10v5',
  move:'M12 2v20M2 12h20M9 5l3-3 3 3M9 19l3 3 3-3M5 9l-3 3 3 3M19 9l3 3-3 3',appearance:'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zm0 0v18',
@@ -2016,7 +2043,7 @@ const mobilePaths={
  size:'M4 20 20 4M14 4h6v6M4 14v6h6',remove:'M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7',
  fit:'M9 4H4v5m11-5h5v5M4 15v5h5m11-5v5h-5'
 };
-for(const name of ['frame','template','page','base','move','appearance']){
+for(const name of ['new','save','load','export','frame','template','page','base','move','appearance','lock']){
  const button=$('mobile-'+name);
  const label=button.getAttribute('aria-label')??button.textContent;
  button.title=label;button.setAttribute('aria-label',label);
@@ -2031,17 +2058,21 @@ for(const [key,label] of Object.entries({edit:'Upravit',rotate:'Otočení',copy:
  if(key!=='rotate'&&key!=='copy')button.insertAdjacentText('beforeend',label);
  button.title=label;button.setAttribute('aria-label',label);
 }
-for(const [key,target] of Object.entries({page:'page-open',base:'toggle-base',move:'move-composition',appearance:'appearance-open'})){
+for(const [key,target] of Object.entries({new:'project-new',save:'project-save',load:'project-load',page:'page-open',base:'toggle-base',move:'move-composition',appearance:'appearance-open',lock:'scene-lock'})){
  $('mobile-'+key).onclick=()=>$(target).onclick();
 }
 function syncMobileProject(){
  $('scene-mode').setAttribute('data-mobile-project',mobileProject);
- for(const key of ['frame','template','more'])$('mobile-'+key).setAttribute('aria-pressed',mobileProject===key);
+ for(const key of ['frame','template'])$('mobile-'+key).setAttribute('aria-pressed',mobileProject===key);
  $('mobile-move').setAttribute('aria-pressed',moveComposition&&!sceneLocked);
  $('mobile-base').setAttribute('aria-pressed',!!base);
+ const lock=$('mobile-lock'),label=sceneLocked?'Odemknout kompozici':'Zamknout kompozici';
+ if(lock.getAttribute('aria-pressed')!==String(sceneLocked))lock.innerHTML=uiIcon(mobilePaths[sceneLocked?'lock':'unlock']);
+ lock.setAttribute('aria-pressed',sceneLocked);lock.setAttribute('aria-label',label);lock.title=label;
+ $('mobile-new').disabled=$('mobile-load').disabled=sceneLocked;
  for(const key of ['frame','template','page','base','move'])$('mobile-'+key).disabled=sceneLocked||(key==='move'&&!objects.length);
 }
-for(const key of ['frame','template','more'])$('mobile-'+key).onclick=()=>{
+for(const key of ['frame','template'])$('mobile-'+key).onclick=()=>{
  mobileProject=mobileProject===key?'':key;syncMobileProject();
 };
 function syncMobileControls(item,index){
@@ -2120,10 +2151,24 @@ for(const [key,direction] of [['left',-1],['right',1]])$('motifs-'+key).onclick=
 };
 function placeExportActions(){
  const actions=document.querySelector('.export-actions');
- document.querySelector(mobileUI.matches?'.project-tools':'.scene-footer').append(actions);
+ (mobileUI.matches?$('mobile-export-formats'):document.querySelector('.scene-footer')).append(actions);
+}
+$('mobile-export').onclick=()=>$('mobile-export-dialog').showModal();
+$('mobile-export-close').innerHTML=uiIcon(mobilePaths.close);
+$('mobile-export-close').onclick=()=>$('mobile-export-dialog').close();
+for(const id of ['png','svg']){
+ const button=$(id),download=button.onclick;
+ button.onclick=()=>{download();if($('mobile-export-dialog').open)$('mobile-export-dialog').close();};
+}
+for(const [id,icon] of Object.entries({'motif-open':'plus','motifs-left':'left','motifs-right':'right','zoom-out':'minus','zoom-in':'plus'}))$(id).innerHTML=uiIcon(mobilePaths[icon]);
+for(const [id,icon] of Object.entries({'page-cancel':'close','page-apply':'confirm','save-template':'save','apply-object':'confirm',reset:'reset','setup-done':'confirm'})){
+ const button=$(id),label=button.textContent,text=document.createElement('span');
+ text.textContent=label;button.setAttribute('aria-label',label);button.title=label;
+ button.classList.add('mobile-action-icon');
+ button.innerHTML=uiIcon(mobilePaths[icon]);button.append(text);
 }
 placeExportActions();
-mobileUI.addEventListener?.('change',()=>{placeExportActions();mobilePanel='';mobileProject='';$('size-panel').hidden=true;refresh();});
+mobileUI.addEventListener?.('change',()=>{if($('mobile-export-dialog').open)$('mobile-export-dialog').close();placeExportActions();mobilePanel='';mobileProject='';$('size-panel').hidden=true;refresh();});
 for(const [event,step] of [['zoom-out',-.05],['zoom-in',.05]])$(event).onclick=()=>zoomScene(mobileUI.matches?step:step*5);
 
 const touchPoints=new Map();
