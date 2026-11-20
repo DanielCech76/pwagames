@@ -106,7 +106,8 @@ function syncCircleControls() {
  $('frame').value=frame;
  $('rim-width').value=rimMm;
  $('minimum-width').value=minimumMm;
- $('frame-settings').hidden=frame==='none';
+ $('rim-width-field').hidden=frame==='none';
+ $('frame-settings').hidden=false;
  $('scene-lock').setAttribute('aria-pressed',sceneLocked);
  $('scene-lock').textContent=sceneLocked?'Odemknout':'Zamknout';
  for(const id of ['setup-open','project-new','page-open','toggle-base','project-load','frame','circle-preset','rim-width','minimum-width','library','layers','empty-building','wide-inspector','scene-tools']){
@@ -117,12 +118,8 @@ function syncCircleControls() {
  stage.classList.toggle('scene-locked',sceneLocked);
 }
 
-// Erode the silhouette by half the required width and test the remaining core.
-function hasStrongConnections({mask,w,h,scale},required=minimumMm) {
- const radius=mmToUnits(required)*scale/2;
- const limit=Math.max(1,Math.floor(radius*3+.5));
+function cutChamferDistance(mask,w,h,limit){
  const distance=new Uint16Array(mask.length);
- const core=new Uint8Array(mask.length);
  for(let y=0;y<h;y++){
   for(let x=0;x<w;x++){
    const i=y*w+x;
@@ -137,7 +134,14 @@ function hasStrongConnections({mask,w,h,scale},required=minimumMm) {
    if(mask[i])distance[i]=Math.min(distance[i],distance[i+1]+3,distance[i+w]+3,distance[i+w-1]+4,distance[i+w+1]+4);
   }
  }
- for(let i=0;i<core.length;i++)core[i]=mask[i]&&distance[i]>limit;
+ return distance;
+}
+// Erode the silhouette by half the required width and test the remaining core.
+function hasStrongConnections({mask,w,h,scale},required=minimumMm) {
+ const radius=cutPixelsPerMm(scale)*required/2;
+ const limit=Math.max(1,Math.floor(radius*3+.5));
+ const distance=cutChamferDistance(mask,w,h,limit);
+ const core=Uint8Array.from(mask,(value,i)=>value&&distance[i]>limit);
  const result=labelMask(core,w,h,scale);
  if(result.components===0)return false;
  const areas=new Uint32Array(result.components+1);
@@ -146,6 +150,23 @@ function hasStrongConnections({mask,w,h,scale},required=minimumMm) {
   if(id&&id!==result.keeper&&++areas[id]>tolerance)return false;
  }
  return true;
+}
+
+// A hole reaches the configured width if it contains a circle of that diameter.
+function narrowCutOpenings({mask,w,h,scale},required=minimumMm){
+ const empty=Uint8Array.from(mask,value=>1-value);
+ const {components,problem}=labelMask(empty,w,h,scale);
+ if(!components)return 0;
+ const exterior=new Uint8Array(components+1),wide=new Uint8Array(components+1);
+ for(let x=0;x<w;x++){exterior[problem[x]]=1;exterior[problem[(h-1)*w+x]]=1;}
+ for(let y=0;y<h;y++){exterior[problem[y*w]]=1;exterior[problem[y*w+w-1]]=1;}
+ if(exterior.subarray(1).every(Boolean))return 0;
+ const limit=Math.max(1,Math.round(cutPixelsPerMm(scale)*required*1.5));
+ const distance=cutChamferDistance(empty,w,h,limit);
+ for(let i=0;i<distance.length;i++)if(distance[i]>limit)wide[problem[i]]=1;
+ let count=0;
+ for(let i=1;i<=components;i++)if(!exterior[i]&&!wide[i])count++;
+ return count;
 }
 
 function syncFramePosition(item) {
