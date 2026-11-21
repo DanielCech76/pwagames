@@ -81,3 +81,14 @@ test('rejects a contour with crossing segments',()=>{
  const outline={start:[0,0],segments:[[10,10],[0,10],[10,0],[0,0]].map(end=>({end}))};
  assert.equal(run('traceTopologyIsSafe([outline])',{outline}),false);
 });
+
+test('reports only detected vertices and increases sensitivity independently of tolerance',()=>{
+ const points=[[0,0],[40,0],[80,20],[80,75],[0,75]];
+ const low=run('fitTracedOutline(points,2,0)',{points});
+ const high=run('fitTracedOutline(points,2,100)',{points});
+ const original=run('fitTracedOutline(points,0,100)',{points});
+ assert(high.vertices.length>low.vertices.length);
+ assert.deepEqual(high.vertices,original.vertices);
+ for(const vertex of high.vertices)assert(high.segments.some(({end})=>end===vertex));
+ assert(high.deviation<=2);
+});

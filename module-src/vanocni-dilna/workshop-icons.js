@@ -1,5 +1,8 @@
 /* Bootstrap Icons, MIT license. */
 const workshopGlyphs={
+ "dash-lg": "<path d='M3 7.25h10v1.5H3z'/>",
+ "plus-lg": "<path d='M7.25 3h1.5v10h-1.5zM3 7.25h10v1.5H3z'/>",
+ "percent": "<path d='M4.5 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5m0 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2M11.5 9a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5m0 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2M11.9 2l1.1 1L4.1 14 3 13z'/>",
  "file-earmark-plus-fill": "<path d=\"M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M8.5 7v1.5H10a.5.5 0 0 1 0 1H8.5V11a.5.5 0 0 1-1 0V9.5H6a.5.5 0 0 1 0-1h1.5V7a.5.5 0 0 1 1 0\"/>",
  "folder-fill": "<path d=\"M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.825a2 2 0 0 1-1.991-1.819l-.637-7a2 2 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3m-8.322.12q.322-.119.684-.12h5.396l-.707-.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981z\"/>",
  "floppy-fill": "<path d=\"M0 1.5A1.5 1.5 0 0 1 1.5 0H3v5.5A1.5 1.5 0 0 0 4.5 7h7A1.5 1.5 0 0 0 13 5.5V0h.086a1.5 1.5 0 0 1 1.06.44l1.415 1.414A1.5 1.5 0 0 1 16 2.914V14.5a1.5 1.5 0 0 1-1.5 1.5H14v-5.5A1.5 1.5 0 0 0 12.5 9h-9A1.5 1.5 0 0 0 2 10.5V16h-.5A1.5 1.5 0 0 1 0 14.5z\"/>\n  <path d=\"M3 16h10v-5.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5zm9-16H4v5.5a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5zM9 1h2v4H9z\"/>",
@@ -135,6 +138,11 @@ const workshopActions={
  "Drobný otvor": "circle",
  "Vyplnit otvor": "paint-bucket",
  "Zkontrolovat aktualizaci": "arrow-repeat",
+ "Podle objektu (%)": "percent",
+ "V milimetrech": "rulers",
+ "Oddálit": "dash-lg",
+ "Přiblížit": "plus-lg",
+ "Chytré vyhlazení": "bezier2",
  "Před / po": "subtract",
  "Původní obrys": "arrow-clockwise",
  "Stáhnout PNG": "download",

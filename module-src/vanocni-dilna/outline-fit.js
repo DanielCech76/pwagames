@@ -1,6 +1,6 @@
 // Fit traced polygons in their original coordinate system. Each accepted cubic
 // is checked against the entire corresponding polyline, in both directions.
-function fitTracedOutline(points, tolerance) {
+function fitTracedOutline(points, tolerance, sensitivity=50) {
  const n = points.length;
  const distance = (a,b) => Math.hypot(a[0]-b[0],a[1]-b[1]);
  const mix = (a,b,t) => a.map((v,i) => v+(b[i]-v)*t);
@@ -10,7 +10,7 @@ function fitTracedOutline(points, tolerance) {
  };
  const dot = (a,b) => a[0]*b[0]+a[1]*b[1];
  const polyline = () => points.slice(1).concat([points[0]]).map(end=>({end}));
- if(n<5 || n>12000 || tolerance<=0)return {start:points[0],segments:polyline()};
+ if(n<5 || n>12000)return {start:points[0],segments:polyline(),vertices:n<5?points:[]};
  const reach = 5;
  const angles = points.map((p,i)=>{
   const neighbor = (sign,radius) => {
@@ -25,7 +25,10 @@ function fitTracedOutline(points, tolerance) {
   const angleAt = radius => dot(direction(neighbor(-1,radius),p),direction(neighbor(1,radius),p));
   return Math.min(angleAt(reach),angleAt(reach*1.7));
  });
- const corners=angles.flatMap((angle,i)=>angle>-.42 && angle>angles[(i+n-1)%n] && angle>=angles[(i+1)%n]?[i]:[]);
+ const threshold=-.42-(sensitivity-50)*.01;
+ const corners=angles.flatMap((angle,i)=>angle>threshold && angle>angles[(i+n-1)%n] && angle>=angles[(i+1)%n]?[i]:[]);
+ const vertices=corners.map(index=>points[index]);
+ if(tolerance<=0)return {start:points[0],segments:polyline(),vertices};
  if(corners.length<2){
   const first=corners[0]??0;
   corners.push(...(corners.length?[]:[first]),(first+Math.floor(n/2))%n);
@@ -129,7 +132,7 @@ function fitTracedOutline(points, tolerance) {
   }
   segments.push(...fitted.reverse());
  }
- return {start:points[corners[0]],segments,deviation};
+ return {start:points[corners[0]],segments,deviation,vertices};
 }
 
 // Detect crossings on a finely flattened copy before committing the vector fit.

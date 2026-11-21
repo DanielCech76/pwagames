@@ -178,9 +178,18 @@ body:has(#work-dialog[open]) .scene-scroll { touch-action:none }
 #work-dialog button[hidden] { display:none }
 #work-dialog .work-inline-icon[aria-pressed=true] { background:#174c37;color:#fff }
 
-.work-fit-caption { display:flex; align-items:center; gap:5px }
-.work-fit-caption svg { width:14px; height:14px; flex:none }
 
-.work-fit-legend:not([hidden]) { display:flex; flex-wrap:wrap; gap:6px 14px }
-.work-fit-legend span::before { content:""; display:inline-block; width:15px; margin-right:5px; vertical-align:middle; border-top:2px solid #00ad91 }
-.work-fit-legend span:first-child::before { border-top:2px dashed #ec7428 }
+#work-dialog[data-mode=smoothing][open] { inset: max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom)) auto; width:min(540px,calc(100vw - 16px));height:auto;max-height:none }
+#work-dialog[data-mode=smoothing] #work-content { padding:8px 12px 12px }
+#work-dialog .work-fit-name { font-weight:600;margin:0 }
+.work-fit-tools { display:flex;gap:6px;justify-content:end;margin:2px 0 5px }
+.work-fit-viewport { width:100%;height:clamp(170px,36dvh,390px);overflow:auto;overscroll-behavior:contain;background:#d6ebdd;border:1px solid #a9c3b2;border-radius:8px }
+.work-fit-preview { display:block;max-width:none;max-height:none }
+.work-fit-legend,.work-fit-units { display:flex;flex-wrap:wrap;gap:6px 12px }
+.work-fit-legend { font-size:11px }
+.work-fit-legend span::before { content:"";display:inline-block;width:12px;margin-right:4px;vertical-align:middle;border-top:2px solid #008274 }
+.work-fit-legend span:first-child::before { border-top:2px dashed #a44b24 }
+.work-fit-legend span:last-child::before { width:6px;height:6px;border:1px solid #513913;border-radius:50%;background:#ffd166 }
+#work-dialog .work-fit-units button[aria-pressed=true],#work-dialog .work-fit-actions button:last-child { background:#174c37;color:#fff }
+.work-fit-stats { padding:7px;border-radius:6px;background:#e7eee3 }
+#work-dialog .work-fit-actions { position:sticky;bottom:0;background:#fbf6e9;padding:5px 0 }

@@ -30,7 +30,6 @@ function backToolPanel(){
 }
 toolBack.onclick=backToolPanel;
 workshopDialog.addEventListener('close',()=>{
- clearOutlinePreview();
  if(workshopDialog.open)return;
  restoreEditorForm();toolHistory.length=0;toolBack.hidden=true;
 });
@@ -141,7 +140,6 @@ function workButton(label,action,parent=workContent){
  return button;
 }
 function workPanel(title,mode='tools'){
- clearOutlinePreview();
  if(mode!=='form')restoreEditorForm();
  if(workshopDialog.dataset.mode==='object'&&mode!=='object')finishWorkshopMove(true);
  workshopDialog.dataset.mode=mode;
@@ -313,7 +311,6 @@ function showWorkshopObject(){
  if(sceneLocked)return;
  const controls=document.createElement('div');controls.className='work-object-fields';workContent.insertBefore(controls,row);
  const [naturalWidth,naturalHeight]=objectDimensions(item,false);
- let updateSmoothing=()=>{};
  const [pageWidth,pageHeight]=workPageMm();
  const factor=pageWidth/W/unitFactor(workPreferences.unit);
  const ratioButton=workButton('Poměr stran',()=>{
@@ -345,48 +342,13 @@ function showWorkshopObject(){
      paired.input.value=(item[axis]??1)*nominal;paired.sync();
     }
    }
-   updateSmoothing();positionWorkshopHandle();
+   positionWorkshopHandle();
   },workUnit(),true);
   dimensions.push([field,key,unit]);
  }
  number('Otočení',item.rotation??0,-180,180,value=>{item.rotation=value;positionWorkshopHandle();},'°');
  if(item.externalSvg){
-  const tolerance=workText('',controls);
-  const compare=workButton('Před / po',()=>{
-   originalOutlinePreview=originalOutlinePreview===item?null:item;
-   updateSmoothing();paint();
-  },row);
-  function setSmoothing(value){
-   item.smoothing=value;originalOutlinePreview=null;updateSmoothing();
-  }
-  const smoothing=number('Chytré vyhlazení',item.smoothing??defaultExternalSmoothing,0,100,setSmoothing,'%');
-  smoothing.input.step='1';
-  controls.append(tolerance);
-  const legend=workText('',controls);
-  legend.classList.add('work-fit-legend');
-  legend.innerHTML='<span>Původní obrys</span><span>Vyhlazený obrys</span>';
-  const reset=workButton('Původní obrys',()=>{
-   smoothing.input.value=0;smoothing.sync();setSmoothing(0);refresh();
-  },row);
-  updateSmoothing=()=>{
-   const strength=item.smoothing??defaultExternalSmoothing;
-   const scale=item.height/(item.unitTop??item.externalSvg.height)*Math.max(item.scaleX??1,item.scaleY??1);
-   const mmPerUnit=scale*workPageMm()[0]/W;
-   const {originalNodes,nodes,deviation}=externalGeometry(item.externalSvg,strength);
-   const visible=originalOutlinePreview===item;
-   const millimeters=value=>value.toLocaleString('cs-CZ',{maximumFractionDigits:3})+' mm';
-   tolerance.textContent='Uzly '+originalNodes+' → '+nodes+' · Odchylka ≤ '+
-    millimeters(Math.ceil(deviation*mmPerUnit*1000)/1000)+' · Limit '+millimeters(externalTolerance(strength)*mmPerUnit);
-   legend.hidden=!visible;
-   compare.disabled=deviation===0;
-   reset.disabled=strength===0;
-   compare.setAttribute('aria-pressed',String(visible));
-  };
-  const label=smoothing.input.closest('.work-number-row').querySelector('label');
-  const caption=document.createElement('span');caption.className='work-fit-caption';
-  caption.innerHTML=glyph('bezier2');caption.append(label.firstChild);
-  label.prepend(caption);
-  updateSmoothing();
+  workButton('Chytré vyhlazení',()=>openSubpanel(()=>showWorkshopSmoothing(item)),row);
  }
  if(moveDraft?.item===item){
   workButton('Dokončit přesun',()=>{finishWorkshopMove(true);showWorkshopObject();},row);
@@ -579,19 +541,168 @@ function externalLoops(path){
  }).filter(points=>points.length>=3);
 }
 const externalTolerance=strength=>strength*.08;
-let originalOutlinePreview=null;
-function getOriginalOutlinePreview(){return workshopDialog.open&&selectedObject()===originalOutlinePreview?originalOutlinePreview:null;}
-function clearOutlinePreview(){
- if(originalOutlinePreview){originalOutlinePreview=null;paint();}
+const smoothingLimits={relative:15,mm:1000};
+const smoothingDefaults={unit:'relative',value:.6,sensitivity:50};
+function validSmoothingSettings(settings){
+ return !!settings&&Object.hasOwn(smoothingLimits,settings.unit)&&
+  Number.isFinite(settings.value)&&settings.value>=0&&settings.value<=smoothingLimits[settings.unit]&&
+  Number.isInteger(settings.sensitivity)&&settings.sensitivity>=0&&settings.sensitivity<=100;
 }
-function externalGeometry(model,strength=defaultExternalSmoothing){
+function smoothingDimensions(item){
+ const model=item.externalSvg,scale=item.height/(item.unitTop??model.height);
+ const sx=scale*(item.scaleX??1),sy=scale*(item.scaleY??1);
+ const pageScale=workPageMm()[0]/W;
+ return {sx,sy,shortSide:Math.min(model.width*sx,model.height*sy)*pageScale,
+  mmPerUnit:Math.max(sx,sy)*pageScale};
+}
+function smoothedObjectGeometry(item){
+ if(!item.smoothingSettings)return externalGeometry(item.externalSvg,item.smoothing);
+ const {shortSide,mmPerUnit}=smoothingDimensions(item);
+ const {unit,value,sensitivity}=item.smoothingSettings;
+ const mm=unit==='relative'?value*shortSide/100:value;
+ return externalGeometry(item.externalSvg,item.smoothing,mm/mmPerUnit,sensitivity);
+}
+function showWorkshopSmoothing(item){
+ workPanel('Chytré vyhlazení','smoothing');
+ workText(item.externalSvg.name).className='work-fit-name';
+ const {sx,sy,shortSide,mmPerUnit}=smoothingDimensions(item);
+ const legacyMm=externalTolerance(item.smoothing??defaultExternalSmoothing)*mmPerUnit;
+ const legacyPercent=100*legacyMm/shortSide;
+ const start=item.smoothingSettings??(legacyPercent<=smoothingLimits.relative
+  ?{...smoothingDefaults,value:Number(legacyPercent.toPrecision(10))}
+  :{...smoothingDefaults,unit:'mm',value:Math.min(smoothingLimits.mm,legacyMm)});
+ let draft={...start},zoom=1,frameRequest=0,fitted;
+ const created=(tag,cls,parent=workContent)=>{
+  const element=document.createElement(tag);element.className=cls;parent.append(element);return element;
+ };
+ const tools=created('div','work-fit-tools');
+ const viewport=created('div','work-fit-viewport');
+ viewport.tabIndex=0;viewport.setAttribute('aria-label','Detail obrysu, posuvný při přiblížení');
+ const preview=created('canvas','work-fit-preview',viewport);
+ preview.setAttribute('aria-label','Překryv původního obrysu, nové křivky a významných vrcholů');
+ const ctx=preview.getContext('2d');
+ const zoomOut=workButton('Oddálit',()=>setZoom(zoom/1.5),tools);
+ const zoomIn=workButton('Přiblížit',()=>setZoom(zoom*1.5),tools);
+ const legend=workText('');
+ legend.className='work-fit-legend';
+ legend.innerHTML='<span>Původní obrys</span><span>Nová křivka</span><span>Významný vrchol</span>';
+ function render(){
+  if(!preview.isConnected||!fitted)return;
+  const width=viewport.clientWidth,height=viewport.clientHeight;
+  if(!width||!height)return;
+  const model=item.externalSvg;
+  const fit=Math.min((width-24)/(model.width*sx),(height-24)/(model.height*sy))*zoom;
+  const viewW=Math.max(width,Math.ceil(model.width*sx*fit+24));
+  const viewH=Math.max(height,Math.ceil(model.height*sy*fit+24));
+  const pixels=Math.min(window.devicePixelRatio||1,2,2400/Math.max(viewW,viewH));
+  preview.style.width=viewW+'px';preview.style.height=viewH+'px';
+  preview.width=Math.ceil(viewW*pixels);preview.height=Math.ceil(viewH*pixels);
+  ctx.setTransform(pixels,0,0,pixels,0,0);
+  const transform=new DOMMatrix().translate(viewW/2,(viewH+model.height*sy*fit)/2)
+   .scale(sx*fit*(item.mirrored?-1:1),sy*fit);
+  function transformed(path){
+   const result=new Path2D();result.addPath(path,transform);return result;
+  }
+  const ink=transformed(fitted.ink);
+  ctx.fillStyle='#123c32';ctx.fill(ink,'evenodd');
+  ctx.lineJoin='round';ctx.lineWidth=1.8;
+  ctx.strokeStyle='#1ad3b1';ctx.stroke(ink);
+  ctx.setLineDash([4,4]);ctx.lineWidth=1.25;
+  ctx.strokeStyle='#a44b24';ctx.stroke(transformed(fitted.originalInk));
+  ctx.setLineDash([]);
+  ctx.fillStyle='#ffd166';ctx.strokeStyle='#513913';ctx.lineWidth=.75;
+  for(const [x,y] of fitted.vertices){
+   const point=transform.transformPoint({x,y});
+   ctx.beginPath();ctx.arc(point.x,point.y,2.5,0,Math.PI*2);ctx.fill();ctx.stroke();
+  }
+ }
+ function setZoom(value){
+  const x=(viewport.scrollLeft+viewport.clientWidth/2)/(preview.clientWidth||1);
+  const y=(viewport.scrollTop+viewport.clientHeight/2)/(preview.clientHeight||1);
+  zoom=clamp(value,1,6);render();
+  viewport.scrollLeft=x*preview.clientWidth-viewport.clientWidth/2;
+  viewport.scrollTop=y*preview.clientHeight-viewport.clientHeight/2;
+  zoomOut.disabled=zoom===1;zoomIn.disabled=zoom===6;
+ }
+ const observer=new ResizeObserver(render);
+ observer.observe(viewport);
+ const cleanup=new MutationObserver(()=>{
+  if(!preview.isConnected||!workshopDialog.open){observer.disconnect();cleanup.disconnect();}
+ });
+ cleanup.observe(workContent,{childList:true});
+ cleanup.observe(workshopDialog,{attributes:true,attributeFilter:['open']});
+ const options=created('div','work-fit-units');
+ const relative=workButton('Podle objektu (%)',()=>setUnit('relative'),options);
+ const absolute=workButton('V milimetrech',()=>setUnit('mm'),options);
+ function field(label,min,max,step,unit,changed){
+  const input=document.createElement('input');
+  input.type='number';input.min=min;input.max=max;input.step='any';
+  const row=workNumberRow(input,label,[()=>min,()=>Number(input.dataset.rangeMax)||max,()=>step,unit]);
+  workContent.append(row.element);
+  input.addEventListener('input',()=>{
+   if(input.value!==''&&input.validity.valid)changed(input.valueAsNumber);
+   schedule();
+  });
+  return {input,sync:row.sync};
+ }
+ const tolerance=field('Povolená odchylka',0,15,.001,()=>draft.unit==='mm'?'mm':'%',value=>draft.value=value);
+ const sensitivity=field('Citlivost vrcholů',0,100,1,()=> '%',value=>draft.sensitivity=Math.round(value));
+ sensitivity.input.step='1';
+ const conversion=workText('');
+ const stats=workText('');stats.className='work-fit-stats';stats.setAttribute('aria-live','polite');
+ const row=workActions();row.classList.add('work-fit-actions');
+ workButton('Zrušit',backToolPanel,row);
+ workButton('Obnovit výchozí nastavení',()=>{draft={...smoothingDefaults};sync();},row);
+ const apply=workButton('Použít',()=>{
+  if(selectedObject()!==item||!validSmoothingSettings(draft)||!fieldsValid())return;
+  item.smoothingSettings={...draft};invalidateCut();refresh();backToolPanel();
+ },row);
+ const fmt=value=>value.toLocaleString('cs-CZ',{maximumFractionDigits:3});
+ function fieldsValid(){
+  return [tolerance.input,sensitivity.input].every(input=>input.value!==''&&input.validity.valid);
+ }
+ function schedule(){
+  const rel=draft.unit==='relative';
+  relative.disabled=!rel&&100*draft.value/shortSide>smoothingLimits.relative;
+  absolute.disabled=rel&&draft.value*shortSide/100>smoothingLimits.mm;
+  apply.disabled=!fieldsValid();
+  cancelAnimationFrame(frameRequest);
+  frameRequest=requestAnimationFrame(()=>{
+   if(!preview.isConnected||!fieldsValid())return;
+   fitted=smoothedObjectGeometry({...item,smoothingSettings:draft});
+   const mm=draft.unit==='relative'?draft.value*shortSide/100:draft.value;
+   conversion.textContent='Kratší strana '+fmt(shortSide)+' mm · Limit '+fmt(mm)+' mm';
+   const bound=Math.ceil(fitted.deviation*mmPerUnit*1000)/1000;
+   stats.textContent='Uzly '+fitted.originalNodes+' → '+fitted.nodes+' · Odchylka ≤ '+fmt(bound)+' mm';
+   render();
+  });
+ }
+ function sync(){
+  const rel=draft.unit==='relative';
+  relative.setAttribute('aria-pressed',String(rel));
+  absolute.setAttribute('aria-pressed',String(!rel));
+  tolerance.input.max=smoothingLimits[draft.unit];
+  tolerance.input.dataset.rangeMax=rel?3:Math.max(1,Math.min(smoothingLimits.mm,shortSide*.03));
+  tolerance.input.value=draft.value;tolerance.sync();
+  sensitivity.input.value=draft.sensitivity;sensitivity.sync();schedule();
+ }
+ function setUnit(unit){
+  if(unit===draft.unit)return;
+  const next=unit==='mm'?draft.value*shortSide/100:100*draft.value/shortSide;
+  draft={...draft,unit,value:Number(next.toPrecision(10))};
+  sync();
+ }
+ zoomOut.disabled=true;sync();
+}
+function externalGeometry(model,strength=defaultExternalSmoothing,limit=externalTolerance(strength),sensitivity=50){
+ const key=limit+':'+sensitivity;
  let cached=externalGeometries.get(model);
  if(!cached){
   cached={points:externalLoops(model.path),variants:new Map()};
   externalGeometries.set(model,cached);
  }
  const {points,variants}=cached;
- if(variants.has(strength))return variants.get(strength);
+ if(variants.has(key))return variants.get(key);
  const ink=new Path2D(),back=new Path2D(),matrix=new DOMMatrix().translate(-model.width/2,-model.height);
  const originals=points.map(loop=>{
   const path=new Path2D();path.moveTo(...loop[0]);
@@ -606,11 +717,11 @@ function externalGeometry(model,strength=defaultExternalSmoothing){
    return i!==j&&x>=l-4&&x<=r+4&&y>=t-4&&y<=b+4&&pc.isPointInPath(other,x,y,'evenodd')?[j]:[];
   });
  });
- const baseline=points.map(loop=>fitTracedOutline(loop,0));
+ const baseline=points.map(loop=>({start:loop[0],segments:loop.slice(1).concat([loop[0]]).map(end=>({end}))}));
  const originalNesting=nesting(originals,baseline.map(loop=>loop.start));
  let paths=originals, accepted=baseline;
- const limit=externalTolerance(strength);
- if(limit>0 && points.reduce((count,loop)=>count+loop.length,0)<=12000 && points.length<=128){
+ let vertices=[];
+ if( points.reduce((count,loop)=>count+loop.length,0)<=12000 && points.length<=128){
   const toPath=({start,segments})=>{
    const path=new Path2D();path.moveTo(...start);
    for(const {end,c1,c2} of segments){
@@ -625,12 +736,13 @@ function externalGeometry(model,strength=defaultExternalSmoothing){
    if(!fittedNesting.every((row,i)=>row.length===originalNesting[i].length&&row.every((value,j)=>value===originalNesting[i][j])))return false;
    accepted=fit;paths=candidate;return true;
   }
-  const fit=points.map(loop=>fitTracedOutline(loop,limit));
+  const fit=points.map(loop=>fitTracedOutline(loop,limit,sensitivity));
+  vertices=fit.flatMap(outline=>outline.vertices);
   const candidate=fit.map(toPath);
-  if(!accept(fit,candidate)){
+  if(limit>0&&!accept(fit,candidate)){
    for(let i=0;i<points.length;i++){
     for(const tolerance of [limit,limit/2,limit/4,limit/8]){
-     const outline=tolerance===limit?fit[i]:fitTracedOutline(points[i],tolerance);
+     const outline=tolerance===limit?fit[i]:fitTracedOutline(points[i],tolerance,sensitivity);
      if(outline.segments.length>=accepted[i].segments.length)continue;
      const next=accepted.slice(), nextPaths=paths.slice();
      next[i]=outline;nextPaths[i]=tolerance===limit?candidate[i]:toPath(outline);
@@ -646,10 +758,10 @@ function externalGeometry(model,strength=defaultExternalSmoothing){
  const originalInk=new Path2D();
  originals.forEach(path=>originalInk.addPath(path,matrix));
  const nodeCount=outlines=>outlines.reduce((count,loop)=>count+loop.segments.length,0);
- const geometry={ink,back,originalInk,originalNodes:nodeCount(baseline),nodes:nodeCount(accepted),
+ const geometry={ink,back,originalInk,vertices:vertices.map(([x,y])=>[x-model.width/2,y-model.height]),originalNodes:nodeCount(baseline),nodes:nodeCount(accepted),
   deviation:accepted.reduce((largest,loop)=>Math.max(largest,loop.deviation??0),0),holes:new Path2D(),strokes:[],inset:[],evenOdd:true,top:-model.height,half:model.width/2};
  if(variants.size>=4)variants.delete(variants.keys().next().value);
- variants.set(strength,geometry);return geometry;
+ variants.set(key,geometry);return geometry;
 }
 function safeSvg(source){
  if(source.length>maxAssetSize||/<!DOCTYPE|<!ENTITY/i.test(source))throw Error('SVG je příliš velké nebo má nepodporovanou deklaraci.');
