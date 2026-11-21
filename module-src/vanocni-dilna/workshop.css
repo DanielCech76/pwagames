@@ -176,3 +176,4 @@ body:has(#work-dialog[open]) .scene-scroll { touch-action:none }
  #object-mode .object-controls { margin-top:2px }
 }
 #work-dialog button[hidden] { display:none }
+#work-dialog .work-inline-icon[aria-pressed=true] { background:#174c37;color:#fff }

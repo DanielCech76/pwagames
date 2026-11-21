@@ -343,7 +343,8 @@ function showWorkshopObject(){
   workButton(label,()=>{finishWorkshopMove(true);$(id).click();showWorkshopObject();},row).disabled=$(id).disabled;
  }
  if(detailLabel(item)) for(const [label,value] of [['Průhledné','transparent'],['Barva pozadí','background']]){
-  workButton(label,()=>{item.detailTreatment=value;refresh();showWorkshopObject();});
+  const fill=workButton(label,()=>{item.detailTreatment=value;refresh();showWorkshopObject();});
+  fill.setAttribute('aria-pressed',String(value===(item.detailTreatment??(legacyBacking(item,geometry(item))?'background':'transparent'))));
  }
  if(!item.externalSvg)workButton('Upravit motiv',()=>closeThen(()=>$('quick-edit').click()));
 }
@@ -508,10 +509,54 @@ function validateExternalModel(model){
   !Number.isFinite(model.height)||model.height<1||model.height>1600)throw Error('Neplatná geometrie SVG motivu.');
  return {name:model.name,path:model.path,width:model.width,height:model.height};
 }
+const externalGeometries=new WeakMap();
+function externalLoops(path){
+ return [...path.matchAll(/M([^MZ]+)Z/gi)].map(match=>{
+  const coords=match[1].match(/-?(?:\d+(?:\.\d*)?|\.\d+)/g)?.map(Number)??[];
+  const points=[];
+  for(let i=0;i+1<coords.length;i+=2)points.push([coords[i],coords[i+1]]);
+  return points;
+ }).filter(points=>points.length>=3);
+}
+function roundedExternalLoop(points,limit){
+ // Round short tracing steps while keeping the long edges and intentional points.
+ const corners=points.map((p,i)=>{
+  const prev=points.at(i-1),next=points[(i+1)%points.length];
+  const a=Math.hypot(p[0]-prev[0],p[1]-prev[1]),b=Math.hypot(p[0]-next[0],p[1]-next[1]);
+  const short=Math.min(a,b);
+  const amount=short>limit*2.2?0:Math.min(short*.46,limit);
+  return [a? p.map((v,j)=>v+(prev[j]-v)*amount/a):p,p,b?p.map((v,j)=>v+(next[j]-v)*amount/b):p];
+ });
+ const loop=new Path2D();loop.moveTo(...corners[0][0]);
+ for(const [start,vertex,end] of corners){
+  loop.lineTo(...start);loop.quadraticCurveTo(...vertex,...end);
+ }
+ loop.closePath();return loop;
+}
 function externalGeometry(model){
- const ink=new Path2D();
- ink.addPath(new Path2D(model.path),new DOMMatrix().translate(-model.width/2,-model.height));
- return {ink,holes:new Path2D(),strokes:[],inset:[],evenOdd:true,top:-model.height,half:model.width/2};
+ const cached=externalGeometries.get(model);
+ if(cached)return cached;
+ const ink=new Path2D(),back=new Path2D(),matrix=new DOMMatrix().translate(-model.width/2,-model.height);
+ const limit=Math.max(.5,Math.min(4,Math.max(model.width,model.height)*.0027));
+ const loops=externalLoops(model.path).map(points=>{
+  const box=[Infinity,Infinity,-Infinity,-Infinity];
+  for(const [x,y] of points){
+   box[0]=Math.min(box[0],x);box[1]=Math.min(box[1],y);
+   box[2]=Math.max(box[2],x);box[3]=Math.max(box[3],y);
+  }
+  return {box,outline:roundedExternalLoop(points,limit),point:points[0]};
+ });
+ for(const loop of loops){
+  ink.addPath(loop.outline,matrix);
+  const [x,y]=loop.point;
+  const nested=loops.some(other=>other!==loop&&other.box[0]<=loop.box[0]&&other.box[1]<=loop.box[1]&&
+   other.box[2]>=loop.box[2]&&other.box[3]>=loop.box[3]&&
+   (other.box[0]<loop.box[0]||other.box[1]<loop.box[1]||other.box[2]>loop.box[2]||other.box[3]>loop.box[3])&&
+   pc.isPointInPath(other.outline,x,y,'evenodd'));
+  if(!nested)back.addPath(loop.outline,matrix);
+ }
+ const geometry={ink,back,holes:new Path2D(),strokes:[],inset:[],evenOdd:true,top:-model.height,half:model.width/2};
+ externalGeometries.set(model,geometry);return geometry;
 }
 function safeSvg(source){
  if(source.length>maxAssetSize||/<!DOCTYPE|<!ENTITY/i.test(source))throw Error('SVG je příliš velké nebo má nepodporovanou deklaraci.');
