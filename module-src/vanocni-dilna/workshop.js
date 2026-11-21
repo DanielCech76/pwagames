@@ -7,16 +7,18 @@ workshopDialog.querySelector('button').onclick=()=>workshopDialog.close();
 function workButton(label,action,parent=workContent){
  const button=document.createElement('button');
  button.type='button';button.textContent=label;button.onclick=action;parent.append(button);
+ if(parent.classList.contains('work-actions')&&workContent.contains(parent)){
+  const icons={'Nový':'new','Otevřít':'load','Uložit jako':'save','Rozměry plátna':'fit','PNG':'export','SVG':'export','Domky':'house','Stromy':'tree','Jehličí':'tree','Sníh':'snow','Zvonky':'bell','Knihovny':'layer','Zpět':'left','Vložit':'plus','Nastavení':'about','Celé plátno':'fit','+':'plus','−':'minus','Přizpůsobit':'fit'};
+  button.classList.add('work-tile');
+  button.insertAdjacentHTML('afterbegin',workIcon(icons[label]||'more'));
+ }
  return button;
 }
 function workPanel(title){
  workshopDialog.querySelector('h2').textContent=title;
  workContent.replaceChildren();
- if(!workshopDialog.open){
-  const docked=matchMedia('(max-width:1100px) and (max-height:530px) and (orientation:landscape)').matches;
-  if(docked)workshopDialog.show();else workshopDialog.showModal();
- }
- workshopDialog.scrollTop=0;
+ if(!workshopDialog.open)workshopDialog.show();
+ workContent.scrollTop=0;
 }
 function workText(value,parent=workContent){
  const p=document.createElement('p');p.textContent=value;parent.append(p);return p;
@@ -24,7 +26,7 @@ function workText(value,parent=workContent){
 function workActions(){
  const row=document.createElement('div');row.className='work-actions';workContent.append(row);return row;
 }
-function closeThen(action){workshopDialog.close();action();}
+function closeThen(action){if(workshopDialog.open)workshopDialog.close();action();}
 function showWorkshopView(){
  workPanel('Pohled');
  const row=workActions();
@@ -41,7 +43,7 @@ function showWorkshopView(){
  workButton('Barvy, obrysy a inverze',()=>closeThen(()=>$('appearance-open').click()));
 }
 function workshopMenu(){
- workPanel('Vánoční dílna '+document.querySelector('.app-version').textContent.trim());
+ workPanel('Nabídka');
  const row=workActions();
  for(const [label,id] of [['Nový','project-new'],['Otevřít','project-load'],['Uložit jako','project-save'],
  ['Rozměry plátna','page-open'],['Podstava','toggle-base'],['PNG','png'],['SVG','svg']]){
@@ -52,7 +54,7 @@ function workshopMenu(){
  workButton('Kontrola řezání',showCutCheck,row);
  workButton('Opravit siluetu',()=>closeThen(()=>$('repair-open').click()),row);
  workButton('Knihovny objektů',showWorkshopLibraries,row);
- workButton('Aktualizace modulu',showWorkshopUpdate,row);
+ workButton('Nastavení',()=>closeThen(()=>openWorkSettings('system')),row);
  workButton('Nastavení řezu',()=>closeThen(()=>$('setup-open').click()),row);
  workButton('Zpět do aplikace',()=>closeThen(()=>window.ArcadeHost.back()),row);
 }
@@ -175,14 +177,15 @@ function showMotifPreview(name,model,back=showWorkshopAdd){
 }
 function showWorkshopAdd(){
  workPanel('Přidat objekt');
- workButton('Knihovny objektů',showWorkshopLibraries);
+ const row=workActions();
+ workButton('Knihovny',showWorkshopLibraries,row);
  for(const [name,types] of motifCategories){
   workButton(name,()=>{
    workPanel(name);workButton('Zpět',showWorkshopAdd);
    const entries=types.length?types.flatMap(categoryModels):savedTemplates.map(item=>[item.label,item]);
    renderWorkshopMotifs(entries,()=>showWorkshopAdd());
    if(name==='Domky')workButton('Vlastní dům',()=>closeThen(()=>$('empty-building').click()));
-  });
+  },row);
  }
 }
 function renderWorkshopMotifs(entries,back){
@@ -194,11 +197,10 @@ function renderWorkshopMotifs(entries,back){
 function updateModuleSource(){
  return new URL('../../../core/',location.href);
 }
-function showWorkshopUpdate(){
+function showWorkshopUpdate(target){
  const id='vanocni-dilna',version=document.querySelector('.app-version').textContent.trim();
- workPanel('Aktualizace modulu');
- const status=workText('Nainstalovaná verze '+version);
- const progress=document.createElement('progress');progress.hidden=true;progress.max=1;workContent.append(progress);
+ const status=workText('Nainstalovaná verze '+version,target);
+ const progress=document.createElement('progress');progress.hidden=true;progress.max=1;target.append(progress);
  const button=workButton('Zkontrolovat aktualizaci',async()=>{
   button.disabled=true;
   try{
@@ -212,7 +214,7 @@ function showWorkshopUpdate(){
     status.textContent='Staženo: '+pending+'. Použije se při příštím otevření dílny.';return;
    }
    const entry=(await packages.catalog()).modules.find(item=>item.id===id);
-   if(!button.isConnected||!workshopDialog.open)return;
+   if(!button.isConnected)return;
    if(pending&&(!entry||packages.compare(pending,entry.version)>=0)){
     status.textContent='Staženo: '+pending+'. Použije se při příštím otevření dílny.';
     return;
@@ -231,11 +233,11 @@ function showWorkshopUpdate(){
      download.remove();
     }catch(error){status.textContent=error.message;download.disabled=false;}
     finally{progress.hidden=true;button.disabled=false;}
-   }).dataset.download='true';
+   },target).dataset.download='true';
   }catch(error){status.textContent='Kontrola selhala: '+error.message;}
   finally{button.disabled=false;}
- });
- button.addEventListener('click',()=>workContent.querySelector('[data-download]')?.remove(),{capture:true});
+ },target);
+ button.addEventListener('click',()=>target.querySelector('[data-download]')?.remove(),{capture:true});
 }
 const handBadge=workButton('Ruka aktivní · vypnout',()=>setWorkshopHand(false),sceneScroll);
 handBadge.id='work-hand-badge';handBadge.hidden=true;
@@ -249,7 +251,7 @@ const toolbarActions={
  'work-add':showWorkshopAdd,
  'work-layers':()=>selectedObject()?showWorkshopObject():showWorkshopObjects(),
  'work-view':showWorkshopView,'work-fit':fitScene,
- 'work-save':()=>$('project-save').click(),'work-more':workshopMenu
+ 'work-save':()=>closeThen(()=>$('project-save').click()),'work-more':workshopMenu
 };
 for(const [id,action] of Object.entries(toolbarActions))$(id).onclick=action;
 const desktopMenu=workButton('Nástroje dílny',workshopMenu,document.querySelector('.project-tools'));
@@ -691,4 +693,141 @@ function showCutProblem(problem){
   invalidateCut();check();fitScene();showCutCheck();
  });
 }
-window.ArcadeHost.register({start:reset});
+const workPreferenceKey='workshop-display-v1';
+const workDefaults={unit:'mm',dimensions:'edge',grid:0,dpi:300,background:'paper',range:'page'};
+const workPreferences={...workDefaults};
+try{Object.assign(workPreferences,JSON.parse(editorStorage.getItem(workPreferenceKey)||'{}'));}catch{}
+const unitFactor=unit=>({mm:1,cm:10,in:25.4}[unit]||1);
+const workVersion=document.querySelector('.app-version').textContent.trim();
+const workPageMm=()=>[outputMm*W/(fullPage?W:cutWidth||W),pageHeightMm??outputMm*H/(fullPage?W:cutWidth||W)];
+const workUnit=()=>workPreferences.unit==='in'?'″':workPreferences.unit;
+const workMeasure=value=>new Intl.NumberFormat('cs',{maximumFractionDigits:2}).format(value/unitFactor(workPreferences.unit));
+const workDimensions=document.createElement('div');
+workDimensions.className='work-dimensions';
+workDimensions.innerHTML='<output><span></span></output><output><span></span></output>';
+scenePaper.append(workDimensions);
+const workSizeCorner=document.createElement('output');
+workSizeCorner.className='work-size-corner';
+sceneScroll.append(workSizeCorner);
+const workGrid=document.createElement('div');workGrid.className='work-grid';scenePaper.append(workGrid);
+function refreshWorkDimensions(){
+ const [width,height]=workPageMm(),unit=workUnit();
+ workDimensions.children[0].firstElementChild.textContent=workMeasure(width)+' '+unit;
+ workDimensions.children[1].firstElementChild.textContent=workMeasure(height)+' '+unit;
+ const viewport=sceneScroll.getBoundingClientRect(),paper=scenePaper.getBoundingClientRect();
+ const edge=workPreferences.dimensions==='edge'&&paper.left>=viewport.left&&paper.top>=viewport.top&&paper.right+60<=viewport.right&&paper.bottom+25<=viewport.bottom;
+ workDimensions.hidden=!edge;
+ workSizeCorner.hidden=workPreferences.dimensions==='hide'||edge;
+ workSizeCorner.textContent=workMeasure(width)+' × '+workMeasure(height)+' '+unit;
+ const step=workPreferences.grid*unitFactor(workPreferences.unit);
+ workGrid.hidden=!step||paper.width*step/width<8;
+ workGrid.style.backgroundSize=100*step/width+'% '+100*step/height+'%';
+}
+new ResizeObserver(refreshWorkDimensions).observe(scenePaper);
+function saveWorkPreferences(){
+ try{editorStorage.setItem(workPreferenceKey,JSON.stringify(workPreferences));}catch{}
+ refreshWorkDimensions();
+}
+const workIconPaths={about:'M8 2 2 12h3L1 19h14l-4-7h3L8 2zm8 3 6 9h-3l4 6h-7',help:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm-3-13a3 3 0 0 1 6 0c0 2-3 2-3 5m0 3h.01',eye:'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zm13 0a3 3 0 1 0-6 0 3 3 0 0 0 6 0z',more:'M4 12h.01m8 0h.01m8 0h.01',house:'M3 11 12 3l9 8v10H3V11zm7 10v-7h4v7',tree:'m12 2-6 9h3l-6 8h18l-6-8h3l-6-9zm0 17v3',snow:'M12 2v20M3 7l18 10M3 17 21 7',bell:'M4 17h16l-3-4V9a5 5 0 0 0-10 0v4l-3 4zm6 3h4'};
+const workIcon=(key)=>uiIcon(workIconPaths[key]||mobilePaths[key]||mobilePaths.layer);
+const bar=$('workshop-bar');
+for(const [id,key] of Object.entries({'work-add':'plus','work-layers':'layer','work-view':'eye','work-fit':'fit','work-save':'save','work-more':'more'})){
+ const button=$(id),label=button.querySelector('span').textContent;
+ button.setAttribute('aria-label',label);button.title=label;button.innerHTML=workIcon(key);
+}
+const iconButton=(label,key,action,parent)=>{
+ const button=workButton(label,action,parent);button.setAttribute('aria-label',label);button.title=label;button.innerHTML=workIcon(key);return button;
+};
+const railAbout=iconButton('Nastavení dílny','about',()=>openWorkSettings(),bar);
+railAbout.className='work-brand';
+const railVersion=document.createElement('small');railVersion.textContent=workVersion;railAbout.append(railVersion);bar.prepend(railAbout);
+const railHelp=iconButton('Průvodce','help',()=>toggleWorkGuide(),bar);railHelp.className='work-rail-help';
+const mast=document.querySelector('.masthead');
+const headerAbout=iconButton('Nastavení dílny','about',()=>openWorkSettings(),mast);headerAbout.className='work-header-about';
+const headerHelp=iconButton('Průvodce','help',()=>toggleWorkGuide(),mast);headerHelp.className='work-header-help';
+const guide=document.createElement('div');guide.className='work-guide';guide.hidden=true;document.body.append(guide);
+function toggleWorkGuide(force=guide.hidden){
+ guide.hidden=!force;guide.replaceChildren();
+ if(!force)return;
+ iconButton('Zavřít průvodce','close',()=>toggleWorkGuide(false),guide);
+ workText('Průvodce',guide);
+ const targets=workshopDialog.open?[...workContent.querySelectorAll('button')]:[...bar.querySelectorAll('button:not(.work-rail-help)')].filter(el=>el.offsetWidth);
+ for(const target of targets){
+  const box=target.getBoundingClientRect();
+  if(box.bottom<=0||box.top>=innerHeight||(workshopDialog.open&&(box.top<workContent.getBoundingClientRect().top||box.bottom>workContent.getBoundingClientRect().bottom)))continue;
+  const caption=workText(target.getAttribute('aria-label')||target.textContent,guide);
+  const side=matchMedia('(orientation:landscape)').matches;
+  if(workshopDialog.open)continue;
+  caption.className='work-guide-tip';
+  if(side){caption.style.left=box.right+8+'px';caption.style.top=box.top+'px';}
+  else {
+   const index=targets.indexOf(target);
+   caption.style.left=Math.max(38,Math.min(innerWidth-38,(box.left+box.right)/2))+'px';
+   caption.style.top=box.top-(index%2?90:48)+'px';caption.classList.add('work-guide-bottom');
+  }
+ }
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!guide.hidden){e.stopImmediatePropagation();toggleWorkGuide(false);}},true);
+const settings=document.createElement('dialog');settings.id='work-settings';settings.setAttribute('aria-label','Nastavení dílny');document.body.append(settings);
+let workSection='canvas';
+function openWorkSettings(section=workSection){
+ if(workshopDialog.open)workshopDialog.close();
+ toggleWorkGuide(false);
+ if(!settings.open)settings.show();
+ document.body.classList.add('work-settings-open');renderWorkSettings(section);
+}
+settings.addEventListener('close',()=>document.body.classList.remove('work-settings-open'));
+function renderWorkSettings(section){
+ workSection=section;settings.replaceChildren();
+ const header=document.createElement('header');settings.append(header);
+ iconButton('Zpět do kompozice','left',()=>settings.close(),header);
+ const title=document.createElement('h2');title.textContent='Nastavení dílny';header.append(title);
+ const nav=document.createElement('nav'),content=document.createElement('section');settings.append(nav,content);
+ for(const [id,label] of [['canvas','Plátno'],['png','Export PNG'],['system','Systém']]){
+  const b=workButton(label,()=>renderWorkSettings(id),nav);b.setAttribute('aria-current',id===section?'page':'false');
+ }
+ function option(label,key,entries){
+  const field=document.createElement('label'),select=document.createElement('select');
+  field.textContent=label;field.append(select);content.append(field);
+  for(const [value,name] of entries)select.add(new Option(name,value));
+  select.value=workPreferences[key];select.onchange=()=>{workPreferences[key]=select.value;saveWorkPreferences();renderWorkSettings(section);};
+ }
+ function number(label,key,min,max){
+  const field=document.createElement('label'),input=document.createElement('input');
+  field.textContent=label;input.type='number';input.min=min;input.max=max;input.value=workPreferences[key];
+  input.step=key==='grid'?'any':'1';
+  input.onchange=()=>{if(!input.reportValidity()||!Number.isFinite(input.valueAsNumber))return;workPreferences[key]=input.valueAsNumber;saveWorkPreferences();renderWorkSettings(section);};
+  field.append(input);content.append(field);
+ }
+ if(section==='canvas'){
+  option('Jednotky','unit',[['mm','Milimetry'],['cm','Centimetry'],['in','Palce']]);
+  option('Rozměry plátna','dimensions',[['edge','Kóty u plátna'],['corner','V rohu'],['hide','Skrýt']]);
+  number('Krok mřížky ('+workUnit()+', 0 vypne)','grid',0,10000);
+ }else if(section==='png'){
+  const row=document.createElement('div');row.className='work-actions';content.append(row);
+  for(const dpi of [150,300,600]){
+   const button=workButton(dpi+' DPI',()=>{workPreferences.dpi=dpi;saveWorkPreferences();renderWorkSettings(section);},row);
+   button.setAttribute('aria-pressed',String(workPreferences.dpi===dpi));
+  }
+  number('Vlastní DPI','dpi',1,2400);
+  option('Pozadí','background',[['paper','Barva plátna'],['clear','Průhledné']]);
+  option('Rozsah exportu','range',[['page','Celé plátno'],['ink','Ořez na obsah']]);
+  const [w,h]=workPageMm(),mask=preparedCutMask(),bounds=workPreferences.range==='ink'?exportBounds(true):{width:mask.w,height:mask.h};
+  if(bounds)workText(Math.round(w*bounds.width/mask.w*workPreferences.dpi/25.4)+' × '+Math.round(h*bounds.height/mask.h*workPreferences.dpi/25.4)+' px',content);
+ }else{
+  showWorkshopUpdate(content);
+  workText(navigator.onLine?'Připojení: online':'Připojení: offline',content);
+  const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Systémové informace';details.append(summary);content.append(details);
+  workText(innerWidth+' × '+innerHeight+' CSS px',details);
+  const root=updateModuleSource();
+  import(new URL('db.js',root)).then(async db=>{
+   workText('Jádro PWA '+db.CORE_VERSION,details);
+   const record=await db.get('modules','vanocni-dilna');
+   const cache=record?.active?.cache;
+   workText(cache&&await caches.has(cache)?'Offline balíček je uložen.':'Offline balíček není k dispozici.',details);
+  }).catch(()=>workText('Údaje jádra nejsou dostupné.',details));
+  workButton('Obnovit výchozí nastavení',()=>{Object.assign(workPreferences,workDefaults);saveWorkPreferences();renderWorkSettings(section);},content);
+ }
+}
+
+window.ArcadeHost.register({start(){reset();refreshWorkDimensions();}});

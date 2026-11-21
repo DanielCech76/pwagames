@@ -53,3 +53,70 @@ body:has(#work-dialog[open]) .scene-scroll { touch-action:none }
 }
 #work-hand-badge { position:absolute; left:8px; top:8px; min-height:48px; z-index:3; background:#174c37; color:#fff; }
 #work-hand-badge[hidden] { display:none }
+/* Docked tools and service view. */
+#work-dialog[open] { display:flex; flex-direction:column; padding:0; border:0; border-radius:0; overflow:hidden; box-shadow:-5px 0 14px #17282024 }
+#work-dialog header { position:static; flex:none; padding:0 10px; border-bottom:1px solid #dfd7c4 }
+#work-content { min-height:0; overflow:auto; overscroll-behavior:contain; padding:10px; touch-action:pan-y }
+#work-dialog button,#work-settings button { box-shadow:none; border-radius:4px }
+#work-dialog .work-actions:has(.work-tile) { display:grid; grid-template-columns:repeat(auto-fit,56px); gap:6px }
+#work-dialog button.work-tile { width:56px; height:56px; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2px; gap:3px; font-size:9px; line-height:1.12; overflow-wrap:anywhere }
+.work-tile svg,#workshop-bar svg,.work-header-about svg,.work-header-help svg,#work-settings header svg,.work-guide svg { width:22px;height:22px;flex:none }
+#scene-mode .composition-stage { box-shadow:0 4px 12px #18291a2b }
+.work-dimensions,.work-grid { position:absolute; inset:0; pointer-events:none }
+.work-grid { background-image:linear-gradient(to right,#52715c40 1px,transparent 1px),linear-gradient(to bottom,#52715c40 1px,transparent 1px) }
+.work-dimensions output { position:absolute; display:grid; place-items:center; font:12px system-ui; color:#363c33; white-space:nowrap }
+.work-dimensions output:first-child { top:calc(100% + 9px); left:0; width:100%; border-inline:1px solid; background:linear-gradient(#737970,#737970) center/100% 1px no-repeat }
+.work-dimensions output:last-child { left:calc(100% + 8px); top:0; height:100%; min-width:42px; border-block:1px solid; background:linear-gradient(#737970,#737970) center/1px 100% no-repeat }
+.work-dimensions output span { background:#dddcd7; padding:0 3px }
+.work-size-corner { position:absolute; right:6px; bottom:6px; padding:4px 8px; background:#fbf6e9; pointer-events:none }
+.work-header-about,.work-header-help { display:none }
+#workshop-bar .work-brand,#workshop-bar .work-rail-help { display:none }
+#work-settings[open] { position:fixed; display:grid; grid-template-columns:minmax(76px,20%) minmax(0,1fr); grid-template-rows:auto minmax(0,1fr); inset:0; width:auto; max-width:none; max-height:none; height:auto; margin:0; padding:0; border:0; border-radius:0; overflow:hidden; background:#fbf6e9; color:#173e30; z-index:8 }
+#work-settings header { grid-column:1/-1; display:flex; align-items:center; gap:10px; padding:5px 12px; border-bottom:1px solid #ded5c0 }
+#work-settings header h2 { margin:0; font:700 clamp(18px,4vw,28px) Georgia,serif }
+#work-settings nav,#work-settings section { overflow:auto; overscroll-behavior:contain; padding:10px; min-width:0 }
+#work-settings nav { padding:4px; border-right:1px solid #ded5c0 }
+#work-settings nav button { display:block;width:100%;min-height:48px;text-align:left;border:0;padding:5px;font-size:clamp(11px,2vw,16px) }
+#work-settings nav button[aria-current=page] { background:#dae5d6; border-left:3px solid #174c37 }
+#work-settings section label { display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:5px;padding:8px 0;border-bottom:1px solid #ded5c0 }
+#work-settings section input,#work-settings section select { max-width:100% }
+#work-settings section input { width:85px }
+.work-guide { position:fixed;inset:0;z-index:20;background:#10241edf;color:#fff6df;padding:14px;overflow:auto }
+.work-guide button { min-width:44px;min-height:44px }
+.work-guide p { display:inline-block;margin:6px;padding:6px;border:1px solid #fff6df }
+.work-guide[hidden],.work-dimensions[hidden],.work-size-corner[hidden],.work-grid[hidden] { display:none }
+@media (max-width:760px) and (orientation:portrait), (max-width:1100px) and (max-height:530px) and (orientation:landscape) {
+ #workshop-bar { justify-content:start; overscroll-behavior:contain }
+ #workshop-bar button { flex:1 0 0; min-width:0 }
+ #work-dialog[open] { position:fixed; width:auto; max-width:none; max-height:none; margin:0; z-index:7 }
+ #work-dialog .work-actions:has(.work-tile) { justify-content:start }
+ .work-settings-open #workshop-bar button:not(.work-brand) { visibility:hidden }
+}
+@media (max-width:760px) and (orientation:portrait) {
+ body:has(#scene-mode:not([hidden])) > header.masthead { display:grid; height:60px; box-sizing:border-box; z-index:9; grid-template-columns:44px minmax(0,1fr) 44px }
+ body:has(#scene-mode:not([hidden])) > .masthead :is(.winter,.header-icon) { display:none }
+ body:has(#scene-mode:not([hidden])) > .masthead h1 { grid-column:2; font-size:clamp(15px,4.5vw,26px) }
+ .work-header-about,.work-header-help { display:grid; place-items:center; width:44px;height:44px;background:transparent;color:inherit;border:0;grid-row:1 }
+ .work-header-about { grid-column:1 } .work-header-help { grid-column:3 }
+ #workshop-bar { height:calc(52px + env(safe-area-inset-bottom)); min-height:0; box-sizing:border-box }
+ #scene-mode .scene-scroll { height:calc(100dvh - 112px - env(safe-area-inset-bottom)); }
+ #work-dialog[open] { inset:auto 0 calc(52px + env(safe-area-inset-bottom)); height:min(40dvh,300px); box-shadow:0 -5px 14px #17282024 }
+ body:has(#work-dialog[open]) #scene-mode .scene-scroll { height:calc(100dvh - 112px - env(safe-area-inset-bottom) - min(40dvh,300px)); }
+ #work-settings[open] { top:60px }
+}
+@media (max-width:1100px) and (max-height:530px) and (orientation:landscape) {
+ #workshop-bar { width:56px; padding:0; gap:0; touch-action:pan-y; scrollbar-width:none }
+ #workshop-bar button { flex:0 0 42px; min-height:42px }
+ #workshop-bar .work-brand,#workshop-bar .work-rail-help { display:grid; flex:0 0 44px }
+ #workshop-bar .work-brand small { font:10px system-ui }
+ #scene-mode .scene-viewport { margin-left:56px }
+ #work-dialog[open] { inset:0 0 0 auto; width:min(238px,44vw); height:100dvh }
+ body:has(#work-dialog[open]) #scene-mode .scene-viewport { margin-right:min(238px,44vw) }
+ #work-settings[open] { left:56px }
+}
+@media (prefers-reduced-motion:no-preference) {
+ #work-dialog[open] { animation:work-panel-in .12s ease-out }
+ @keyframes work-panel-in { from { opacity:.5 } to { opacity:1 } }
+}
+.work-guide .work-guide-tip { position:fixed; color:#173e30; background:#fbf6e9; border:1px solid #ded5c0; margin:0; font-size:12px; max-width:90px; text-align:center }
+.work-guide .work-guide-bottom { transform:translateX(-50%) }

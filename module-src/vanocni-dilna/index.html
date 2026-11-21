@@ -307,7 +307,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 <header class="masthead">
  <button id="setup-open" class="header-icon" aria-label="Nastavení řezu" title="Nastavení řezu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
  <svg class="winter left" viewBox="0 0 88 64" aria-hidden="true"><path d="M25 10l3 7 7 3-7 3-3 7-3-7-7-3 7-3zm24-8 10 15h-5l11 12h-8l13 13H53v12h-8V42H29l13-13h-8l11-12h-6zm27 27 7 11h-3l7 10h-8v9h-5v-9h-8l7-10h-3z" fill="currentColor"/></svg>
- <h1>Vánoční dílna <small class="app-version">1.8.0</small></h1>
+ <h1>Vánoční dílna <small class="app-version">1.9.0</small></h1>
  <svg class="winter right-winter" viewBox="0 0 88 64" aria-hidden="true"><path d="M18 27l8 13h-4l9 10H20v9h-5v-9H5l9-10h-4zm29-25 10 15h-5l11 12h-8l13 13H51v12h-8V42H27l13-13h-8l11-12h-6zm28 8 3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="currentColor"/></svg>
  <svg class="snow-edge" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 13Q45-4 82 11T158 13T236 10T311 15T400 12V22H0Z" fill="currentColor"/></svg>
 </header>
@@ -420,10 +420,11 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 <dialog id="png-dialog" aria-labelledby="png-title">
  <form id="png-form">
   <h2 id="png-title">Export PNG</h2>
-  <label>Jednotka <select id="png-unit"><option value="mm">Milimetry</option><option value="in">Palce</option></select></label>
+  <label>Jednotka <select id="png-unit"><option value="mm">Milimetry</option><option value="cm">Centimetry</option><option value="in">Palce</option></select></label>
   <label>Šířka plátna <input id="png-width" type="number" min="0.000001" step="any" required></label>
   <label>Výška plátna <input id="png-height" type="number" min="0.000001" step="any" required></label>
-  <label>Rozlišení (DPI) <input id="png-dpi" type="number" min="1" max="2400" step="1" value="300" required></label>
+  <label>Rozsah <select id="png-range"><option value="page">Celé plátno</option><option value="ink">Ořez na obsah</option></select></label><label>Pozadí <select id="png-background"><option value="paper">Barva plátna</option><option value="clear">Průhledné</option></select></label>
+ <label>Rozlišení (DPI) <input id="png-dpi" type="number" min="1" max="2400" step="1" value="300" required></label>
   <p id="png-pixels" aria-live="polite"></p>
   <div class="page-actions"><button id="png-cancel" type="button">Zrušit</button><button id="png-download" class="primary" type="submit">Stáhnout PNG</button></div>
  </form>
@@ -440,8 +441,8 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 <dialog id="page-dialog" aria-labelledby="page-title"><h2 id="page-title">Rozměry kompozice</h2>
  <label>Předvolba <select id="page-preset"><option value="">Vlastní rozměr</option><option value="80">Ozdoba na stromek · Ø 80 mm</option><option value="100">Podtácek · Ø 100 mm</option><option value="250">Kruh do okna · Ø 250 mm</option></select></label>
  <p id="diameter-help" hidden>Předvolba udává vnější průměr kruhu. Rozměry plochy níže zahrnují okraj a případné ouško.</p>
- <div class="page-fields"><label>Šířka (mm)<input id="page-width" type="number" min="30" max="1500" step="0.1"></label>
- <label>Výška (mm)<input id="page-height" type="number" min="20" max="1000" step="0.1"></label></div>
+ <div class="page-fields"><label>Šířka <span id="page-width-unit"></span><input id="page-width" type="number" min="30" max="1500" step="0.1"></label>
+ <label>Výška <span id="page-height-unit"></span><input id="page-height" type="number" min="20" max="1000" step="0.1"></label></div>
  <p>Při změně rozměrů motivy zachovají polohu vůči rámu nebo podstavě.</p>
  <p id="page-error" role="alert"></p><div class="page-actions"><button id="page-cancel">Zrušit</button><button id="page-apply" class="primary">Použít rozměry</button></div>
 </dialog>
@@ -1205,7 +1206,7 @@ function paint(){
   ctx.fillStyle=foreground;ctx.fill(new Path2D(cutOutline()),'evenodd');ctx.restore();
  }else{
   compose(1,foreground,background);
-  ctx.drawImage(scene,0,0);
+  ctx.save();ctx.shadowColor="#1c241b32";ctx.shadowBlur=W/250;ctx.shadowOffsetY=H/300;ctx.drawImage(scene,0,0);ctx.restore();
  }
  if(!cutEdits.length&&appearance!=='hairline'&&lastCheck?.problem && lastCheck.scale===1){
   const {problem,keeper}=lastCheck,overlay=ctx.createImageData(W,H);
@@ -2037,14 +2038,15 @@ const sceneScroll=document.querySelector('.scene-scroll');
 const scenePaper=document.querySelector('.composition-stage');
 function layoutView(){
  const rect=sceneScroll.getBoundingClientRect();
- const width=Math.min(Math.max(1,rect.width-36),Math.max(1,rect.height-36)*W/H)*sceneZoom;
+ const width=Math.min(Math.max(1,rect.width-82),Math.max(1,rect.height-58)*W/H)*sceneZoom;
  scenePaper.style.width=width+'px';
- scenePaper.style.left=(rect.width-width)/2+viewX+'px';
- scenePaper.style.top=(rect.height-width*H/W)/2+viewY+'px';
+ scenePaper.style.left=(rect.width-width)/2-22+viewX+'px';
+ scenePaper.style.top=(rect.height-width*H/W)/2-8+viewY+'px';
  $('zoom-range').value=Math.round(sceneZoom*100);
  paintRangeProgress($('zoom-range'));
  $('zoom-value').textContent=Math.round(sceneZoom*100)+' %';
  if($('work-zoom-value'))$('work-zoom-value').textContent=$('zoom-value').textContent;
+ if(typeof refreshWorkDimensions==='function'&&document.querySelector('.work-dimensions'))refreshWorkDimensions();
  if(appearance==='hairline')paint();
  if(!$('context').hidden&&selectedObject())positionMenu(selectedObject());
 }
@@ -2155,8 +2157,13 @@ function resizePage(widthMm,heightMm,scaleScene){
 }
 $('page-open').onclick=()=>{
  const dialog=$('page-dialog');
- $('page-width').value=outputMm;
- $('page-height').value=Number((pageHeightMm??outputMm*H/(cutWidth||W)).toFixed(1));
+ const factor=unitFactor(workPreferences.unit);
+ const [width,height]=workPageMm();
+ for(const [id,mm,min,max] of [['page-width',width,30,1500],['page-height',height,20,1000]]){
+  const input=$(id);
+  input.min=min/factor;input.max=max/factor;input.step='any';input.value=Number((mm/factor).toPrecision(12));
+  if($(id+'-unit'))$(id+'-unit').textContent='('+workUnit()+')';
+ }
  $('page-preset').value='';$('diameter-help').hidden=frame==='none';
  $('page-error').textContent='';dialog.showModal();
 };
@@ -2164,12 +2171,13 @@ $('page-preset').onchange=()=>{
  const diameter=Number($('page-preset').value);if(!diameter)return;
  const ratio=frame==='eye'?.87:.94;
  const size=frame==='none'?diameter:Number((diameter/ratio).toFixed(1));
- $('page-width').value=$('page-height').value=size;
+ $('page-width').value=$('page-height').value=size/unitFactor(workPreferences.unit);
 };
 for(const id of ['page-width','page-height'])$(id).oninput=()=>$('page-preset').value='';
 $('page-cancel').onclick=()=>$('page-dialog').close();
 $('page-apply').onclick=()=>{
- if(!resizePage($('page-width').valueAsNumber,$('page-height').valueAsNumber,true)){
+ const factor=unitFactor(workPreferences.unit);
+ if(!resizePage($('page-width').valueAsNumber*factor,$('page-height').valueAsNumber*factor,true)){
   $('page-error').textContent='Zadej šířku 30–1500 mm a výšku 20–1000 mm.';return;
  }
  $('page-dialog').close();
@@ -2338,14 +2346,14 @@ function download(blob,name){
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),30000);
 }
-function exportBounds(){
+function exportBounds(crop=false){
  const {mask,w,h}=preparedCutMask();
  let left=w,top=h,right=-1,bottom=-1;
  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(mask[y*w+x]){
   left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);
  }
  if(right<0)return null;
- if(fullPage)return {left:0,top:0,width:w,height:h};
+ if(fullPage&&!crop)return {left:0,top:0,width:w,height:h};
  return {left,top,width:right-left+1,height:bottom-top+1};
 }
 function closeMobileExport(){
@@ -2363,7 +2371,20 @@ $('svg').onclick=()=>{
  closeMobileExport();
 };
 let pngWidthMm,pngHeightMm,pngUnit='mm';
-const pngMmPerUnit=()=>pngUnit==='in'?25.4:1;
+const pngMmPerUnit=()=>unitFactor(pngUnit);
+function pngBounds(){
+ if($('png-range').value==='ink')return exportBounds(true);
+ const {w,h}=preparedCutMask();
+ return {left:0,top:0,width:w,height:h};
+}
+function recalculatePng(){
+ const bounds=pngBounds();
+ if(!bounds){$('png-download').disabled=true;$('png-pixels').textContent='Kompozice je prázdná.';return;}
+ const {w}=preparedCutMask(),[width,height]=workPageMm();
+ pngWidthMm=width*bounds.width/w;
+ pngHeightMm=height*bounds.height/preparedCutMask().h;
+ showPngDimensions();checkPngSize();
+}
 function showPngDimensions(){
  $('png-width').value=Number((pngWidthMm/pngMmPerUnit()).toPrecision(12));
  $('png-height').value=Number((pngHeightMm/pngMmPerUnit()).toPrecision(12));
@@ -2381,12 +2402,13 @@ function checkPngSize(){
  return valid;
 }
 $('png').onclick=()=>{
- const bounds=exportBounds();
- if(!bounds)return;
- pngWidthMm=outputMm;
- pngHeightMm=fullPage?pageHeightMm:outputMm*bounds.height/bounds.width;
- showPngDimensions();checkPngSize();closeMobileExport();$('png-dialog').showModal();
+ $('png-dpi').value=workPreferences.dpi;
+ $('png-background').value=workPreferences.background;
+ $('png-range').value=workPreferences.range;
+ $('png-unit').value=pngUnit=workPreferences.unit;
+ recalculatePng();closeMobileExport();$('png-dialog').showModal();
 };
+$('png-range').onchange=recalculatePng;
 $('png-unit').onchange=event=>{
  pngUnit=event.currentTarget.value;
  showPngDimensions();checkPngSize();
@@ -2397,13 +2419,14 @@ $('png-dpi').oninput=checkPngSize;
 $('png-cancel').onclick=()=>$('png-dialog').close();
 $('png-form').onsubmit=event=>{
  event.preventDefault();
- const bounds=exportBounds();
+ const bounds=pngBounds();
  if(!bounds||!checkPngSize())return;
  const {dpi,width,height}=pngDimensions();
  const hairline=appearance==='hairline';
  const out=document.createElement('canvas');out.width=width;out.height=height;
  const c=out.getContext('2d');
- c.fillStyle=background;c.fillRect(0,0,width,height);c.fillStyle=foreground;
+ if($('png-background').value==='paper'){c.fillStyle=background;c.fillRect(0,0,width,height);}
+ c.fillStyle=foreground;
  const margin=Math.min(hairline?Math.max(1,dpi*.1/25.4):0,(Math.min(width,height)-.01)/2);
  const scale=Math.min((width-2*margin)/bounds.width,(height-2*margin)/bounds.height);
  c.translate((width-bounds.width*scale)/2,(height-bounds.height*scale)/2);
