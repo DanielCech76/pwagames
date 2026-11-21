@@ -1,0 +1,55 @@
+#workshop-bar { display:none }
+#scene-mode .scene-scroll { position:relative; height:clamp(220px,52dvh,760px); width:100%; max-height:none; overflow:clip; background:#dddcd7; touch-action:none; }
+#scene-mode .composition-stage { display:block; position:absolute; min-height:0; padding:0; outline:1px solid #858780; }
+#stage { cursor:crosshair }
+.scene-scroll[data-hand] #stage { cursor:grab }
+.scene-scroll[data-hand]:active #stage { cursor:grabbing }
+#work-dialog { width:min(600px, 94vw); max-height:90dvh; overflow:auto; }
+#work-dialog header { position:sticky; top:0; display:flex; align-items:center; justify-content:space-between; padding:4px; background:#fbf6e9; color:#173e30; z-index:1; }
+#work-dialog h2 { margin:4px; font-size:1.25rem }
+#work-dialog button, #workshop-bar button { min-height:48px; min-width:48px }
+.work-actions { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 }
+.work-preview { height:min(49dvh,420px); overflow:auto; background:#e4e3dc; }
+.work-preview canvas { display:block; margin:auto; max-width:none; }
+.work-card { display:flex; align-items:center; gap:10px; width:100%; margin:6px 0; text-align:left }
+.work-card canvas { width:70px; height:40px; object-fit:contain }
+#work-move-handle { position:absolute; z-index:3; transform:translate(-50%,-50%); touch-action:none; width:48px; height:48px; padding:0; border-radius:50%; background:#075944; color:white; font-size:24px }
+@media (max-width:760px) and (orientation:portrait), (max-width:1100px) and (max-height:530px) and (orientation:landscape) {
+ body:has(#scene-mode:not([hidden])) > header { display:none }
+ #scene-mode { display:block; max-width:none; margin:0; padding:0 }
+ #scene-mode .composition-head,#scene-mode .scene-extra,#scene-mode #object-tools-home,#scene-mode .scene-footer,#scene-mode .zoom-tools,#scene-mode .wide-inspector,#scene-mode .scene-library { display:none!important }
+ #scene-mode .scene-viewport { display:block; margin:0; padding:0; border:0; border-radius:0 }
+ #scene-mode .scene-scroll { height:calc(100dvh - 58px - env(safe-area-inset-bottom)); }
+ #workshop-bar { display:flex; position:fixed; z-index:5; justify-content:space-around; gap:2px; inset:auto 0 0; min-height:58px; padding:3px 2px calc(3px + env(safe-area-inset-bottom)); background:#133e30; overflow:auto }
+ #workshop-bar button { background:transparent; border:0; color:#fff6df; display:grid; place-content:center; font-size:19px; line-height:1; padding:2px 4px }
+ #workshop-bar span { font-size:10px; margin-top:4px }
+ #work-dialog { margin:auto auto 0; max-height:84dvh }
+}
+@media (max-width:1100px) and (max-height:530px) and (orientation:landscape) {
+ #scene-mode .scene-viewport { margin-left:65px }
+ #scene-mode .scene-scroll { height:100dvh }
+ #workshop-bar { inset:0 auto 0 0; width:65px; flex-direction:column; justify-content:safe center; }
+ #workshop-bar button { flex:none }
+ #work-dialog { margin:auto 0 auto auto; max-width:min(390px,53vw); height:100dvh; max-height:100dvh; border-radius:12px 0 0 12px }
+ #scene-mode:has(~ #work-dialog[open]) .scene-viewport { margin-right:min(390px,53vw) }
+ #work-dialog::backdrop { background:transparent }
+}
+.work-move-confirm { position:fixed; z-index:5; right:8px; top:8px; display:flex; gap:6px }
+.work-move-confirm[hidden],#work-move-handle[hidden] { display:none }
+.work-move-confirm button { min-height:48px }
+#work-dialog[open] { background:#fbf6e9; color:#182b22; box-shadow:0 0 0 1px #afa897 }
+.work-actions button[aria-pressed=true] { background:#174c37; color:#fff }
+#work-cut-markers { position:absolute; inset:0; pointer-events:none }
+#work-cut-markers span { position:absolute; transform:translate(-50%,-50%); color:white; background:#a92132; border:2px solid white; border-radius:20px; padding:2px 6px; font:bold 13px/1.3 system-ui }
+#work-cut-markers [data-kind="Tenký spoj"] { background:#9a4d00 }
+#work-cut-markers [data-kind^="Drobný"] { background:#69378e }
+body:has(#work-dialog[open]) .scene-scroll { touch-action:none }
+.work-group-instruction { display:none; margin:0; padding:10px; background:#fbf6e9; border-radius:5px }
+.work-move-confirm[data-group] .work-group-instruction { display:block }
+#work-dialog label { display:block; margin:6px 0 }
+#work-dialog input[type=number] { max-width:90px }
+@media (max-width:1100px) and (max-height:530px) and (orientation:landscape) {
+ #work-dialog { position:fixed; inset:0 0 0 auto }
+}
+#work-hand-badge { position:absolute; left:8px; top:8px; min-height:48px; z-index:3; background:#174c37; color:#fff; }
+#work-hand-badge[hidden] { display:none }

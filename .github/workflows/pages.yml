@@ -83,6 +83,7 @@ jobs:
           node tests/cyklo-road-match.test.cjs
           node tests/cyklo-track-match.test.cjs
           node tests/azulejo-module.test.cjs
+          node --test tests/vanocni-cut-cleanup.test.cjs tests/vanocni-workshop.test.cjs
       - uses: actions/configure-pages@v5
         with:
           enablement: true

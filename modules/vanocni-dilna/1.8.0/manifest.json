@@ -1,0 +1,96 @@
+{
+  "format": 1,
+  "id": "vanocni-dilna",
+  "version": "1.8.0",
+  "apiVersion": 1,
+  "minCoreVersion": "2.1.0",
+  "maxCoreMajor": 2,
+  "dataSchema": 1,
+  "largeData": true,
+  "name": "Vánoční dílna",
+  "description": "Skládání zimních scén ze siluet, vlastní motivy a SVG export pro laserové řezání.",
+  "icon": "🎄",
+  "theme": "green",
+  "permissions": [
+    "Místní úložiště a import/export souborů"
+  ],
+  "fullscreen": false,
+  "entry": "index.html",
+  "files": [
+    {
+      "path": "LICENSE-fflate.txt",
+      "size": 1069,
+      "sha256": "805f6cb28bb8b6d3a0badd83c93bccd9671fa01a3b4b92b7042b0743325ac243"
+    },
+    {
+      "path": "bridge.js",
+      "size": 2612,
+      "sha256": "72dd43162d26a93e65f8ec6c95b9f27464093902e71d46cfbb3376752c794369"
+    },
+    {
+      "path": "circle.js",
+      "size": 7210,
+      "sha256": "a997baa85b484c7ffff8db64a97569a03f0015407ad4b96e6050e85fe541e35a"
+    },
+    {
+      "path": "cut-cleanup.js",
+      "size": 3425,
+      "sha256": "3c6124ebf3749742e82130e8b1e7391c5ee06b20243fd193cec80e0ca75c5ab7"
+    },
+    {
+      "path": "cut-repair.js",
+      "size": 2041,
+      "sha256": "1cd2941756a61df00dbc3cfaa5ec81e07810fb3b8cbc191e84a2fbcc35d17435"
+    },
+    {
+      "path": "fflate.js",
+      "size": 32665,
+      "sha256": "c3b34f2e9f5e74d4d7d64e01cac7a0c01954c6c406414d42185c7b53d6875ddf"
+    },
+    {
+      "path": "index.html",
+      "size": 2155237,
+      "sha256": "5ff46d3c93082b5bd6a4e7fe373d7740da6b7b88e7e47a10bed222db9af06b27"
+    },
+    {
+      "path": "module-data.js",
+      "size": 2541,
+      "sha256": "c262c018874e1fdba92690f7701b35b0c664e4c8623e0e6db189d73e42759be0"
+    },
+    {
+      "path": "png-density.js",
+      "size": 1015,
+      "sha256": "2d4f20607c4742eae579e53376f8bc5641954351a0ba36f1c7879c642d1b9d8a"
+    },
+    {
+      "path": "snow-motifs.js",
+      "size": 337913,
+      "sha256": "71d9b5bb35d14ef0fd916607d48c1e5bc7b7bdcf79198f9276065783a77ff19f"
+    },
+    {
+      "path": "village-buildings.js",
+      "size": 7673,
+      "sha256": "ee599d213e0572d74dad5f582bfa2799a33dd117107ea56fbb04cda036843f4f"
+    },
+    {
+      "path": "window-revisions.js",
+      "size": 19257,
+      "sha256": "47b93a634c8317bf093faf66237ff5fcacd58ffe7b7bb214eb97f85c4e1fee19"
+    },
+    {
+      "path": "winter-motifs.js",
+      "size": 12014,
+      "sha256": "5cfd6cbbd252755b5967667f9344e99b3cf52c893b344d2b2870ea66e4c3a907"
+    },
+    {
+      "path": "workshop.css",
+      "size": 4561,
+      "sha256": "d360df8ba6578a8c580d801645f3c08b7b678d2dcdf1dc6d08e34862cc5002e4"
+    },
+    {
+      "path": "workshop.js",
+      "size": 35813,
+      "sha256": "7ef780ffec1f890afa9d833a973a22719fd465a991609ec3ef74168ad345a83e"
+    }
+  ]
+}

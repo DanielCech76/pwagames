@@ -192,7 +192,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  #scene-mode .zoom-tools{display:flex;position:static;align-items:center;gap:8px;padding:2px 0 10px;border:0;background:none}
  #scene-mode .zoom-tools button{min-height:36px;min-width:34px;padding:2px;flex:none}
  #zoom-out{order:0}#zoom-range{display:block;flex:1;order:1}#zoom-value{display:block;order:2;white-space:nowrap;font-size:14px;min-width:53px;text-align:center;padding:5px 4px;border:1px solid var(--line);border-radius:8px;background:#fff9ec}#zoom-in{order:3}#mobile-fit{display:grid;place-items:center;order:4}#scene-mode #zoom-fit{display:none}
- #scene-mode .scene-extra{display:block!important;border:0;margin:0;padding:0;overflow:visible}
+ #scene-mode .scene-extra{display:block;border:0;margin:0;padding:0;overflow:visible}
  #scene-mode .scene-extra summary,#scene-mode #layers-arrows{display:none!important}
  #scene-mode .layer-strip{gap:7px}
  #scene-mode #layers{display:flex;gap:7px;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
@@ -258,7 +258,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  #scene-mode .zoom-tools{position:static;display:flex;align-items:center;gap:8px;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:4px 8px}
  #zoom-out{order:0}#zoom-range{display:block;flex:1;order:1}#zoom-value{display:block;order:2;white-space:nowrap}#zoom-in{order:3}#mobile-fit{order:4}#scene-mode #zoom-fit{display:none}
  #scene-mode .zoom-tools button{min-width:38px;min-height:36px}
- #scene-mode .scene-extra{display:block!important;grid-column:1;grid-row:3;padding:0;margin:0;border:0;overflow:hidden}
+ #scene-mode .scene-extra{display:block;grid-column:1;grid-row:3;padding:0;margin:0;border:0;overflow:hidden}
  #scene-mode .scene-extra summary,#scene-mode #layers-arrows,#context{display:none!important}
  #scene-mode #layers{display:flex;gap:7px;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
  #scene-mode #layers button{width:64px;flex:none;min-height:44px;scroll-snap-align:start;padding:4px;font-size:0}
@@ -290,6 +290,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  #scene-mode .wide-inspector{display:block!important;grid-column:3;grid-row:1/5}
 }
 </style>
+<script src="./module-data.js"></script>
 <script src="./bridge.js"></script>
 <script src="./winter-motifs.js"></script>
 <script src="./circle.js"></script>
@@ -298,18 +299,24 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 <script src="./window-revisions.js"></script>
 <script src="./village-buildings.js"></script>
 <script src="./cut-repair.js"></script>
+<script src="./fflate.js"></script>
 <script src="./png-density.js"></script>
+<link rel="stylesheet" href="./workshop.css">
 </head>
 <body>
 <header class="masthead">
  <button id="setup-open" class="header-icon" aria-label="Nastavení řezu" title="Nastavení řezu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
  <svg class="winter left" viewBox="0 0 88 64" aria-hidden="true"><path d="M25 10l3 7 7 3-7 3-3 7-3-7-7-3 7-3zm24-8 10 15h-5l11 12h-8l13 13H53v12h-8V42H29l13-13h-8l11-12h-6zm27 27 7 11h-3l7 10h-8v9h-5v-9h-8l7-10h-3z" fill="currentColor"/></svg>
- <h1>Vánoční dílna <small class="app-version">1.7.0</small></h1>
+ <h1>Vánoční dílna <small class="app-version">1.8.0</small></h1>
  <svg class="winter right-winter" viewBox="0 0 88 64" aria-hidden="true"><path d="M18 27l8 13h-4l9 10H20v9h-5v-9H5l9-10h-4zm29-25 10 15h-5l11 12h-8l13 13H51v12h-8V42H27l13-13h-8l11-12h-6zm28 8 3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="currentColor"/></svg>
  <svg class="snow-edge" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 13Q45-4 82 11T158 13T236 10T311 15T400 12V22H0Z" fill="currentColor"/></svg>
 </header>
 <main id="scene-mode">
- <div class="composition-head"><h2 class="screen-heading">Kompozice</h2>
+ <nav id="workshop-bar" aria-label="Nástroje dílny">
+<button id="work-add">＋<span>Přidat</span></button><button id="work-layers">▤<span>Objekty</span></button>
+<button id="work-view">◉<span>Pohled</span></button><button id="work-fit">⛶<span>Celé plátno</span></button>
+<button id="work-save">↓<span>Uložit</span></button><button id="work-more">⋯<span>Nabídka</span></button>
+</nav><div class="composition-head"><h2 class="screen-heading">Kompozice</h2>
  <div id="mobile-files" class="mobile-only" role="group" aria-label="Soubory projektu">
   <button id="mobile-new">Nový projekt</button><button id="mobile-save">Uložit projekt</button><button id="mobile-load">Načíst projekt</button><button id="mobile-export" aria-haspopup="dialog">Exportovat</button>
  </div>
@@ -336,11 +343,11 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  </div>
  </div>
  <div class="scene-viewport"><div class="scene-scroll"><section class="composition-stage" aria-label="Kompozice">
-  <canvas class="art" id="stage" width="1000" height="520" aria-label="Náhled kompozice. Podržením objektu otevřeš jeho nabídku."></canvas>
+  <canvas class="art" id="stage" width="1000" height="520" aria-label="Náhled kompozice. Klepnutím vybereš objekt."></canvas>
   <div id="context" class="popover" hidden><strong>Přetažením přesuneš</strong><div class="popover-actions"><button id="edit-object" class="primary">Upravit</button><button id="remove" class="primary">Smazat</button></div>
  <div class="popover-actions"><button id="layer-down">Dozadu</button><button id="layer-up">Dopředu</button><button id="size-open">Velikost</button></div><div class="popover-actions"><button id="mirror-object" aria-pressed="false">Zrcadlit</button></div></div>
  </section>
- </div><div class="zoom-tools" aria-label="Přiblížení plátna"><button id="zoom-out" aria-label="Oddálit">−</button><input class="mobile-only" id="zoom-range" type="range" min="75" max="250" step="1" value="100" aria-label="Přiblížení v procentech"><output class="mobile-only" id="zoom-value">100 %</output><button id="zoom-fit" aria-label="Přizpůsobit plátno">100 %</button><button id="zoom-in" aria-label="Přiblížit">+</button><button id="mobile-fit" class="mobile-only" aria-label="Přizpůsobit plátno"></button></div></div>
+ </div><div class="zoom-tools" aria-label="Přiblížení plátna"><button id="zoom-out" aria-label="Oddálit">−</button><input class="mobile-only" id="zoom-range" type="range" min="5" max="800" step="1" value="100" aria-label="Přiblížení v procentech"><output class="mobile-only" id="zoom-value">100 %</output><button id="zoom-fit" aria-label="Přizpůsobit plátno">100 %</button><button id="zoom-in" aria-label="Přiblížit">+</button><button id="mobile-fit" class="mobile-only" aria-label="Přizpůsobit plátno"></button></div></div>
  <details class="scene-extra" id="scene-layers"><summary>Objekty v kompozici</summary><div class="strip-arrows" id="layers-arrows" hidden><span>Objekty v kompozici</span><button id="layers-left" aria-label="Objekty v kompozici doleva" aria-controls="layers">‹</button><button id="layers-right" aria-label="Objekty v kompozici doprava" aria-controls="layers">›</button></div><div class="layer-strip"><button id="motif-open" class="primary" aria-label="Přidat objekt" title="Přidat objekt">+</button><button id="motifs-left" class="mobile-only" aria-label="Předchozí objekty" hidden>‹</button><nav class="layers" id="layers" aria-label="Objekty v kompozici"></nav><button id="motifs-right" class="mobile-only" aria-label="Další objekty" hidden>›</button></div></details>
  <div id="object-tools-home"><div id="object-tools"> <div id="scene-tools" class="scene-tools" hidden>
   <button id="quick-edit">Upravit</button><button id="quick-rotate" aria-label="Otočit o 15°" title="Otočit o 15°"></button><button id="quick-copy" aria-label="Duplikovat" title="Duplikovat"></button><button id="quick-detail">Detaily</button><button id="quick-mirror">Zrcadlit</button><button id="quick-layer">Vrstvy</button><button id="quick-size">Velikost</button><button id="quick-remove">Smazat</button>
@@ -777,7 +784,7 @@ function template(type){
 function add(type, overrides={}){
  const item={...template(type),detailTreatment:'transparent',id:nextId++,...overrides};
  if(item.village!=null)item.fixedHouse=true;
- if(item.asset==null&&item.village==null&&['house','church'].includes(type)){
+ if(!item.externalSvg&&item.asset==null&&item.village==null&&['house','church'].includes(type)){
   item.parts=overrides.parts?overrides.parts.map(part=>({...part})):buildingPreset(type,item.variant);
   item.unitTop=overrides.unitTop??(item.parts.length?-buildingGeometry(item).top:105);
  }
@@ -785,7 +792,7 @@ function add(type, overrides={}){
 }
 function reset(){
  projectFileStem=defaultProjectFileStem;
- repairArea=0;repairJoin=false;
+ repairArea=0;repairJoin=false;cutEdits=[];
  frame='none';sceneLocked=false;fullPage=false;pageHeightMm=null;
  horizon=0;flatInset=45;moveComposition=false;appearance='normal';[foreground,background]=paletteDefaults.normal;
  $('base').max=45;syncCanvasDimensions(defaultW,defaultH);
@@ -907,6 +914,7 @@ function applySnowGeometry(item,g){
  return {...g,solids:[...(g.solids||[]),snowPaths.get(cacheKey)]};
 }
 function geometry(item){
+ if(item.externalSvg)return externalGeometry(item.externalSvg);
  if(item.winterSpruce!=null){
   const [,width,height,path]=snowySpruces[item.winterSpruce],ink=new Path2D(),back=new Path2D();
   const matrix=new DOMMatrix().translate(-width/2,-height);
@@ -1192,11 +1200,14 @@ function paint(){
   ctx.save();ctx.scale(1/scale,1/scale);
   ctx.strokeStyle=foreground;ctx.lineWidth=scale*W/Math.max(1,stage.clientWidth);
   ctx.stroke(hairlinePath);ctx.restore();
+ }else if(cutEdits.length){
+  const scale=cutScale();ctx.save();ctx.scale(1/scale,1/scale);
+  ctx.fillStyle=foreground;ctx.fill(new Path2D(cutOutline()),'evenodd');ctx.restore();
  }else{
   compose(1,foreground,background);
   ctx.drawImage(scene,0,0);
  }
- if(appearance!=='hairline'&&lastCheck?.problem && lastCheck.scale===1){
+ if(!cutEdits.length&&appearance!=='hairline'&&lastCheck?.problem && lastCheck.scale===1){
   const {problem,keeper}=lastCheck,overlay=ctx.createImageData(W,H);
   for(let i=0;i<problem.length;i++)if(problem[i]&&problem[i]!==keeper){overlay.data[i*4]=205;overlay.data[i*4+1]=48;overlay.data[i*4+2]=38;overlay.data[i*4+3]=255;}
   const c=document.createElement('canvas');c.width=W;c.height=H;c.getContext('2d').putImageData(overlay,0,0);ctx.drawImage(c,0,0);
@@ -1223,7 +1234,7 @@ function cutMask(scale,clean=false){
 }
 function cutPixelsPerMm(scale){return (fullPage?W:cutWidth)*scale/outputMm;}
 let preparedCut=null,preparedOutline=null;
-let repairArea=0,repairJoin=false;
+let repairArea=0,repairJoin=false,cutEdits=[];
 function invalidateCut(){preparedCut=null;preparedOutline=null;hairlinePath=null;}
 function preparedCutMask(){
  if(preparedCut)return preparedCut;
@@ -1231,6 +1242,7 @@ function preparedCutMask(){
  const pixelsPerMm=cutPixelsPerMm(scale);
  if(repairArea>0)removeCutIslands(mask,labelMask(mask,w,h,scale),Math.floor(repairArea*pixelsPerMm**2));
  if(repairJoin)joinCutPieces(mask,w,h,labelMask(mask,w,h,scale),Math.ceil(minimumMm*pixelsPerMm/2)+1);
+ applyCutEdits(mask,w,h);
  return preparedCut=result;
 }
 function cutOutline(){
@@ -1278,7 +1290,7 @@ function check(){
  $('png').disabled=$('svg').disabled=n===0;paint();
 }
 function schedule(){lastCheck=null;invalidateCut();paint();clearTimeout(validationTimer);validationTimer=setTimeout(check,110);}
-const typeName=o=>o.winterSpruce!=null?snowySpruces[o.winterSpruce][0]:o.village!=null?villageNames[o.village]:['needle','bell','bauble'].includes(o.type)?catalog[o.type][1][o.variant]:o.asset!=null?approvedNames[o.asset]:o.custom?'Vlastní domek':o.parts?catalog[o.type][1][o.variant]:catalog[o.type][0];
+const typeName=o=>o.externalSvg?.name??(o.winterSpruce!=null?snowySpruces[o.winterSpruce][0]:o.village!=null?villageNames[o.village]:['needle','bell','bauble'].includes(o.type)?catalog[o.type][1][o.variant]:o.asset!=null?approvedNames[o.asset]:o.custom?'Vlastní domek':o.parts?catalog[o.type][1][o.variant]:catalog[o.type][0]);
 function keepOnCanvas(item){
  const b=bounds(item),left=item.x-b.left,right=b.right-item.x;
  item.x=clamp(item.x,Math.min(W/2,left+2),Math.max(W/2,W-right-2));
@@ -1583,19 +1595,38 @@ const pc=pick.getContext('2d',{willReadFrequently:true});
 stage.addEventListener('pointerdown',e=>{
  if(e.button!==0||drag||sceneLocked)return;
  const [x,y]=canvasPoint(e,stage);
+ if(viewHand||touchPoints.size>1)return;
  if(moveComposition){
   drag={group:objects.map(item=>({item,x:item.x,y:item.y})),x,y,clientX:e.clientX,clientY:e.clientY,id:e.pointerId};
   stage.setPointerCapture(e.pointerId);return;
  }
+ if(e.pointerType==='mouse'&&!mobileUI.matches){
+  selectAtStage(e);
+  const hit=selectedObject();
+  if(hit){
+   drag={item:hit,dx:x-hit.x,dy:y-hit.y,clientX:e.clientX,clientY:e.clientY,id:e.pointerId,moved:false};
+   stage.setPointerCapture(e.pointerId);
+  }
+  return;
+ }
+ stagePress={id:e.pointerId,x:e.clientX,y:e.clientY};
+});
+stage.addEventListener('pointerup',e=>{
+ if(stagePress?.id!==e.pointerId)return;
+ const press=stagePress;stagePress=null;
+ if(Math.hypot(e.clientX-press.x,e.clientY-press.y)>8)return;
+ selectAtStage(e);
+});
+function selectAtStage(e){
+ const [x,y]=canvasPoint(e,stage);
  const candidates=[...objects].reverse().filter(o=>{const b=bounds(o);return x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom;});
  const hit=candidates.find(o=>{pc.clearRect(0,0,W,H);drawObject(pc,o,geometry(o),1,!o.parts&&o.asset==null);return pc.getImageData(Math.floor(x),Math.floor(y),1,1).data[3]>127;})||candidates[0];
- $('context').hidden=true;
- if(!hit){selected=null;refresh();return;}
- selected=hit.id;
- drag={item:hit,dx:x-hit.x,dy:y-hit.y,clientX:e.clientX,clientY:e.clientY,id:e.pointerId,moved:false,held:false};
+ selected=hit?.id??null;
+ $('context').hidden=true;refresh();
+}
+let stagePress=null;
+stage.addEventListener('pointercancel',()=>{stagePress=null;});
 
- stage.setPointerCapture(e.pointerId);refresh();
-});
 stage.addEventListener('pointermove',e=>{
  if(drag?.id!==e.pointerId||drag.held)return;
  if(!drag.moved&&Math.hypot(e.clientX-drag.clientX,e.clientY-drag.clientY)<7)return;
@@ -1774,7 +1805,7 @@ function showMotifCategory(group){
   button.append(name);
   button.onclick=()=>{
    if(category){showMotifCategory(category);$('motif-grid').querySelector('button')?.focus();return;}
-   if(model)chooseMotif(model);else{$('motif-dialog').close();$('empty-building').onclick();}
+   if(model)showMotifPreview(name,model);else{$('motif-dialog').close();$('empty-building').onclick();}
   };
   return button;
  }));
@@ -1803,7 +1834,7 @@ function library(){
   const thumbnail=motifThumbnail(model);
   button.append(thumbnail,name);
   paletteDrag(button,name,stage,point=>{
-   chooseMotif(model,point);
+   if(point)chooseMotif(model,point);else showMotifPreview(name,model);
   });
   return button;
  }));
@@ -2001,20 +2032,35 @@ function paintRangeProgress(input){
  const percent=(Number(input.value)-Number(input.min))/(Number(input.max)-Number(input.min))*100;
  input.style.setProperty('--range-fill',percent+'%');
 }
-let sceneZoom=1;
-function zoomScene(step){
- sceneZoom=clamp(sceneZoom+step,0.75,2.5);
- $('scene-mode').style.setProperty('--scene-zoom',sceneZoom);
- $('zoom-fit').textContent=Math.round(sceneZoom*100)+' %';
- $('zoom-out').disabled=sceneZoom<=.75;
- $('zoom-in').disabled=sceneZoom>=2.5;
+let sceneZoom=1,viewX=0,viewY=0,viewHand=false;
+const sceneScroll=document.querySelector('.scene-scroll');
+const scenePaper=document.querySelector('.composition-stage');
+function layoutView(){
+ const rect=sceneScroll.getBoundingClientRect();
+ const width=Math.min(Math.max(1,rect.width-36),Math.max(1,rect.height-36)*W/H)*sceneZoom;
+ scenePaper.style.width=width+'px';
+ scenePaper.style.left=(rect.width-width)/2+viewX+'px';
+ scenePaper.style.top=(rect.height-width*H/W)/2+viewY+'px';
+ $('zoom-range').value=Math.round(sceneZoom*100);
+ paintRangeProgress($('zoom-range'));
+ $('zoom-value').textContent=Math.round(sceneZoom*100)+' %';
+ if($('work-zoom-value'))$('work-zoom-value').textContent=$('zoom-value').textContent;
  if(appearance==='hairline')paint();
- $('zoom-range').value=Math.round(sceneZoom*100);paintRangeProgress($('zoom-range'));$('zoom-value').textContent=Math.round(sceneZoom*100)+' %';
  if(!$('context').hidden&&selectedObject())positionMenu(selectedObject());
 }
-$('zoom-out').onclick=()=>zoomScene(-.25);
-$('zoom-in').onclick=()=>zoomScene(.25);
-$('zoom-fit').onclick=()=>zoomScene(1-sceneZoom);
+function zoomScene(step,point){
+ const previous=sceneZoom;
+ sceneZoom=clamp(sceneZoom+step,.05,8);
+ if(point){
+  const r=sceneScroll.getBoundingClientRect(),ratio=sceneZoom/previous;
+  const x=point.clientX-r.left-r.width/2,y=point.clientY-r.top-r.height/2;
+  viewX=x+(viewX-x)*ratio;viewY=y+(viewY-y)*ratio;
+ }
+ layoutView();
+}
+function fitScene(){viewX=viewY=0;zoomScene(1-sceneZoom);}
+$('zoom-fit').textContent='Celé plátno';
+$('zoom-fit').onclick=fitScene;
 for(const [id,key] of [['frame-x','x'],['frame-y','y'],['frame-cord','cordMm']]){
  $(id).onchange=event=>updateFramePosition(key,event.currentTarget.valueAsNumber);
 }
@@ -2130,7 +2176,7 @@ $('page-apply').onclick=()=>{
 };
 
 function snapshotProject(){
- return {format:'vanocni-dilna',version:2,base,outputMm,mullionMm,frame,rimMm,minimumMm,repairArea,repairJoin,sceneLocked,horizon,flatInset,appearance,foreground,background,canvasWidth:W,canvasHeight:H,pageHeightMm,fullPage,objects:structuredClone(objects)};
+ return {format:'vanocni-dilna',version:2,base,outputMm,mullionMm,frame,rimMm,minimumMm,repairArea,repairJoin,cutEdits:structuredClone(cutEdits),sceneLocked,horizon,flatInset,appearance,foreground,background,canvasWidth:W,canvasHeight:H,pageHeightMm,fullPage,objects:structuredClone(objects)};
 }
 function readProject(text){
  const fail=()=>{throw new Error('Soubor neobsahuje platnou kompozici Vánoční dílny.');};
@@ -2139,6 +2185,7 @@ function readProject(text){
  const index=(v,count)=>Number.isInteger(v)&&v>=0&&v<count;
  if(data?.format!=='vanocni-dilna'||![1,2].includes(data.version)||!Array.isArray(data.objects)||data.objects.length>1000||
     !between(data.base,0,data.version===1?45:1500)||!between(data.outputMm,30,1500)||!between(data.mullionMm,.4,5))fail();
+ validateCutEdits(data.cutEdits);
  if((data.repairArea!=null&&!between(data.repairArea,0,100))||
     (data.repairJoin!=null&&typeof data.repairJoin!=='boolean'))fail();
  if((data.frame!=null&&!circleOptions.includes(data.frame))||
@@ -2157,6 +2204,7 @@ function readProject(text){
     !between(o.x,-8800,8800)||!between(o.y,-6000,6000)||!between(o.height,.01,10000)||
     !between(o.scaleX??1,.2,2.01)||!between(o.scaleY??1,.2,2.01)||
     (o.unitTop!=null&&!between(o.unitTop,1,1000))||!index(o.variant,catalog[o.type][1].length))fail();
+  if(o.externalSvg!=null)o.externalSvg=validateExternalModel(o.externalSvg);
   ids.add(o.id);
   if((o.village!=null&&(!index(o.village,villageNames.length)||(o.village===1?'church':'house')!==o.type||o.asset!=null||o.parts!=null))||
      (o.rotation!=null&&!between(o.rotation,-180,180))||
@@ -2183,7 +2231,9 @@ function readProject(text){
  return data;
 }
 function openProject(data){
+ finishWorkshopMove(false);setWorkshopHand(false);fitScene();
  objects=data.objects;
+ cutEdits=validateCutEdits(data.cutEdits);
  repairArea=data.repairArea??0;repairJoin=data.repairJoin??false;
  frame=data.frame??'none';rimMm=data.rimMm??5;minimumMm=data.minimumMm??1.6;sceneLocked=data.sceneLocked??false;
  base=data.base;outputMm=data.outputMm;mullionMm=data.mullionMm;
@@ -2201,7 +2251,7 @@ function openProject(data){
 }
 $('project-new').onclick=()=>{
  if(objects.length&&typeof confirm==='function'&&!confirm('Vytvořit novou kompozici? Neuložené úpravy aktuální kompozice se zahodí.'))return;
- openProject({...snapshotProject(),objects:[],base:0,repairArea:0,repairJoin:false,sceneLocked:false});
+ openProject({...snapshotProject(),objects:[],base:0,repairArea:0,repairJoin:false,cutEdits:[],sceneLocked:false});
  projectFileStem=defaultProjectFileStem;
  $('project-message').textContent='Nová kompozice';
 };
@@ -2391,7 +2441,7 @@ $('repair-form').onsubmit=event=>{
  }
  refresh();check();
 };
-const mobileUI=typeof matchMedia==='function'?matchMedia('(max-width:760px) and (orientation:portrait), (orientation:landscape) and (max-height:500px) and (max-width:1000px)'):{matches:false};
+const mobileUI=typeof matchMedia==='function'?matchMedia('(max-width:760px) and (orientation:portrait), (orientation:landscape) and (max-height:530px) and (max-width:1100px)'):{matches:false};
 let mobilePanel='',mobileItem=null,mobileProject='';
 const mobilePanels={rotate:'mobile-rotate-panel',layer:'mobile-layer-panel',size:'size-panel',detail:'mobile-detail-panel'};
 const mobilePaths={
@@ -2545,37 +2595,52 @@ mobileUI.addEventListener?.('change',()=>{if($('mobile-export-dialog').open)$('m
 for(const [event,step] of [['zoom-out',-.05],['zoom-in',.05]])$(event).onclick=()=>zoomScene(step);
 
 const touchPoints=new Map();
-let pinch=null,pinched=false;
-stage.addEventListener('pointerdown',e=>{
- if(e.pointerType!=='touch')return;
- if(!touchPoints.size)pinched=false;
- touchPoints.set(e.pointerId,e);stage.setPointerCapture(e.pointerId);
- if(touchPoints.size===2&&!pinched){
-  const [a,b]=touchPoints.values(),x=(a.clientX+b.clientX)/2,y=(a.clientY+b.clientY)/2;
-  const [localX,localY]=canvasPoint({clientX:x,clientY:y},stage);
-  pinch={distance:Math.max(1,Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY)),zoom:sceneZoom,localX,localY};
-  pinched=true;clearTimeout(drag?.timer);drag=null;$('context').hidden=true;
+let viewGesture=null,viewGestureUsed=false;
+function viewContacts(){
+ const [a,b]=touchPoints.values();
+ if(!a)return null;
+ return b?{clientX:(a.clientX+b.clientX)/2,clientY:(a.clientY+b.clientY)/2,
+  distance:Math.max(1,Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY))}:
+  {clientX:a.clientX,clientY:a.clientY,distance:1};
+}
+sceneScroll.addEventListener('pointerdown',e=>{
+ if(e.target.closest('button')||e.button!==0||(!viewHand&&e.pointerType!=='touch'))return;
+ if(!touchPoints.size)viewGestureUsed=false;
+ touchPoints.set(e.pointerId,e);
+ if(viewHand||touchPoints.size===2){
+  viewGesture=viewContacts();viewGestureUsed=true;stagePress=null;
+  if(drag?.group){
+   for(const entry of drag.group){entry.item.x=entry.x;entry.item.y=entry.y;}
+   drag=null;check();
+  }
+  if(viewHand)sceneScroll.setPointerCapture(e.pointerId);
  }
- if(pinched)e.stopImmediatePropagation();
 },true);
-stage.addEventListener('pointermove',e=>{
+sceneScroll.addEventListener('pointermove',e=>{
  if(!touchPoints.has(e.pointerId))return;
  touchPoints.set(e.pointerId,e);
- if(!pinched)return;
- e.stopImmediatePropagation();
- if(!pinch||touchPoints.size!==2)return;
- const [a,b]=touchPoints.values();
- const distance=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);
- zoomScene(pinch.zoom*distance/pinch.distance-sceneZoom);
- const rect=stage.getBoundingClientRect(),scroll=document.querySelector('.scene-scroll');
- scroll.scrollLeft+=rect.left+pinch.localX*rect.width/W-(a.clientX+b.clientX)/2;
- scroll.scrollTop+=rect.top+pinch.localY*rect.height/H-(a.clientY+b.clientY)/2;
+ if(!viewGesture)return;
+ const next=viewContacts();
+ zoomScene(sceneZoom*(next.distance/viewGesture.distance-1),viewGesture);
+ viewX+=next.clientX-viewGesture.clientX;viewY+=next.clientY-viewGesture.clientY;
+ viewGesture=next;layoutView();
 },true);
-for(const event of ['pointerup','pointercancel','lostpointercapture'])stage.addEventListener(event,e=>{
- if(!touchPoints.delete(e.pointerId)||!pinched)return;
- e.stopImmediatePropagation();pinch=null;
-},true);
-window.ArcadeHost.register({start:reset});
+function releaseView(e){
+ if(!touchPoints.delete(e.pointerId))return;
+ if(viewGestureUsed)stagePress=null;
+ viewGesture=viewHand?viewContacts():null;
+}
+for(const event of ['pointerup','pointercancel','lostpointercapture'])window.addEventListener(event,releaseView,true);
+sceneScroll.addEventListener('wheel',e=>{
+ if(!e.ctrlKey&&!viewHand)return;
+ e.preventDefault();
+ if(e.ctrlKey)zoomScene(sceneZoom*(Math.exp(-e.deltaY*.004)-1),e);
+ else{viewX-=e.deltaX;viewY-=e.deltaY;layoutView();}
+},{passive:false});
+new ResizeObserver(layoutView).observe(sceneScroll);
+new ResizeObserver(layoutView).observe(stage);
+
 </script>
+<script src="./workshop.js"></script>
 </body>
 </html>
