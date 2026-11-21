@@ -307,7 +307,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 <header class="masthead">
  <button id="setup-open" class="header-icon" aria-label="Nastavení řezu" title="Nastavení řezu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
  <svg class="winter left" viewBox="0 0 88 64" aria-hidden="true"><path d="M25 10l3 7 7 3-7 3-3 7-3-7-7-3 7-3zm24-8 10 15h-5l11 12h-8l13 13H53v12h-8V42H29l13-13h-8l11-12h-6zm27 27 7 11h-3l7 10h-8v9h-5v-9h-8l7-10h-3z" fill="currentColor"/></svg>
- <h1>Vánoční dílna <small class="app-version">1.11.0</small></h1>
+ <h1>Vánoční dílna <small class="app-version">1.12.0</small></h1>
  <svg class="winter right-winter" viewBox="0 0 88 64" aria-hidden="true"><path d="M18 27l8 13h-4l9 10H20v9h-5v-9H5l9-10h-4zm29-25 10 15h-5l11 12h-8l13 13H51v12h-8V42H27l13-13h-8l11-12h-6zm28 8 3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="currentColor"/></svg>
  <svg class="snow-edge" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 13Q45-4 82 11T158 13T236 10T311 15T400 12V22H0Z" fill="currentColor"/></svg>
 </header>
@@ -2022,8 +2022,8 @@ function syncAppearance(){
  }
  $('color-preset').value=foreground+','+background;
 }
-$('appearance-open').onclick=()=>{syncAppearance();$('appearance-dialog').showModal();};
-$('appearance-close').onclick=()=>$('appearance-dialog').close();
+$('appearance-open').onclick=()=>{syncAppearance();openEditorForm('appearance-dialog');};
+$('appearance-close').onclick=()=>closeEditorForm('appearance-dialog');
 $('appearance-modes').onclick=event=>{
  const mode=event.target.value;
  if(!['normal','inverse','hairline'].includes(mode))return;
@@ -2169,16 +2169,15 @@ function resizePage(widthMm,heightMm,scaleScene){
  refresh();check();return true;
 }
 $('page-open').onclick=()=>{
- const dialog=$('page-dialog');
  const factor=unitFactor(workPreferences.unit);
  const [width,height]=workPageMm();
  for(const [id,mm,min,max] of [['page-width',width,30,1500],['page-height',height,20,1000]]){
   const input=$(id);
-  input.min=min/factor;input.max=max/factor;input.step='any';input.value=Number((mm/factor).toPrecision(12));
+  input.min=min/factor;input.max=max/factor;input.step='any';input.value=Number((mm/factor).toFixed(factor===25.4?4:2));
   if($(id+'-unit'))$(id+'-unit').textContent='('+workUnit()+')';
  }
  $('page-preset').value='';$('diameter-help').hidden=frame==='none';
- $('page-error').textContent='';dialog.showModal();
+ $('page-error').textContent='';openEditorForm('page-dialog');
 };
 $('page-preset').onchange=()=>{
  const diameter=Number($('page-preset').value);if(!diameter)return;
@@ -2187,13 +2186,13 @@ $('page-preset').onchange=()=>{
  $('page-width').value=$('page-height').value=size/unitFactor(workPreferences.unit);
 };
 for(const id of ['page-width','page-height'])$(id).oninput=()=>$('page-preset').value='';
-$('page-cancel').onclick=()=>$('page-dialog').close();
+$('page-cancel').onclick=()=>closeEditorForm('page-dialog');
 $('page-apply').onclick=()=>{
  const factor=unitFactor(workPreferences.unit);
  if(!resizePage($('page-width').valueAsNumber*factor,$('page-height').valueAsNumber*factor,true)){
   $('page-error').textContent='Zadej šířku 30–1500 mm a výšku 20–1000 mm.';return;
  }
- $('page-dialog').close();
+ closeEditorForm('page-dialog');
 };
 
 function snapshotProject(){
@@ -2293,10 +2292,10 @@ $('project-save').onclick=()=>{
  const field=$('project-name');
  field.value=projectFileStem;
  $('project-save-error').hidden=true;
- $('project-save-dialog').showModal();
+ openEditorForm('project-save-dialog');
  field.select();
 };
-$('project-save-cancel').onclick=()=>$('project-save-dialog').close();
+$('project-save-cancel').onclick=()=>closeEditorForm('project-save-dialog');
 $('project-save-form').onsubmit=event=>{
  event.preventDefault();
  const stem=normalizeProjectFileStem($('project-name').value);
@@ -2306,7 +2305,7 @@ $('project-save-form').onsubmit=event=>{
   $('project-name').focus();return;
  }
  saveProjectFile(stem);
- $('project-save-dialog').close();
+ closeEditorForm('project-save-dialog');
 };
 function saveProjectFile(stem){
  projectFileStem=stem;projectHasName=true;
@@ -2402,8 +2401,8 @@ function recalculatePng(){
  showPngDimensions();checkPngSize();
 }
 function showPngDimensions(){
- $('png-width').value=Number((pngWidthMm/pngMmPerUnit()).toPrecision(12));
- $('png-height').value=Number((pngHeightMm/pngMmPerUnit()).toPrecision(12));
+ $('png-width').value=Number((pngWidthMm/pngMmPerUnit()).toFixed(pngUnit==='in'?4:2));
+ $('png-height').value=Number((pngHeightMm/pngMmPerUnit()).toFixed(pngUnit==='in'?4:2));
 }
 function pngDimensions(){
  const dpi=$('png-dpi').valueAsNumber;
@@ -2422,7 +2421,7 @@ $('png').onclick=()=>{
  $('png-background').value=workPreferences.background;
  $('png-range').value=workPreferences.range;
  $('png-unit').value=pngUnit=workPreferences.unit;
- recalculatePng();closeMobileExport();$('png-dialog').showModal();
+ recalculatePng();closeMobileExport();openEditorForm('png-dialog');
 };
 $('png-range').onchange=recalculatePng;
 $('png-unit').onchange=event=>{
@@ -2432,7 +2431,7 @@ $('png-unit').onchange=event=>{
 $('png-width').oninput=event=>{pngWidthMm=event.currentTarget.valueAsNumber*pngMmPerUnit();checkPngSize();};
 $('png-height').oninput=event=>{pngHeightMm=event.currentTarget.valueAsNumber*pngMmPerUnit();checkPngSize();};
 $('png-dpi').oninput=checkPngSize;
-$('png-cancel').onclick=()=>$('png-dialog').close();
+$('png-cancel').onclick=()=>closeEditorForm('png-dialog');
 $('png-form').onsubmit=event=>{
  event.preventDefault();
  const bounds=pngBounds();
@@ -2452,12 +2451,13 @@ $('png-form').onsubmit=event=>{
   c.strokeStyle=foreground;c.lineWidth=Math.max(1,dpi*.1/25.4)/scale;c.stroke(outline);
  }else c.fill(outline,'evenodd');
  const name=projectFileStem+(hairline?'-vlasova-cara':'')+'.png';
+ const exportForm=stagedForm;
  $('png-download').disabled=true;
  out.toBlob(async blob=>{
   try{
    if(!blob)throw new Error('PNG se nepodařilo vytvořit.');
    download(await pngWithDensity(blob,dpi),name);
-   $('png-dialog').close();
+   closeEditorForm('png-dialog',exportForm);
   }catch{
    $('png-pixels').textContent='PNG se nepodařilo vytvořit.';
   }finally{
@@ -2467,13 +2467,13 @@ $('png-form').onsubmit=event=>{
 };
 $('repair-open').onclick=()=>{
  $('repair-area').value=repairArea;$('repair-join').checked=repairJoin;
- closeMobileExport();$('repair-dialog').showModal();
+ closeMobileExport();openEditorForm('repair-dialog');
 };
-$('repair-cancel').onclick=()=>$('repair-dialog').close();
+$('repair-cancel').onclick=()=>closeEditorForm('repair-dialog');
 $('repair-form').onsubmit=event=>{
  event.preventDefault();
  repairArea=$('repair-area').valueAsNumber;repairJoin=$('repair-join').checked;
- $('repair-dialog').close();
+ closeEditorForm('repair-dialog');
  if(repairArea>0||repairJoin){
   appearance='hairline';
   syncAppearance();

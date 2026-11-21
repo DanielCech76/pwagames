@@ -6,9 +6,128 @@ const workContent=$('work-content');
 const closeTools=workshopDialog.querySelector('button');
 closeTools.className='work-close';closeTools.innerHTML=uiIcon('M5 5l14 14M19 5 5 19');
 closeTools.onclick=()=>workshopDialog.close();
+const toolBack=document.createElement('button');
+toolBack.type='button';toolBack.className='work-close work-panel-back';toolBack.hidden=true;
+toolBack.setAttribute('aria-label','Zpět');toolBack.innerHTML=uiIcon('M19 12H5m7-7-7 7 7 7');
+workshopDialog.querySelector('header').prepend(toolBack);
+const toolHistory=[];
+let stagedForm=null;
+const preparedEditorForms=new WeakMap();
+function openSubpanel(action){
+ if(workshopDialog.open){
+  toolHistory.push({title:workshopDialog.querySelector('h2').textContent,mode:workshopDialog.dataset.mode,
+   nodes:[...workContent.childNodes],scroll:workContent.scrollTop});
+ }
+ action();toolBack.hidden=!toolHistory.length;
+}
+function backToolPanel(){
+ if(!toolHistory.length){workshopDialog.close();return;}
+ restoreEditorForm();
+ if(workshopDialog.dataset.mode==='object')finishWorkshopMove(true);
+ const {title,mode,nodes,scroll}=toolHistory.pop();
+ workPanel(title,mode);workContent.replaceChildren(...nodes);workContent.scrollTop=scroll;
+ toolBack.hidden=!toolHistory.length;
+}
+toolBack.onclick=backToolPanel;
+workshopDialog.addEventListener('close',()=>{
+ if(workshopDialog.open)return;
+ restoreEditorForm();toolHistory.length=0;toolBack.hidden=true;
+});
+function rootTool(action){
+ restoreEditorForm();toolHistory.length=0;toolBack.hidden=true;action();
+}
+function restoreEditorForm(){
+ if(!stagedForm)return;
+ const {source,container,sync}=stagedForm;
+ sync.abort();source.append(...container.childNodes);container.remove();stagedForm=null;
+}
+function openEditorForm(id){
+ const source=$(id),heading=$(source.getAttribute('aria-labelledby'));
+ openSubpanel(()=>{
+  workPanel(heading.textContent,'form');
+  const container=document.createElement('div');container.className='work-form';
+  container.append(...source.childNodes);workContent.append(container);
+  heading.hidden=true;
+  const decorative=heading.closest('.dialog-heading');
+  if(decorative)decorative.hidden=true;
+  const sync=new AbortController();
+  stagedForm={source,container,sync};
+  const dimensions=(value)=>value==='in'?'″':value;
+  const mmFactor=()=>unitFactor(workPreferences.unit);
+  const pngFactor=()=>unitFactor($('png-unit').value);
+  const spec={
+   'page-width':[()=>30/mmFactor(),()=>1500/mmFactor(),()=>.1/mmFactor(),()=>workUnit()],
+   'page-height':[()=>20/mmFactor(),()=>1000/mmFactor(),()=>.1/mmFactor(),()=>workUnit()],
+   'png-width':[()=>1/pngFactor(),()=>1500/pngFactor(),()=>.1/pngFactor(),()=>dimensions($('png-unit').value)],
+   'png-height':[()=>1/pngFactor(),()=>1000/pngFactor(),()=>.1/pngFactor(),()=>dimensions($('png-unit').value)],
+   'png-dpi':[()=>1,()=>2400,()=>1,()=>'DPI'],
+   'repair-area':[()=>0,()=>100,()=>.1,()=>'mm²']
+  };
+  const update=preparedEditorForms.get(source)??[];
+  if(!preparedEditorForms.has(source)){
+  for(const input of container.querySelectorAll('input[type=number]')){
+   const config=spec[input.id];if(!config)continue;
+   const label=input.closest('label');
+   const row=workNumberRow(input,label.textContent.replace(/ mm²$| \(mm\)$| \(cm\)$| \(″\)$| \(DPI\)$/,'').trim(),config);
+   label.replaceWith(row.element);update.push(row.sync);
+  }
+  for(const select of container.querySelectorAll('select')){
+   const label=select.closest('label');if(!label)continue;
+   if(select.options.length<=3&&select.id!=='png-unit'){
+    label.classList.add('work-segment-row');
+    const choices=document.createElement('div');choices.className='work-param-options';label.append(choices);
+    select.hidden=true;
+    for(const option of select.options){
+     const button=workButton(option.textContent,()=>{select.value=option.value;select.dispatchEvent(new Event('change',{bubbles:true}));},choices);
+     update.push(()=>button.setAttribute('aria-pressed',String(option.value===select.value)));
+    }
+   }else label.classList.add('work-choice-row');
+  }
+  preparedEditorForms.set(source,update);
+  }
+  if(id==='appearance-dialog'){
+   const close=$('appearance-close');close.hidden=true;
+  }
+  const apply=()=>update.forEach(fn=>fn());
+  container.addEventListener('input',apply,{signal:sync.signal});
+  container.addEventListener('change',apply,{signal:sync.signal});
+  apply();
+ });
+}
+function closeEditorForm(id,instance=stagedForm){
+ if(stagedForm?.source.id===id){if(instance===stagedForm)backToolPanel();return;}
+ $(id).close();
+}
+function workNumberRow(input,label,config){
+ const [min,max,step,unit]=config;
+ const element=document.createElement('div');element.className='work-number-row';
+ const title=document.createElement('label');title.textContent=label;
+ const range=document.createElement('input');range.type='range';range.setAttribute('aria-label',label);
+ title.append(range);
+ const value=document.createElement('div');value.className='work-number-value';
+ input.setAttribute('aria-label',label+' – přesná hodnota');
+ const suffix=document.createElement('span');suffix.setAttribute('aria-hidden','true');
+ value.append(input,suffix);element.append(title,value);
+ function sync(){
+  const current=input.valueAsNumber;
+  range.min=min();range.max=Math.max(max(),Number.isFinite(current)?current:max());range.step=step();
+  if(Number.isFinite(current))range.value=current;
+  suffix.textContent=unit();
+  paintRangeProgress(range);
+ }
+ range.oninput=()=>{
+  input.value=Number(range.valueAsNumber.toPrecision(10));
+  input.dispatchEvent(new Event('input',{bubbles:true}));sync();
+ };
+ range.onchange=()=>input.dispatchEvent(new Event('change',{bubbles:true}));
+ input.addEventListener('input',sync);
+ sync();
+ return {element,sync};
+}
 function workButton(label,action,parent=workContent){
  const button=document.createElement('button');
  button.type='button';button.textContent=label;button.onclick=action;parent.append(button);
+ if(label==='Zpět'&&workContent.contains(button)&&toolHistory.length)button.hidden=true;
  const icon=actionGlyph(label);
  if(icon){
   button.classList.add(parent.classList.contains('work-actions')&&workContent.contains(parent)?'work-tile':'work-inline-icon');
@@ -17,6 +136,7 @@ function workButton(label,action,parent=workContent){
  return button;
 }
 function workPanel(title,mode='tools'){
+ if(mode!=='form')restoreEditorForm();
  if(workshopDialog.dataset.mode==='object'&&mode!=='object')finishWorkshopMove(true);
  workshopDialog.dataset.mode=mode;
 
@@ -58,7 +178,7 @@ function showWorkshopView(){
  theme.onchange=()=>{$('color-preset').value=theme.value;$('color-preset').onchange();};
  const field=document.createElement('label');field.textContent='Barevné téma ';field.append(theme);workContent.append(field);
  const tools=workActions();
- workButton('Vlastní barvy',()=>closeThen(()=>$('appearance-open').click()),tools);
+ workButton('Vlastní barvy',()=> $('appearance-open').click(),tools);
  const dimensions=workButton('Kóty',()=>{
   if(workPreferences.dimensions!=='hide')workPreferences.lastDimensions=workPreferences.dimensions;
   workPreferences.dimensions=workPreferences.dimensions==='hide'?(workPreferences.lastDimensions??'edge'):'hide';
@@ -70,7 +190,8 @@ function showWorkshopView(){
 const lockedTools=new Set(['project-new','project-load','page-open','toggle-base']);
 function triggerTool(id){
  if(sceneLocked&&lockedTools.has(id)){showWorkshopComposition();return;}
- closeThen(()=>$(id).click());
+ if(['page-open','project-save','png','repair-open','appearance-open'].includes(id))$(id).click();
+ else closeThen(()=>$(id).click());
 }
 function showWorkshopTemplates(){
  if(sceneLocked){showWorkshopComposition();return;}
@@ -87,8 +208,8 @@ function showWorkshopComposition(){
  workPanel('Kompozice');
  const row=workActions();
  for(const [label,action] of [
-  ['Nová',()=>triggerTool('project-new')],['Šablony',showWorkshopTemplates],['Rozměry',()=>triggerTool('page-open')],
-  ['Rám a horizont',showWorkshopFrame],['Podstava',()=>{$('toggle-base').click();showWorkshopComposition();}],
+  ['Nová',()=>triggerTool('project-new')],['Šablony',()=>openSubpanel(showWorkshopTemplates)],['Rozměry',()=>triggerTool('page-open')],
+  ['Rám a horizont',()=>openSubpanel(showWorkshopFrame)],['Podstava',()=>{$('toggle-base').click();showWorkshopComposition();}],
   [sceneLocked?'Odemknout kompozici':'Zamknout kompozici',()=>{$('scene-lock').click();showWorkshopComposition();}],
   ['Posun celé kompozice',()=>closeThen(beginWorkshopGroupMove)]]){
   const button=workButton(label,action,row);
@@ -108,17 +229,17 @@ function showWorkshopFiles(){
  const row=workActions();
  workButton('PNG',()=>triggerTool('png'),row);
  workButton('SVG',()=>triggerTool('svg'),row);
- workButton('Nastavení exportu',()=>closeThen(()=>openWorkSettings('png')),row);
+ workButton('Nastavení exportu',()=>openWorkSettings('png',showWorkshopFiles),row);
  workText('PNG · '+workPreferences.dpi+' DPI · '+(workPreferences.range==='page'?'Celé plátno':'Ořez na obsah')+' · '+(workPreferences.background==='clear'?'Průhledné':'Barva plátna'));
 }
 function workshopMenu(){
  workPanel('Další nástroje');
  const row=workActions();
- workButton('Kontrola řezání',showCutCheck,row);
+ workButton('Kontrola řezání',()=>openSubpanel(showCutCheck),row);
  workButton('Opravit siluetu',()=>triggerTool('repair-open'),row);
  workButton('Nastavení řezu',()=>triggerTool('setup-open'),row);
- workButton('Sady objektů',()=>closeThen(()=>openWorkSettings('sets')),row);
- workButton('Nastavení dílny',()=>closeThen(()=>openWorkSettings()),row);
+ workButton('Sady objektů',()=>openWorkSettings('sets',workshopMenu),row);
+ workButton('Nastavení dílny',()=>openWorkSettings(workSection,workshopMenu),row);
  workButton('Zpět do aplikace',()=>closeThen(()=>window.ArcadeHost.back()),row);
 }
 function showWorkshopFrame(){
@@ -139,9 +260,9 @@ function showWorkshopFrame(){
 }
 function showWorkshopObjects(){
  workPanel('Objekty');
- const add=workButton('Přidat objekt',showWorkshopAdd);add.classList.add('primary','work-add-object');add.disabled=sceneLocked;
+ const add=workButton('Přidat objekt',()=>openSubpanel(showWorkshopAdd));add.classList.add('primary','work-add-object');add.disabled=sceneLocked;
  for(const item of [...objects].reverse()){
-  const button=workButton(typeName(item),()=>{selected=item.id;refresh();showWorkshopObject();});
+  const button=workButton(typeName(item),()=>{selected=item.id;refresh();openSubpanel(showWorkshopObject);});
   button.className='work-card';button.prepend(motifThumbnail(item));
   button.setAttribute('aria-pressed',String(item.id===selected));
  }
@@ -182,7 +303,7 @@ function showWorkshopObject(){
  workText(typeName(item));
 
  const row=workActions();
- workButton('Zpět na objekty',showWorkshopObjects,row);
+ workButton('Zpět na objekty',()=>{if(toolHistory.at(-1)?.title==='Objekty')backToolPanel();else rootTool(showWorkshopObjects);},row);
  if(sceneLocked)return;
  const controls=document.createElement('div');controls.className='work-object-fields';workContent.insertBefore(controls,row);
  const g=geometry(item),r=item.height/(item.unitTop??g.reference??-g.top);
@@ -192,22 +313,24 @@ function showWorkshopObject(){
   ratioButton.setAttribute('aria-pressed',String($('lock-aspect').checked));
  },controls);
  ratioButton.setAttribute('aria-pressed',String($('lock-aspect').checked));
- function number(label,value,min,max,onchange){
-  const field=document.createElement('label'),input=document.createElement('input');
-  field.textContent=label;input.type='number';input.min=min;input.max=max;input.step='any';input.value=Number(value.toFixed(6));
-  input.onchange=()=>{if(Number.isFinite(input.valueAsNumber)&&input.reportValidity()){onchange(input.valueAsNumber);refresh();}};
-  field.append(input);controls.append(field);
+ function number(label,value,min,max,onchange,unit=''){
+  const input=document.createElement('input');
+  input.type='number';input.min=min;input.max=max;input.step='any';input.value=Number(value.toFixed(unit==='″'?4:2));
+  const row=workNumberRow(input,label,[()=>min,()=>max,()=>unit==='°'?1:unit==='mm'?.1:.01,()=>unit]);
+  input.oninput=()=>{if(Number.isFinite(input.valueAsNumber)&&input.validity.valid){onchange(input.valueAsNumber);refresh();}};
+  if(unit!=='°')input.onchange=()=>showWorkshopObject();
+  controls.append(row.element);
  }
  for(const [label,key,other,baseSize] of [['Šířka','scaleX','scaleY',2*g.half*r],['Výška','scaleY','scaleX',((g.bottom||0)-g.top)*r]]){
   const unit=baseSize*factor;if(!(unit>0))continue;
-  number(label+' ('+workUnit()+')',(item[key]??1)*unit,Math.floor(unit*.2*1e6)/1e6,Math.ceil(unit*2*1e6)/1e6,value=>{
+  number(label,(item[key]??1)*unit,Math.floor(unit*.2*1e6)/1e6,Math.ceil(unit*2*1e6)/1e6,value=>{
    const scale=clamp(value/unit,.2,2),relative=scale/(item[key]??1);
    item[key]=scale;
    if($('lock-aspect').checked)item[other]=clamp((item[other]??1)*relative,.2,2);
-   positionWorkshopHandle();showWorkshopObject();
-  });
+   positionWorkshopHandle();
+  },workUnit());
  }
- number('Otočení (°)',item.rotation??0,-180,180,value=>{item.rotation=value;positionWorkshopHandle();});
+ number('Otočení',item.rotation??0,-180,180,value=>{item.rotation=value;positionWorkshopHandle();},'°');
  if(moveDraft?.item===item){
   workButton('Dokončit přesun',()=>{finishWorkshopMove(true);showWorkshopObject();},row);
   workButton('Zrušit přesun',()=>{finishWorkshopMove(false);showWorkshopObject();},row);
@@ -261,7 +384,7 @@ function showMotifPreview(name,model,back=showWorkshopAdd){
  renderMotifCanvas(canvas,model);
  let zoom=1;
  const resize=()=>{canvas.style.width=Math.max(1,Math.min(viewport.clientWidth,viewport.clientHeight*canvas.width/canvas.height))*zoom+'px';};
- workButton('Zpět',back,row);workButton('−',()=>{zoom=Math.max(.25,zoom/1.5);resize();},row);
+ workButton('Zpět',()=>toolHistory.length?backToolPanel():back(),row);workButton('−',()=>{zoom=Math.max(.25,zoom/1.5);resize();},row);
  workButton('+',()=>{zoom=Math.min(10,zoom*1.5);resize();},row);
  workButton('Přizpůsobit',()=>{zoom=1;resize();},row);
  workButton('Vložit',()=>closeThen(()=>chooseMotif(model)),row).disabled=sceneLocked;
@@ -270,15 +393,15 @@ function showMotifPreview(name,model,back=showWorkshopAdd){
 async function showWorkshopAdd(){
  workPanel('Přidat objekt');
  const row=workActions();
- workButton('Zpět na objekty',showWorkshopObjects,row);
- workButton('Knihovny',showWorkshopLibraries,row);
+ workButton('Zpět na objekty',()=>{if(toolHistory.at(-1)?.title==='Objekty')backToolPanel();else rootTool(showWorkshopObjects);},row);
+ workButton('Knihovny',()=>openSubpanel(showWorkshopLibraries),row);
  for(const [index,[name,types]] of motifCategories.entries()){
-  const button=workButton(name,()=>{
-   workPanel(builtInSet(index).name);workButton('Zpět',showWorkshopAdd);
+  const button=workButton(name,()=>openSubpanel(()=>{
+   workPanel(builtInSet(index).name);
    const entries=types.length?types.flatMap(categoryModels):savedTemplates.map(item=>[item.label,item]);
    renderWorkshopMotifs(entries,()=>showWorkshopAdd());
    if(name==='Domky')workButton('Vlastní dům',()=>closeThen(()=>$('empty-building').click()));
-  },row);
+  }),row);
   button.classList.add('work-tile');
   const set=builtInSet(index);
   setTileIcon(button,set);
@@ -287,14 +410,14 @@ async function showWorkshopAdd(){
  awaitSets().then(()=>{
   if(!row.isConnected)return;
   for(const group of workshopGroups){
-   const button=workButton(group.name,()=>showLibraryGroup(group.id),row);
+   const button=workButton(group.name,()=>openSubpanel(()=>showLibraryGroup(group.id)),row);
    button.classList.add('work-tile');setTileIcon(button,group);
   }
  }).catch(error=>{if(row.isConnected)workText(error.message);});
 }
 function renderWorkshopMotifs(entries,back){
  for(const [name,model] of entries){
-  const button=workButton(name,()=>showMotifPreview(name,model,back));
+  const button=workButton(name,()=>openSubpanel(()=>showMotifPreview(name,model,back)));
   button.className='work-card';button.prepend(motifThumbnail(model));
  }
 }
@@ -357,7 +480,7 @@ const toolbarActions={
  'work-view':showWorkshopView,'work-fit':()=>currentShortcut()[2](),
  'work-save':showWorkshopFiles,'work-more':workshopMenu
 };
-for(const [id,action] of Object.entries(toolbarActions))$(id).onclick=action;
+for(const [id,action] of Object.entries(toolbarActions))$(id).onclick=()=>rootTool(action);
 const desktopMenu=workButton('Nástroje dílny',workshopMenu,document.querySelector('.project-tools'));
 desktopMenu.className='work-desktop-menu';
 const libraryKey='workshop-object-libraries-v1';
@@ -468,9 +591,9 @@ async function showWorkshopLibraries(){
   message.remove();
  }
  const row=workActions();
- workButton('Import ZIP',()=>showLibraryImport(),row);
- workButton('Export ZIP',()=>showLibraryExport(),row).disabled=!workshopGroups.length;
- workButton('Přidat SVG',()=>showLibraryAdd(),row).disabled=!workshopGroups.length;
+ workButton('Import ZIP',()=>openSubpanel(()=>showLibraryImport()),row);
+ workButton('Export ZIP',()=>openSubpanel(()=>showLibraryExport()),row).disabled=!workshopGroups.length;
+ workButton('Přidat SVG',()=>openSubpanel(()=>showLibraryAdd()),row).disabled=!workshopGroups.length;
  workButton('Nová skupina',()=>{
   workPanel('Nová skupina');
   const name=libraryInput('Název','text');
@@ -483,7 +606,7 @@ async function showWorkshopLibraries(){
   });
  },row);
  for(const group of workshopGroups){
-  const button=workButton(group.name+' · '+group.items.length,()=>showLibraryGroup(group.id));
+  const button=workButton(group.name+' · '+group.items.length,()=>openSubpanel(()=>showLibraryGroup(group.id)));
   button.className='work-card';button.prepend(libraryIcon(group));
  }
 }
@@ -493,7 +616,7 @@ function showLibraryGroup(id){
  workPanel(group.name);
  const row=workActions();
  workButton('Zpět',showWorkshopLibraries,row);
- workButton('Přidat SVG',()=>showLibraryAdd(id),row);
+ workButton('Přidat SVG',()=>openSubpanel(()=>showLibraryAdd(id)),row);
  renderWorkshopMotifs(group.items.map(item=>[item.name,libraryModel(item)]),()=>showLibraryGroup(id));
 }
 function libraryInput(label,type){
@@ -889,17 +1012,24 @@ function toggleWorkGuide(force=guide.hidden){
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!guide.hidden){e.stopImmediatePropagation();toggleWorkGuide(false);}},true);
 const settings=document.createElement('dialog');settings.id='work-settings';settings.setAttribute('aria-label','Nastavení dílny');document.body.append(settings);
 let workSection='canvas';
-function openWorkSettings(section=workSection){
+let settingsBack=null;
+function openWorkSettings(section=workSection,back=null){
+ settingsBack=back;
  if(workshopDialog.open)workshopDialog.close();
  toggleWorkGuide(false);
  if(!settings.open)settings.show();
  document.body.classList.add('work-settings-open');renderWorkSettings(section);
 }
-settings.addEventListener('close',()=>document.body.classList.remove('work-settings-open'));
+settings.addEventListener('close',()=>{
+ if(settings.open)return;
+ document.body.classList.remove('work-settings-open');
+ const back=settingsBack;settingsBack=null;
+ back?.();
+});
 function renderWorkSettings(section){
  workSection=section;settings.replaceChildren();
  const header=document.createElement('header');settings.append(header);
- iconButton('Zpět do kompozice','left',()=>settings.close(),header);
+ iconButton(settingsBack?'Zpět':'Zpět do kompozice','left',()=>settings.close(),header);
  const title=document.createElement('h2');title.textContent='Nastavení dílny';header.append(title);
  const nav=document.createElement('nav'),content=document.createElement('section');settings.append(nav,content);
  for(const [id,label] of [['canvas','Plátno'],['png','Export PNG'],['sets','Sady objektů'],['controls','Ovládání'],['system','Systém']]){
@@ -912,11 +1042,12 @@ function renderWorkSettings(section){
   select.value=workPreferences[key];select.onchange=()=>{workPreferences[key]=select.value;saveWorkPreferences();updateShortcutButton();renderWorkSettings(section);};
  }
  function number(label,key,min,max){
-  const field=document.createElement('label'),input=document.createElement('input');
-  field.textContent=label;input.type='number';input.min=min;input.max=max;input.value=workPreferences[key];
+  const input=document.createElement('input');
+  input.type='number';input.min=min;input.max=max;input.value=workPreferences[key];
   input.step=key==='grid'?'any':'1';
+  const row=workNumberRow(input,label,[()=>min,()=>key==='grid'?100:max,()=>key==='grid'?.1:1,()=>key==='dpi'?'DPI':'']);
   input.onchange=()=>{if(!input.reportValidity()||!Number.isFinite(input.valueAsNumber))return;workPreferences[key]=input.valueAsNumber;saveWorkPreferences();renderWorkSettings(section);};
-  field.append(input);content.append(field);
+  content.append(row.element);
  }
  if(section==='canvas'){
   option('Jednotky','unit',[['mm','Milimetry'],['cm','Centimetry'],['in','Palce']]);
