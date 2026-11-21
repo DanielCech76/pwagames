@@ -177,7 +177,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
  .layer-strip > button,.zoom-tools > button,#mobile-export-close,.mobile-action-icon{display:grid;place-items:center;padding:2px;min-width:40px}
  .mobile-action-icon > span{display:none}
  #mobile-export-dialog button{min-height:44px}
- #mobile-export-formats .export-actions{display:flex!important;gap:8px}
+ #mobile-export-formats .export-actions{display:flex!important;flex-wrap:wrap;gap:8px}
  #mobile-export-formats .export-actions button{display:inline-flex;align-items:center;justify-content:center;gap:5px}
  .project-tools{display:contents!important}
  .project-tools > button,.project-tools > #project-message:empty{display:none}
@@ -238,7 +238,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 #snow-options canvas{width:100%;height:auto;max-width:112px}
 #snow-insert{width:100%}
 #motif-dialog:has(#snow-picker:not([hidden])) #motif-grid,#motif-dialog:has(#snow-picker:not([hidden])) #motif-back{display:none}
-#mobile-export-formats .export-actions{display:flex!important;gap:8px}
+#mobile-export-formats .export-actions{display:flex!important;flex-wrap:wrap;gap:8px}
 @media (min-width:761px) and (orientation:portrait), (orientation:landscape) and (min-height:501px), (orientation:landscape) and (min-width:1001px){
  .masthead,#scene-mode{max-width:none;margin:0;border-radius:0}
  #scene-mode{display:grid;grid-template-columns:minmax(0,1fr) minmax(235px,31%);grid-template-rows:auto minmax(0,1fr) auto auto;gap:9px;padding:9px 12px 12px;min-height:calc(100svh - 60px)}
@@ -296,12 +296,14 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 <script src="./snow-motifs.js"></script>
 <script src="./cut-cleanup.js"></script>
 <script src="./window-revisions.js"></script>
+<script src="./cut-repair.js"></script>
+<script src="./png-density.js"></script>
 </head>
 <body>
 <header class="masthead">
  <button id="setup-open" class="header-icon" aria-label="Nastavení řezu" title="Nastavení řezu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
  <svg class="winter left" viewBox="0 0 88 64" aria-hidden="true"><path d="M25 10l3 7 7 3-7 3-3 7-3-7-7-3 7-3zm24-8 10 15h-5l11 12h-8l13 13H53v12h-8V42H29l13-13h-8l11-12h-6zm27 27 7 11h-3l7 10h-8v9h-5v-9h-8l7-10h-3z" fill="currentColor"/></svg>
- <h1>Vánoční dílna <small class="app-version">1.5.0</small></h1>
+ <h1>Vánoční dílna <small class="app-version">1.6.0</small></h1>
  <svg class="winter right-winter" viewBox="0 0 88 64" aria-hidden="true"><path d="M18 27l8 13h-4l9 10H20v9h-5v-9H5l9-10h-4zm29-25 10 15h-5l11 12h-8l13 13H51v12h-8V42H27l13-13h-8l11-12h-6zm28 8 3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="currentColor"/></svg>
  <svg class="snow-edge" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 13Q45-4 82 11T158 13T236 10T311 15T400 12V22H0Z" fill="currentColor"/></svg>
 </header>
@@ -389,12 +391,34 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
   <details id="library-details"><summary>Vybrat kategorii</summary><label class="category">Druh objektu <select id="library-category"></select></label><button id="empty-building">Prázdná skupina domku</button></details>
   <div class="strip-arrows" id="library-arrows" hidden><span>Paleta objektů</span><button id="library-left" aria-label="Paleta objektů doleva" aria-controls="library">‹</button><button id="library-right" aria-label="Paleta objektů doprava" aria-controls="library">›</button></div><div id="library" class="library tile-strip"></div>
  </section>
- <footer class="scene-footer"><div class="connection">Napojení <span id="status" role="status" aria-live="polite"></span></div><div class="export-actions"><button id="png" class="primary">PNG</button><button id="svg" class="primary">SVG</button></div></footer>
+ <footer class="scene-footer"><div class="connection">Napojení <span id="status" role="status" aria-live="polite"></span></div><div class="export-actions"><button id="repair-open">Opravit siluetu</button><button id="png" class="primary">PNG</button><button id="svg" class="primary">SVG</button></div></footer>
 
 </main>
 <dialog id="mobile-export-dialog" aria-labelledby="mobile-export-title">
  <div class="dialog-heading"><h2 id="mobile-export-title">Export</h2><button id="mobile-export-close" aria-label="Zavřít export">×</button></div>
  <div id="mobile-export-formats"></div>
+ <p id="mobile-export-status"></p>
+</dialog>
+<dialog id="repair-dialog" aria-labelledby="repair-title">
+ <form id="repair-form">
+  <h2 id="repair-title">Opravit siluetu</h2>
+  <label>Odstranit ostrůvky do <input id="repair-area" type="number" min="0" max="100" step="0.1" required> mm²</label>
+  <small>0 ponechá všechny části. Otvory se zachovají.</small>
+  <label><input id="repair-join" type="checkbox"> Spojit oddělené části můstky</label>
+  <small>Opravy se zobrazí ve vlasové čáře a použijí při exportu. Motivy zůstanou upravitelné.</small>
+  <div class="page-actions"><button id="repair-cancel" type="button">Zrušit</button><button class="primary" type="submit">Použít</button></div>
+ </form>
+</dialog>
+<dialog id="png-dialog" aria-labelledby="png-title">
+ <form id="png-form">
+  <h2 id="png-title">Export PNG</h2>
+  <label>Jednotka <select id="png-unit"><option value="mm">Milimetry</option><option value="in">Palce</option></select></label>
+  <label>Šířka plátna <input id="png-width" type="number" min="0.000001" step="any" required></label>
+  <label>Výška plátna <input id="png-height" type="number" min="0.000001" step="any" required></label>
+  <label>Rozlišení (DPI) <input id="png-dpi" type="number" min="1" max="2400" step="1" value="300" required></label>
+  <p id="png-pixels" aria-live="polite"></p>
+  <div class="page-actions"><button id="png-cancel" type="button">Zrušit</button><button id="png-download" class="primary" type="submit">Stáhnout PNG</button></div>
+ </form>
 </dialog>
 <dialog id="project-save-dialog" aria-labelledby="project-save-title">
  <form id="project-save-form">
@@ -757,6 +781,7 @@ function add(type, overrides={}){
 }
 function reset(){
  projectFileStem=defaultProjectFileStem;
+ repairArea=0;repairJoin=false;
  frame='none';sceneLocked=false;fullPage=false;pageHeightMm=null;
  horizon=0;flatInset=45;moveComposition=false;appearance='normal';[foreground,background]=paletteDefaults.normal;
  $('base').max=45;syncCanvasDimensions(defaultW,defaultH);
@@ -1194,9 +1219,15 @@ function cutMask(scale,clean=false){
 }
 function cutPixelsPerMm(scale){return (fullPage?W:cutWidth)*scale/outputMm;}
 let preparedCut=null,preparedOutline=null;
+let repairArea=0,repairJoin=false;
 function invalidateCut(){preparedCut=null;preparedOutline=null;hairlinePath=null;}
 function preparedCutMask(){
- return preparedCut??=cutMask(cutScale(),true);
+ if(preparedCut)return preparedCut;
+ const scale=cutScale(), result=cutMask(scale,true), {mask,w,h}=result;
+ const pixelsPerMm=cutPixelsPerMm(scale);
+ if(repairArea>0)removeCutIslands(mask,labelMask(mask,w,h,scale),Math.floor(repairArea*pixelsPerMm**2));
+ if(repairJoin)joinCutPieces(mask,w,h,labelMask(mask,w,h,scale),Math.ceil(minimumMm*pixelsPerMm/2)+1);
+ return preparedCut=result;
 }
 function cutOutline(){
  if(preparedOutline==null){
@@ -1240,7 +1271,7 @@ function check(){
  const narrowOpenings=n===1&&!narrow?narrowCutOpenings(cut):0;
  $('status').textContent=narrow?'Zesil spoje nebo rám podle zvolené minimální šířky.':narrowOpenings?'Úzké otvory: '+narrowOpenings+' (pod '+minimumMm+' mm)':n===1?'✓ Jeden souvislý díl':n===0?'Kompozice je prázdná':`Oddělených částí: ${n-1}`;
  $('status').classList.toggle('bad',n!==1||narrow||narrowOpenings>0);
- $('png').disabled=$('svg').disabled=n!==1||narrow;paint();
+ $('png').disabled=$('svg').disabled=n===0;paint();
 }
 function schedule(){lastCheck=null;invalidateCut();paint();clearTimeout(validationTimer);validationTimer=setTimeout(check,110);}
 const typeName=o=>o.winterSpruce!=null?snowySpruces[o.winterSpruce][0]:o.village!=null?villageNames[o.village]:['needle','bell','bauble'].includes(o.type)?catalog[o.type][1][o.variant]:o.asset!=null?approvedNames[o.asset]:o.custom?'Vlastní domek':o.parts?catalog[o.type][1][o.variant]:catalog[o.type][0];
@@ -2094,7 +2125,7 @@ $('page-apply').onclick=()=>{
 };
 
 function snapshotProject(){
- return {format:'vanocni-dilna',version:2,base,outputMm,mullionMm,frame,rimMm,minimumMm,sceneLocked,horizon,flatInset,appearance,foreground,background,canvasWidth:W,canvasHeight:H,pageHeightMm,fullPage,objects:structuredClone(objects)};
+ return {format:'vanocni-dilna',version:2,base,outputMm,mullionMm,frame,rimMm,minimumMm,repairArea,repairJoin,sceneLocked,horizon,flatInset,appearance,foreground,background,canvasWidth:W,canvasHeight:H,pageHeightMm,fullPage,objects:structuredClone(objects)};
 }
 function readProject(text){
  const fail=()=>{throw new Error('Soubor neobsahuje platnou kompozici Vánoční dílny.');};
@@ -2103,6 +2134,8 @@ function readProject(text){
  const index=(v,count)=>Number.isInteger(v)&&v>=0&&v<count;
  if(data?.format!=='vanocni-dilna'||![1,2].includes(data.version)||!Array.isArray(data.objects)||data.objects.length>1000||
     !between(data.base,0,data.version===1?45:1500)||!between(data.outputMm,30,1500)||!between(data.mullionMm,.4,5))fail();
+ if((data.repairArea!=null&&!between(data.repairArea,0,100))||
+    (data.repairJoin!=null&&typeof data.repairJoin!=='boolean'))fail();
  if((data.frame!=null&&!circleOptions.includes(data.frame))||
     (data.rimMm!=null&&!between(data.rimMm,1,18))||(data.minimumMm!=null&&!between(data.minimumMm,.4,5))||
     (data.sceneLocked!=null&&typeof data.sceneLocked!=='boolean'))fail();
@@ -2146,6 +2179,7 @@ function readProject(text){
 }
 function openProject(data){
  objects=data.objects;
+ repairArea=data.repairArea??0;repairJoin=data.repairJoin??false;
  frame=data.frame??'none';rimMm=data.rimMm??5;minimumMm=data.minimumMm??1.6;sceneLocked=data.sceneLocked??false;
  base=data.base;outputMm=data.outputMm;mullionMm=data.mullionMm;
  horizon=data.horizon??0;flatInset=data.flatInset??45;moveComposition=false;
@@ -2162,7 +2196,7 @@ function openProject(data){
 }
 $('project-new').onclick=()=>{
  if(objects.length&&typeof confirm==='function'&&!confirm('Vytvořit novou kompozici? Neuložené úpravy aktuální kompozice se zahodí.'))return;
- openProject({...snapshotProject(),objects:[],base:0,sceneLocked:false});
+ openProject({...snapshotProject(),objects:[],base:0,repairArea:0,repairJoin:false,sceneLocked:false});
  projectFileStem=defaultProjectFileStem;
  $('project-message').textContent='Nová kompozice';
 };
@@ -2249,37 +2283,109 @@ function download(blob,name){
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),30000);
 }
-function exportFile(type){
- const result=analyze(cutScale(),true);
- if(result.components!==1){
-  $('status').textContent='Export zastaven: ve vysokém rozlišení nejsou všechny části spojené.';
-  $('status').classList.add('bad');return;
- }
- if(!hasStrongConnections(result)){
-  $('status').textContent='Export zastaven: některý spoj je příliš úzký.';
-  $('status').classList.add('bad');return;
- }
- const {mask,w,h}=result;
+function exportBounds(){
+ const {mask,w,h}=preparedCutMask();
  let left=w,top=h,right=-1,bottom=-1;
  for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(mask[y*w+x]){
   left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);
  }
- if(fullPage){left=0;top=0;right=w-1;bottom=h-1;}
- const cw=right-left+1,ch=bottom-top+1,crop=new Uint8Array(cw*ch);
- for(let y=0;y<ch;y++)crop.set(mask.subarray((y+top)*w+left,(y+top)*w+left+cw),y*cw);
- if(type==='svg'){
-  const mm=outputMm;
-  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${mm}mm" height="${(fullPage?pageHeightMm:mm*ch/cw).toFixed(3)}mm" viewBox="${left} ${top} ${cw} ${ch}"><title>Vánoční kompozice</title><path fill="#000" fill-rule="evenodd" d="${cutOutline()}"/></svg>`;
-  download(new Blob([svg],{type:'image/svg+xml'}),'vanocni-kompozice.svg');
- }else{
-  const out=document.createElement('canvas');out.width=cw;out.height=ch;
-  const c=out.getContext('2d'),image=c.createImageData(cw,ch);
-  for(let i=0;i<crop.length;i++){const off=i*4;image.data[off]=image.data[off+1]=image.data[off+2]=crop[i]?0:255;image.data[off+3]=255;}
-  c.putImageData(image,0,0);out.toBlob(blob=>{if(blob)download(blob,'vanocni-kompozice.png');},'image/png');
- }
+ if(right<0)return null;
+ if(fullPage)return {left:0,top:0,width:w,height:h};
+ return {left,top,width:right-left+1,height:bottom-top+1};
 }
-$('svg').onclick=()=>exportFile('svg');
-$('png').onclick=()=>exportFile('png');
+function closeMobileExport(){
+ if($('mobile-export-dialog').open)$('mobile-export-dialog').close();
+}
+$('svg').onclick=()=>{
+ const bounds=exportBounds();
+ if(!bounds)return;
+ const {left,top,width,height}=bounds,hairline=appearance==='hairline';
+ const paint=hairline?'fill="none" stroke="#000" stroke-width="0.1mm" vector-effect="non-scaling-stroke"':'fill="#000" fill-rule="evenodd"';
+ const padding=hairline?Math.max(1,width/outputMm*.1):0;
+ const mmHeight=fullPage?pageHeightMm:outputMm*height/width;
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${outputMm}mm" height="${mmHeight.toFixed(3)}mm" viewBox="${left-padding} ${top-padding} ${width+2*padding} ${height+2*padding}"><title>Vánoční kompozice</title><path ${paint} d="${cutOutline()}"/></svg>`;
+ download(new Blob([svg],{type:'image/svg+xml'}),projectFileStem+(hairline?'-vlasova-cara':'')+'.svg');
+ closeMobileExport();
+};
+let pngWidthMm,pngHeightMm,pngUnit='mm';
+const pngMmPerUnit=()=>pngUnit==='in'?25.4:1;
+function showPngDimensions(){
+ $('png-width').value=Number((pngWidthMm/pngMmPerUnit()).toPrecision(12));
+ $('png-height').value=Number((pngHeightMm/pngMmPerUnit()).toPrecision(12));
+}
+function pngDimensions(){
+ const dpi=$('png-dpi').valueAsNumber;
+ return {dpi,width:Math.round(pngWidthMm*dpi/25.4),height:Math.round(pngHeightMm*dpi/25.4)};
+}
+function checkPngSize(){
+ const {dpi,width,height}=pngDimensions();
+ const valid=Number.isInteger(dpi)&&dpi>=1&&dpi<=2400&&width>0&&height>0&&
+  width<=8192&&height<=8192&&width*height<=32000000;
+ $('png-pixels').textContent=valid?`${width} × ${height} px`:'Zadej platné rozměry. Maximum je 8 192 px na stranu a 32 Mpx celkem.';
+ $('png-download').disabled=!valid;
+ return valid;
+}
+$('png').onclick=()=>{
+ const bounds=exportBounds();
+ if(!bounds)return;
+ pngWidthMm=outputMm;
+ pngHeightMm=fullPage?pageHeightMm:outputMm*bounds.height/bounds.width;
+ showPngDimensions();checkPngSize();closeMobileExport();$('png-dialog').showModal();
+};
+$('png-unit').onchange=event=>{
+ pngUnit=event.currentTarget.value;
+ showPngDimensions();checkPngSize();
+};
+$('png-width').oninput=event=>{pngWidthMm=event.currentTarget.valueAsNumber*pngMmPerUnit();checkPngSize();};
+$('png-height').oninput=event=>{pngHeightMm=event.currentTarget.valueAsNumber*pngMmPerUnit();checkPngSize();};
+$('png-dpi').oninput=checkPngSize;
+$('png-cancel').onclick=()=>$('png-dialog').close();
+$('png-form').onsubmit=event=>{
+ event.preventDefault();
+ const bounds=exportBounds();
+ if(!bounds||!checkPngSize())return;
+ const {dpi,width,height}=pngDimensions();
+ const hairline=appearance==='hairline';
+ const out=document.createElement('canvas');out.width=width;out.height=height;
+ const c=out.getContext('2d');
+ c.fillStyle=background;c.fillRect(0,0,width,height);c.fillStyle=foreground;
+ const margin=Math.min(hairline?Math.max(1,dpi*.1/25.4):0,(Math.min(width,height)-.01)/2);
+ const scale=Math.min((width-2*margin)/bounds.width,(height-2*margin)/bounds.height);
+ c.translate((width-bounds.width*scale)/2,(height-bounds.height*scale)/2);
+ c.scale(scale,scale);c.translate(-bounds.left,-bounds.top);
+ const outline=new Path2D(cutOutline());
+ if(hairline){
+  c.strokeStyle=foreground;c.lineWidth=Math.max(1,dpi*.1/25.4)/scale;c.stroke(outline);
+ }else c.fill(outline,'evenodd');
+ const name=projectFileStem+(hairline?'-vlasova-cara':'')+'.png';
+ $('png-download').disabled=true;
+ out.toBlob(async blob=>{
+  try{
+   if(!blob)throw new Error('PNG se nepodařilo vytvořit.');
+   download(await pngWithDensity(blob,dpi),name);
+   $('png-dialog').close();
+  }catch{
+   $('png-pixels').textContent='PNG se nepodařilo vytvořit.';
+  }finally{
+   $('png-download').disabled=false;
+  }
+ },'image/png');
+};
+$('repair-open').onclick=()=>{
+ $('repair-area').value=repairArea;$('repair-join').checked=repairJoin;
+ closeMobileExport();$('repair-dialog').showModal();
+};
+$('repair-cancel').onclick=()=>$('repair-dialog').close();
+$('repair-form').onsubmit=event=>{
+ event.preventDefault();
+ repairArea=$('repair-area').valueAsNumber;repairJoin=$('repair-join').checked;
+ $('repair-dialog').close();
+ if(repairArea>0||repairJoin){
+  appearance='hairline';
+  syncAppearance();
+ }
+ refresh();check();
+};
 const mobileUI=typeof matchMedia==='function'?matchMedia('(max-width:760px) and (orientation:portrait), (orientation:landscape) and (max-height:500px) and (max-width:1000px)'):{matches:false};
 let mobilePanel='',mobileItem=null,mobileProject='';
 const mobilePanels={rotate:'mobile-rotate-panel',layer:'mobile-layer-panel',size:'size-panel',detail:'mobile-detail-panel'};
@@ -2416,13 +2522,12 @@ function placeResponsiveControls(){
 function placeExportActions(){
  $('mobile-export-formats').append(document.querySelector('.export-actions'));
 }
-$('mobile-export').onclick=()=>$('mobile-export-dialog').showModal();
+$('mobile-export').onclick=()=>{
+ $('mobile-export-status').textContent=$('status').textContent;
+ $('mobile-export-dialog').showModal();
+};
 $('mobile-export-close').innerHTML=uiIcon(mobilePaths.close);
 $('mobile-export-close').onclick=()=>$('mobile-export-dialog').close();
-for(const id of ['png','svg']){
- const button=$(id),download=button.onclick;
- button.onclick=()=>{download();if($('mobile-export-dialog').open)$('mobile-export-dialog').close();};
-}
 for(const [id,icon] of Object.entries({'motif-open':'plus','motifs-left':'left','motifs-right':'right','zoom-out':'minus','zoom-in':'plus'}))$(id).innerHTML=uiIcon(mobilePaths[icon]);
 for(const [id,icon] of Object.entries({'page-cancel':'close','page-apply':'confirm','save-template':'save','apply-object':'confirm',reset:'reset','setup-done':'confirm'})){
  const button=$(id),label=button.textContent,text=document.createElement('span');

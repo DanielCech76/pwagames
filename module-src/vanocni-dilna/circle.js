@@ -81,6 +81,7 @@ function applyCirclePreset(name) {
  };
  if(!Object.hasOwn(designs,name))return;
  clearTimeout(validationTimer);
+ repairArea=0;repairJoin=false;
  frame='eye';sceneLocked=false;moveComposition=false;horizon=0;flatInset=45;base=name==='empty'?0:28;
  outputMm=200;pageHeightMm=200;fullPage=true;
  syncCanvasDimensions(960,960);

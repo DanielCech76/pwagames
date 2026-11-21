@@ -197,7 +197,7 @@
     },
     {
       "id": "vanocni-dilna",
-      "version": "1.5.0",
+      "version": "1.6.0",
       "apiVersion": 1,
       "minCoreVersion": "2.1.0",
       "maxCoreMajor": 2,
@@ -210,9 +210,9 @@
         "Místní úložiště a import/export souborů"
       ],
       "fullscreen": false,
-      "manifest": "modules/vanocni-dilna/1.5.0/manifest.json",
-      "manifestSha256": "e1596ce19bc0c24b3ea797faeccfb4567db1efe3200e0a7bd5c6687022cd3555",
-      "size": 2528866
+      "manifest": "modules/vanocni-dilna/1.6.0/manifest.json",
+      "manifestSha256": "760aed59e4e1360936c9214af839977d405e9ff2c2b3fb468053a314c635ba80",
+      "size": 2537069
     }
   ]
 }
