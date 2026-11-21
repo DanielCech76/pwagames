@@ -24,6 +24,7 @@ a `version` je číslo `1`.
 - `id` obsahuje 1 až 80 znaků z množiny A–Z, a–z, 0–9, podtržítko a pomlčka.
   ID skupin jsou jedinečná v balíčku. ID motivů jsou jedinečná v rámci skupiny.
 - `name` je zobrazovaný název o nejvýše 120 znacích.
+- `iconItem` je nepovinné ID motivu ze stejné skupiny použitého jako titulní ikona. Samostatná obálka `cover` má přednost.
 - `cover` je nepovinná cesta k SVG obálce. Bez obálky se použije první motiv
   nebo ikona prázdné skupiny.
 - `items` je seznam SVG motivů a může být prázdný. `svg` odkazuje na soubor
