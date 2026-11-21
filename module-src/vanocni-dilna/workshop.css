@@ -177,3 +177,6 @@ body:has(#work-dialog[open]) .scene-scroll { touch-action:none }
 }
 #work-dialog button[hidden] { display:none }
 #work-dialog .work-inline-icon[aria-pressed=true] { background:#174c37;color:#fff }
+
+.work-fit-caption { display:flex; align-items:center; gap:5px }
+.work-fit-caption svg { width:14px; height:14px; flex:none }

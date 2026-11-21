@@ -135,6 +135,8 @@ const workshopActions={
  "Drobný otvor": "circle",
  "Vyplnit otvor": "paint-bucket",
  "Zkontrolovat aktualizaci": "arrow-repeat",
+ "Před / po": "subtract",
+ "Původní obrys": "arrow-clockwise",
  "Stáhnout PNG": "download",
  "Sady objektů": "collection-fill",
  "Vlastní předlohy": "bookmark-star-fill"

@@ -61,3 +61,23 @@ test('ZIP reader preserves assets and rejects unsafe entry paths and oversized r
  const bad=run('fflate.zipSync({"a.svg":new Uint8Array(2000001)})');
  assert.throws(()=>run('readLibraryZip(bad)',{bad}),/překračuje limity/);
 });
+
+vm.runInContext(readFileSync(join(source,'outline-fit.js'),'utf8'),context);
+
+test('fits a stepped arc with a few cubic segments and keeps sharp vertices',()=>{
+ const points=Array.from({length:61},(_,i)=>[i*2,Math.round(-32*Math.sin(Math.PI*i/60))]);
+ points.push([120,55],[0,55]);
+ const outline=run('fitTracedOutline(points,1.5)',{points});
+ assert(outline.segments.length<points.length/4);
+ assert(outline.segments.some(segment=>segment.c1));
+ for(const [x,y] of [[0,0],[120,0],[120,55],[0,55]]){
+  assert(outline.segments.some(({end})=>end[0]===x&&end[1]===y));
+ }
+ assert.equal(run('traceTopologyIsSafe([outline])',{outline}),true);
+ assert.equal(run('fitTracedOutline(points,0).segments.length'),points.length);
+});
+
+test('rejects a contour with crossing segments',()=>{
+ const outline={start:[0,0],segments:[[10,10],[0,10],[10,0],[0,0]].map(end=>({end}))};
+ assert.equal(run('traceTopologyIsSafe([outline])',{outline}),false);
+});

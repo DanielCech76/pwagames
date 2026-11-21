@@ -30,6 +30,7 @@ function backToolPanel(){
 }
 toolBack.onclick=backToolPanel;
 workshopDialog.addEventListener('close',()=>{
+ clearOutlinePreview();
  if(workshopDialog.open)return;
  restoreEditorForm();toolHistory.length=0;toolBack.hidden=true;
 });
@@ -140,6 +141,7 @@ function workButton(label,action,parent=workContent){
  return button;
 }
 function workPanel(title,mode='tools'){
+ clearOutlinePreview();
  if(mode!=='form')restoreEditorForm();
  if(workshopDialog.dataset.mode==='object'&&mode!=='object')finishWorkshopMove(true);
  workshopDialog.dataset.mode=mode;
@@ -311,6 +313,7 @@ function showWorkshopObject(){
  if(sceneLocked)return;
  const controls=document.createElement('div');controls.className='work-object-fields';workContent.insertBefore(controls,row);
  const [naturalWidth,naturalHeight]=objectDimensions(item,false);
+ let updateSmoothing=()=>{};
  const [pageWidth,pageHeight]=workPageMm();
  const factor=pageWidth/W/unitFactor(workPreferences.unit);
  const ratioButton=workButton('Poměr stran',()=>{
@@ -342,17 +345,40 @@ function showWorkshopObject(){
      paired.input.value=(item[axis]??1)*nominal;paired.sync();
     }
    }
-   positionWorkshopHandle();
+   updateSmoothing();positionWorkshopHandle();
   },workUnit(),true);
   dimensions.push([field,key,unit]);
  }
  number('Otočení',item.rotation??0,-180,180,value=>{item.rotation=value;positionWorkshopHandle();},'°');
  if(item.externalSvg){
-  const smoothing=number('Chytré vyhlazení',item.smoothing??defaultExternalSmoothing,0,100,value=>{
-   if(Number.isInteger(value))item.smoothing=value;
-  },'%');
+  const tolerance=workText('',controls);
+  const compare=workButton('Před / po',()=>{
+   originalOutlinePreview=originalOutlinePreview===item?null:item;
+   updateSmoothing();paint();
+  },row);
+  function setSmoothing(value){
+   item.smoothing=value;originalOutlinePreview=null;updateSmoothing();
+  }
+  const smoothing=number('Chytré vyhlazení',item.smoothing??defaultExternalSmoothing,0,100,setSmoothing,'%');
   smoothing.input.step='1';
-  workButton('Původní obrys',()=>{item.smoothing=0;refresh();showWorkshopObject();},row);
+  controls.append(tolerance);
+  const reset=workButton('Původní obrys',()=>{
+   smoothing.input.value=0;smoothing.sync();setSmoothing(0);refresh();
+  },row);
+  updateSmoothing=()=>{
+   const strength=item.smoothing??defaultExternalSmoothing;
+   const scale=item.height/(item.unitTop??item.externalSvg.height)*Math.max(item.scaleX??1,item.scaleY??1);
+   const mm=externalTolerance(strength)*scale*workPageMm()[0]/W;
+   const visible=originalOutlinePreview===item;
+   tolerance.textContent='Povolená odchylka: '+mm.toLocaleString('cs-CZ',{maximumFractionDigits:3})+' mm · '+(visible?'Před':'Po');
+   compare.disabled=reset.disabled=strength===0;
+   compare.setAttribute('aria-pressed',String(visible));
+  };
+  const label=smoothing.input.closest('.work-number-row').querySelector('label');
+  const caption=document.createElement('span');caption.className='work-fit-caption';
+  caption.innerHTML=glyph('bezier2');caption.append(label.firstChild);
+  label.prepend(caption);
+  updateSmoothing();
  }
  if(moveDraft?.item===item){
   workButton('Dokončit přesun',()=>{finishWorkshopMove(true);showWorkshopObject();},row);
@@ -542,48 +568,62 @@ function externalLoops(path){
   return points;
  }).filter(points=>points.length>=3);
 }
-function roundedExternalLoop(points,limit){
- // Round short tracing steps while keeping the long edges and intentional points.
- const corners=points.map((p,i)=>{
-  const prev=points.at(i-1),next=points[(i+1)%points.length];
-  const a=Math.hypot(p[0]-prev[0],p[1]-prev[1]),b=Math.hypot(p[0]-next[0],p[1]-next[1]);
-  const short=Math.min(a,b);
-  const angle=a&&b?((prev[0]-p[0])*(next[0]-p[0])+(prev[1]-p[1])*(next[1]-p[1]))/(a*b):1;
-  // A short side alone is insufficient: protect sharp turns and tips on longer edges.
-  const protectedCorner=angle>-.24&&Math.max(a,b)>limit*2.5;
-  const amount=protectedCorner||short>limit*2.2?0:Math.min(short*.38,limit);
-  return [a? p.map((v,j)=>v+(prev[j]-v)*amount/a):p,p,b?p.map((v,j)=>v+(next[j]-v)*amount/b):p];
- });
- const loop=new Path2D();loop.moveTo(...corners[0][0]);
- for(const [start,vertex,end] of corners){
-  loop.lineTo(...start);loop.quadraticCurveTo(...vertex,...end);
- }
- loop.closePath();return loop;
+const externalTolerance=strength=>strength*.04;
+let originalOutlinePreview=null;
+function getOriginalOutlinePreview(){return workshopDialog.open&&selectedObject()===originalOutlinePreview?originalOutlinePreview:null;}
+function clearOutlinePreview(){
+ if(originalOutlinePreview){originalOutlinePreview=null;paint();}
 }
 function externalGeometry(model,strength=defaultExternalSmoothing){
- const cached=externalGeometries.get(model);
- if(cached?.strength===strength)return cached.geometry;
- const ink=new Path2D(),back=new Path2D(),matrix=new DOMMatrix().translate(-model.width/2,-model.height);
- const limit=Math.min(12,Math.max(.5,Math.max(model.width,model.height)*.0027)*(strength/25));
- const loops=externalLoops(model.path).map(points=>{
-  const box=[Infinity,Infinity,-Infinity,-Infinity];
-  for(const [x,y] of points){
-   box[0]=Math.min(box[0],x);box[1]=Math.min(box[1],y);
-   box[2]=Math.max(box[2],x);box[3]=Math.max(box[3],y);
-  }
-  return {box,outline:roundedExternalLoop(points,limit),point:points[0]};
- });
- for(const loop of loops){
-  ink.addPath(loop.outline,matrix);
-  const [x,y]=loop.point;
-  const nested=loops.some(other=>other!==loop&&other.box[0]<=loop.box[0]&&other.box[1]<=loop.box[1]&&
-   other.box[2]>=loop.box[2]&&other.box[3]>=loop.box[3]&&
-   (other.box[0]<loop.box[0]||other.box[1]<loop.box[1]||other.box[2]>loop.box[2]||other.box[3]>loop.box[3])&&
-   pc.isPointInPath(other.outline,x,y,'evenodd'));
-  if(!nested)back.addPath(loop.outline,matrix);
+ let cached=externalGeometries.get(model);
+ if(!cached){
+  cached={points:externalLoops(model.path),variants:new Map()};
+  externalGeometries.set(model,cached);
  }
+ const {points,variants}=cached;
+ if(variants.has(strength))return variants.get(strength);
+ const ink=new Path2D(),back=new Path2D(),matrix=new DOMMatrix().translate(-model.width/2,-model.height);
+ const originals=points.map(loop=>{
+  const path=new Path2D();path.moveTo(...loop[0]);
+  for(const point of loop.slice(1))path.lineTo(...point);
+  path.closePath();return path;
+ });
+ const boxes=points.map(loop=>loop.reduce(([l,t,r,b],[x,y])=>[Math.min(l,x),Math.min(t,y),Math.max(r,x),Math.max(b,y)],[Infinity,Infinity,-Infinity,-Infinity]));
+ const nesting=(paths,starts)=>paths.map((path,i)=>{
+  const [x,y]=starts[i];
+  return paths.flatMap((other,j)=>{
+   const [l,t,r,b]=boxes[j];
+   return i!==j&&x>=l-4&&x<=r+4&&y>=t-4&&y<=b+4&&pc.isPointInPath(other,x,y,'evenodd')?[j]:[];
+  });
+ });
+ const originalNesting=nesting(originals,points.map(loop=>loop[0]));
+ let paths=originals;
+ const limit=externalTolerance(strength);
+ if(limit>0 && points.reduce((count,loop)=>count+loop.length,0)<=12000 && points.length<=128){
+  for(const tolerance of [limit,limit/2,limit/4]){
+   const fit=points.map(loop=>fitTracedOutline(loop,tolerance));
+   if(!traceTopologyIsSafe(fit))continue;
+   const candidate=fit.map(({start,segments})=>{
+    const path=new Path2D();path.moveTo(...start);
+    for(const {end,c1,c2} of segments){
+     if(c1)path.bezierCurveTo(...c1,...c2,...end);
+     else path.lineTo(...end);
+    }
+    path.closePath();return path;
+   });
+   const fittedNesting=nesting(candidate,fit.map(loop=>loop.start));
+   if(fittedNesting.every((row,i)=>row.length===originalNesting[i].length&&row.every((value,j)=>value===originalNesting[i][j]))){
+    paths=candidate;break;
+   }
+  }
+ }
+ paths.forEach((path,i)=>{
+  ink.addPath(path,matrix);
+  if(!originalNesting[i].length)back.addPath(path,matrix);
+ });
  const geometry={ink,back,holes:new Path2D(),strokes:[],inset:[],evenOdd:true,top:-model.height,half:model.width/2};
- externalGeometries.set(model,{strength,geometry});return geometry;
+ if(variants.size>=4)variants.delete(variants.keys().next().value);
+ variants.set(strength,geometry);return geometry;
 }
 function safeSvg(source){
  if(source.length>maxAssetSize||/<!DOCTYPE|<!ENTITY/i.test(source))throw Error('SVG je příliš velké nebo má nepodporovanou deklaraci.');
