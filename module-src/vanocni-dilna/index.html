@@ -295,12 +295,13 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 <script src="./circle.js"></script>
 <script src="./snow-motifs.js"></script>
 <script src="./cut-cleanup.js"></script>
+<script src="./window-revisions.js"></script>
 </head>
 <body>
 <header class="masthead">
  <button id="setup-open" class="header-icon" aria-label="Nastavení řezu" title="Nastavení řezu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
  <svg class="winter left" viewBox="0 0 88 64" aria-hidden="true"><path d="M25 10l3 7 7 3-7 3-3 7-3-7-7-3 7-3zm24-8 10 15h-5l11 12h-8l13 13H53v12h-8V42H29l13-13h-8l11-12h-6zm27 27 7 11h-3l7 10h-8v9h-5v-9h-8l7-10h-3z" fill="currentColor"/></svg>
- <h1>Vánoční dílna <small class="app-version">1.4.1</small></h1>
+ <h1>Vánoční dílna <small class="app-version">1.5.0</small></h1>
  <svg class="winter right-winter" viewBox="0 0 88 64" aria-hidden="true"><path d="M18 27l8 13h-4l9 10H20v9h-5v-9H5l9-10h-4zm29-25 10 15h-5l11 12h-8l13 13H51v12h-8V42H27l13-13h-8l11-12h-6zm28 8 3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="currentColor"/></svg>
  <svg class="snow-edge" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 13Q45-4 82 11T158 13T236 10T311 15T400 12V22H0Z" fill="currentColor"/></svg>
 </header>
@@ -394,6 +395,15 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 <dialog id="mobile-export-dialog" aria-labelledby="mobile-export-title">
  <div class="dialog-heading"><h2 id="mobile-export-title">Export</h2><button id="mobile-export-close" aria-label="Zavřít export">×</button></div>
  <div id="mobile-export-formats"></div>
+</dialog>
+<dialog id="project-save-dialog" aria-labelledby="project-save-title">
+ <form id="project-save-form">
+  <div class="dialog-heading"><h2 id="project-save-title">Uložit projekt</h2></div>
+  <label for="project-name">Název souboru</label>
+  <input id="project-name" name="project-name" type="text" required maxlength="120" autocomplete="off" style="width:100%">
+  <p id="project-save-error" role="alert" hidden></p>
+  <div class="page-actions"><button id="project-save-cancel" type="button">Zrušit</button><button type="submit" class="primary">Uložit JSON</button></div>
+ </form>
 </dialog>
 <dialog id="page-dialog" aria-labelledby="page-title"><h2 id="page-title">Rozměry kompozice</h2>
  <label>Předvolba <select id="page-preset"><option value="">Vlastní rozměr</option><option value="80">Ozdoba na stromek · Ø 80 mm</option><option value="100">Podtácek · Ø 100 mm</option><option value="250">Kruh do okna · Ø 250 mm</option></select></label>
@@ -580,13 +590,19 @@ function filledLine(data,width){
  filledLineCache.set(key,path);
  return path;
 }
-const approvedPaths=approvedBuildings.map(([w,h,d])=>[w,h,new Path2D(d),new Path2D(d.split('Z',1)[0]+'Z')]);
+const approvedPaths=approvedBuildings.map(([w,h,d],asset)=>{
+ const revised=windowRevisions[asset];
+ const original=d.match(/[Mm][^Mm]*/g);
+ const kept=revised?original.filter((_,i)=>!revised.omit.includes(i)).join(''):d;
+ return [w,h,new Path2D(kept),new Path2D(d.split('Z',1)[0]+'Z'),(revised?.panes??[]).map(pane=>new Path2D(pane))];
+});
 function approvedGeometry(asset){
- const [w,h,shape,outer]=approvedPaths[asset];
+ const [w,h,shape,outer,panes]=approvedPaths[asset];
  const matrix=new DOMMatrix([1,0,0,1,-w/2,-h]);
  const ink=new Path2D(),back=new Path2D();
  ink.addPath(shape,matrix);back.addPath(outer,matrix);
- return {ink,back,holes:new Path2D(),inset:[],strokes:[],top:-h,half:w/2};
+ const inset=panes.map(pane=>{const path=new Path2D();path.addPath(pane,matrix);return path;});
+ return {ink,back,holes:new Path2D(),inset,strokes:[],top:-h,half:w/2};
 }
 const windowShapes=['Čtverec','Obdélník','Trojúhelník','Oblouk','Kruh','Gotické'];
 let mullionMm=1.6, outputMm=200, cutWidth=W-32;
@@ -659,9 +675,15 @@ function buildingGeometry(item){
     break;
    }
    case 'roof': shape(['M0 100L16 0H84L100 100Z','M0 100L50 0L100 100Z','M0 100Q20 76 28 39Q38 0 50 0Q62 0 72 39Q80 76 100 100Z','M0 100L37 37L50 0L63 37L100 100Z'][style]);break;
-   case 'window':
-    for(let i=0;i<count;i++)opening(part.windowShape??[1,1,3,4,5][style],(100*i+7)/count,0,86/count,100,vertical,horizontal);
+   case 'window':{
+    const reference=item.unitTop??-buildingPresetTop(item);
+    const physicalWidth=.86*w*(item.scaleX??1)*item.height*outputMm/(reference*cutWidth);
+    // The original preset keeps its divided rose window at larger cut sizes.
+    const smallRose=item.type==='church'&&x===0&&y===-29&&style===4&&part.windowShape==null&&part.vertical==null&&part.horizontal==null&&physicalWidth<Math.max(8,4*minimumMm);
+    for(let i=0;i<count;i++)opening(smallRose?4:part.windowShape??[1,1,3,4,5][style],
+     (100*i+7)/count,0,86/count,100,!smallRose&&vertical,!smallRose&&horizontal);
     break;
+   }
    case 'door':{
     const frame=['M4 57V0H96V100H84V13H16V57Z','M4 57V48Q4 0 50 0Q96 0 96 48V100H84V48Q84 14 50 14Q16 14 16 48V57Z','M4 57V50Q4 21 50 0Q96 21 96 50V100H84V50Q84 30 50 13Q16 30 16 50V57Z'][style];
     shape(frame,cut);
@@ -734,6 +756,7 @@ function add(type, overrides={}){
  objects.push(item);selected=item.id;componentIndex=0;return item;
 }
 function reset(){
+ projectFileStem=defaultProjectFileStem;
  frame='none';sceneLocked=false;fullPage=false;pageHeightMm=null;
  horizon=0;flatInset=45;moveComposition=false;appearance='normal';[foreground,background]=paletteDefaults.normal;
  $('base').max=45;syncCanvasDimensions(defaultW,defaultH);
@@ -2140,6 +2163,7 @@ function openProject(data){
 $('project-new').onclick=()=>{
  if(objects.length&&typeof confirm==='function'&&!confirm('Vytvořit novou kompozici? Neuložené úpravy aktuální kompozice se zahodí.'))return;
  openProject({...snapshotProject(),objects:[],base:0,sceneLocked:false});
+ projectFileStem=defaultProjectFileStem;
  $('project-message').textContent='Nová kompozice';
 };
 let lastBaseHeight=28;
@@ -2149,8 +2173,31 @@ $('toggle-base').onclick=()=>{
  $('base').value=base;$('base-value').textContent=base;
  refresh();check();
 };
+const defaultProjectFileStem='vanocni-kompozice';
+let projectFileStem=defaultProjectFileStem;
+function normalizeProjectFileStem(value){
+ return value.trim().replace(/(?:\.json)+$/i,'')
+  .replace(/[<>:"/\\|?*\u0000-\u001f]/g,'-').replace(/[. ]+$/u,'').trim();
+}
 $('project-save').onclick=()=>{
- download(new Blob([JSON.stringify(snapshotProject(),null,2)],{type:'application/json'}),'vanocni-kompozice.json');
+ const field=$('project-name');
+ field.value=projectFileStem;
+ $('project-save-error').hidden=true;
+ $('project-save-dialog').showModal();
+ field.select();
+};
+$('project-save-cancel').onclick=()=>$('project-save-dialog').close();
+$('project-save-form').onsubmit=event=>{
+ event.preventDefault();
+ const stem=normalizeProjectFileStem($('project-name').value);
+ if(!stem){
+  $('project-save-error').textContent='Zadej název souboru.';
+  $('project-save-error').hidden=false;
+  $('project-name').focus();return;
+ }
+ projectFileStem=stem;
+ download(new Blob([JSON.stringify(snapshotProject(),null,2)],{type:'application/json'}),stem+'.json');
+ $('project-save-dialog').close();
 };
 $('project-load').onclick=()=>$('project-file').click();
 $('project-file').onchange=async event=>{
@@ -2165,7 +2212,8 @@ $('project-file').onchange=async event=>{
   $('project-message').textContent=error instanceof SyntaxError?'Soubor není platný JSON.':error.message;return;
  }
  if(objects.length&&typeof confirm==='function'&&!confirm('Nahradit aktuální kompozici načteným souborem?'))return;
- openProject(data);$('project-message').textContent='Kompozice načtena';
+ openProject(data);projectFileStem=normalizeProjectFileStem(file.name)||defaultProjectFileStem;
+ $('project-message').textContent='Kompozice načtena';
 };
 
 function contourSVG(mask,w,h,tolerance=0){
