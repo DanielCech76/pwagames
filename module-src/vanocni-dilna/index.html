@@ -307,7 +307,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 <header class="masthead">
  <button id="setup-open" class="header-icon" aria-label="Nastavení řezu" title="Nastavení řezu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
  <svg class="winter left" viewBox="0 0 88 64" aria-hidden="true"><path d="M25 10l3 7 7 3-7 3-3 7-3-7-7-3 7-3zm24-8 10 15h-5l11 12h-8l13 13H53v12h-8V42H29l13-13h-8l11-12h-6zm27 27 7 11h-3l7 10h-8v9h-5v-9h-8l7-10h-3z" fill="currentColor"/></svg>
- <h1>Vánoční dílna <small class="app-version">1.10.0</small></h1>
+ <h1>Vánoční dílna <small class="app-version">1.11.0</small></h1>
  <svg class="winter right-winter" viewBox="0 0 88 64" aria-hidden="true"><path d="M18 27l8 13h-4l9 10H20v9h-5v-9H5l9-10h-4zm29-25 10 15h-5l11 12h-8l13 13H51v12h-8V42H27l13-13h-8l11-12h-6zm28 8 3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="currentColor"/></svg>
  <svg class="snow-edge" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 13Q45-4 82 11T158 13T236 10T311 15T400 12V22H0Z" fill="currentColor"/></svg>
 </header>
@@ -792,7 +792,7 @@ function add(type, overrides={}){
  objects.push(item);selected=item.id;componentIndex=0;return item;
 }
 function reset(){
- projectFileStem=defaultProjectFileStem;
+ projectFileStem=defaultProjectFileStem;projectHasName=false;
  repairArea=0;repairJoin=false;cutEdits=[];
  frame='none';sceneLocked=false;fullPage=false;pageHeightMm=null;
  horizon=0;flatInset=45;moveComposition=false;appearance='normal';[foreground,background]=paletteDefaults.normal;
@@ -1611,12 +1611,21 @@ stage.addEventListener('pointerdown',e=>{
   return;
  }
  stagePress={id:e.pointerId,x:e.clientX,y:e.clientY};
+ stagePress.timer=setTimeout(()=>{
+  if(stagePress?.id!==e.pointerId||touchPoints.size>1||viewHand||moveComposition||sceneLocked)return;
+  clearStagePress();
+  finishWorkshopMove(true);selectAtStage(e);
+  if(selectedObject())showWorkshopObject();
+ },500);
 });
 stage.addEventListener('pointerup',e=>{
  if(stagePress?.id!==e.pointerId)return;
- const press=stagePress;stagePress=null;
+ const press=stagePress;clearStagePress();
  if(Math.hypot(e.clientX-press.x,e.clientY-press.y)>8)return;
+ const editing=workshopDialog.open&&workshopDialog.dataset.mode==='object';
+ if(editing)finishWorkshopMove(true);
  selectAtStage(e);
+ if(editing)showWorkshopObject();
 });
 function selectAtStage(e){
  const [x,y]=canvasPoint(e,stage);
@@ -1626,7 +1635,11 @@ function selectAtStage(e){
  $('context').hidden=true;refresh();
 }
 let stagePress=null;
-stage.addEventListener('pointercancel',()=>{stagePress=null;});
+function clearStagePress(){clearTimeout(stagePress?.timer);stagePress=null;}
+for(const event of ['pointercancel','pointerleave'])stage.addEventListener(event,clearStagePress);
+stage.addEventListener('pointermove',e=>{
+ if(stagePress?.id===e.pointerId&&Math.hypot(e.clientX-stagePress.x,e.clientY-stagePress.y)>8)clearStagePress();
+});
 
 stage.addEventListener('pointermove',e=>{
  if(drag?.id!==e.pointerId||drag.held)return;
@@ -2260,7 +2273,7 @@ function openProject(data){
 $('project-new').onclick=()=>{
  if(objects.length&&typeof confirm==='function'&&!confirm('Vytvořit novou kompozici? Neuložené úpravy aktuální kompozice se zahodí.'))return;
  openProject({...snapshotProject(),objects:[],base:0,repairArea:0,repairJoin:false,cutEdits:[],sceneLocked:false});
- projectFileStem=defaultProjectFileStem;
+ projectFileStem=defaultProjectFileStem;projectHasName=false;
  $('project-message').textContent='Nová kompozice';
 };
 let lastBaseHeight=28;
@@ -2271,7 +2284,7 @@ $('toggle-base').onclick=()=>{
  refresh();check();
 };
 const defaultProjectFileStem='vanocni-kompozice';
-let projectFileStem=defaultProjectFileStem;
+let projectFileStem=defaultProjectFileStem,projectHasName=false;
 function normalizeProjectFileStem(value){
  return value.trim().replace(/(?:\.json)+$/i,'')
   .replace(/[<>:"/\\|?*\u0000-\u001f]/g,'-').replace(/[. ]+$/u,'').trim();
@@ -2292,10 +2305,13 @@ $('project-save-form').onsubmit=event=>{
   $('project-save-error').hidden=false;
   $('project-name').focus();return;
  }
- projectFileStem=stem;
- download(new Blob([JSON.stringify(snapshotProject(),null,2)],{type:'application/json'}),stem+'.json');
+ saveProjectFile(stem);
  $('project-save-dialog').close();
 };
+function saveProjectFile(stem){
+ projectFileStem=stem;projectHasName=true;
+ download(new Blob([JSON.stringify(snapshotProject(),null,2)],{type:'application/json'}),stem+'.json');
+}
 $('project-load').onclick=()=>$('project-file').click();
 $('project-file').onchange=async event=>{
  const input=event.currentTarget,file=input.files[0];
@@ -2309,7 +2325,7 @@ $('project-file').onchange=async event=>{
   $('project-message').textContent=error instanceof SyntaxError?'Soubor není platný JSON.':error.message;return;
  }
  if(objects.length&&typeof confirm==='function'&&!confirm('Nahradit aktuální kompozici načteným souborem?'))return;
- openProject(data);projectFileStem=normalizeProjectFileStem(file.name)||defaultProjectFileStem;
+ openProject(data);projectFileStem=normalizeProjectFileStem(file.name)||defaultProjectFileStem;projectHasName=true;
  $('project-message').textContent='Kompozice načtena';
 };
 
@@ -2631,7 +2647,7 @@ sceneScroll.addEventListener('pointerdown',e=>{
  if(!touchPoints.size)viewGestureUsed=false;
  touchPoints.set(e.pointerId,e);
  if(viewHand||touchPoints.size===2){
-  viewGesture=viewContacts();viewGestureUsed=true;stagePress=null;
+  viewGesture=viewContacts();viewGestureUsed=true;clearStagePress();
   if(drag?.group){
    for(const entry of drag.group){entry.item.x=entry.x;entry.item.y=entry.y;}
    drag=null;check();
@@ -2650,7 +2666,7 @@ sceneScroll.addEventListener('pointermove',e=>{
 },true);
 function releaseView(e){
  if(!touchPoints.delete(e.pointerId))return;
- if(viewGestureUsed)stagePress=null;
+ if(viewGestureUsed)clearStagePress();
  viewGesture=viewHand?viewContacts():null;
 }
 for(const event of ['pointerup','pointercancel','lostpointercapture'])window.addEventListener(event,releaseView,true);
