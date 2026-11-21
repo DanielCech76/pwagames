@@ -180,3 +180,7 @@ body:has(#work-dialog[open]) .scene-scroll { touch-action:none }
 
 .work-fit-caption { display:flex; align-items:center; gap:5px }
 .work-fit-caption svg { width:14px; height:14px; flex:none }
+
+.work-fit-legend:not([hidden]) { display:flex; flex-wrap:wrap; gap:6px 14px }
+.work-fit-legend span::before { content:""; display:inline-block; width:15px; margin-right:5px; vertical-align:middle; border-top:2px solid #00ad91 }
+.work-fit-legend span:first-child::before { border-top:2px dashed #ec7428 }

@@ -362,16 +362,24 @@ function showWorkshopObject(){
   const smoothing=number('Chytré vyhlazení',item.smoothing??defaultExternalSmoothing,0,100,setSmoothing,'%');
   smoothing.input.step='1';
   controls.append(tolerance);
+  const legend=workText('',controls);
+  legend.classList.add('work-fit-legend');
+  legend.innerHTML='<span>Původní obrys</span><span>Vyhlazený obrys</span>';
   const reset=workButton('Původní obrys',()=>{
    smoothing.input.value=0;smoothing.sync();setSmoothing(0);refresh();
   },row);
   updateSmoothing=()=>{
    const strength=item.smoothing??defaultExternalSmoothing;
    const scale=item.height/(item.unitTop??item.externalSvg.height)*Math.max(item.scaleX??1,item.scaleY??1);
-   const mm=externalTolerance(strength)*scale*workPageMm()[0]/W;
+   const mmPerUnit=scale*workPageMm()[0]/W;
+   const {originalNodes,nodes,deviation}=externalGeometry(item.externalSvg,strength);
    const visible=originalOutlinePreview===item;
-   tolerance.textContent='Povolená odchylka: '+mm.toLocaleString('cs-CZ',{maximumFractionDigits:3})+' mm · '+(visible?'Před':'Po');
-   compare.disabled=reset.disabled=strength===0;
+   const millimeters=value=>value.toLocaleString('cs-CZ',{maximumFractionDigits:3})+' mm';
+   tolerance.textContent='Uzly '+originalNodes+' → '+nodes+' · Odchylka ≤ '+
+    millimeters(Math.ceil(deviation*mmPerUnit*1000)/1000)+' · Limit '+millimeters(externalTolerance(strength)*mmPerUnit);
+   legend.hidden=!visible;
+   compare.disabled=deviation===0;
+   reset.disabled=strength===0;
    compare.setAttribute('aria-pressed',String(visible));
   };
   const label=smoothing.input.closest('.work-number-row').querySelector('label');
@@ -565,10 +573,12 @@ function externalLoops(path){
   const coords=match[1].match(/-?(?:\d+(?:\.\d*)?|\.\d+)/g)?.map(Number)??[];
   const points=[];
   for(let i=0;i+1<coords.length;i+=2)points.push([coords[i],coords[i+1]]);
-  return points;
+  const distinct=points.filter(([x,y],i)=>i===0||x!==points[i-1][0]||y!==points[i-1][1]);
+  if(distinct.length>1&&distinct[0].every((value,i)=>value===distinct.at(-1)[i]))distinct.pop();
+  return distinct;
  }).filter(points=>points.length>=3);
 }
-const externalTolerance=strength=>strength*.04;
+const externalTolerance=strength=>strength*.08;
 let originalOutlinePreview=null;
 function getOriginalOutlinePreview(){return workshopDialog.open&&selectedObject()===originalOutlinePreview?originalOutlinePreview:null;}
 function clearOutlinePreview(){
@@ -596,24 +606,36 @@ function externalGeometry(model,strength=defaultExternalSmoothing){
    return i!==j&&x>=l-4&&x<=r+4&&y>=t-4&&y<=b+4&&pc.isPointInPath(other,x,y,'evenodd')?[j]:[];
   });
  });
- const originalNesting=nesting(originals,points.map(loop=>loop[0]));
- let paths=originals;
+ const baseline=points.map(loop=>fitTracedOutline(loop,0));
+ const originalNesting=nesting(originals,baseline.map(loop=>loop.start));
+ let paths=originals, accepted=baseline;
  const limit=externalTolerance(strength);
  if(limit>0 && points.reduce((count,loop)=>count+loop.length,0)<=12000 && points.length<=128){
-  for(const tolerance of [limit,limit/2,limit/4]){
-   const fit=points.map(loop=>fitTracedOutline(loop,tolerance));
-   if(!traceTopologyIsSafe(fit))continue;
-   const candidate=fit.map(({start,segments})=>{
-    const path=new Path2D();path.moveTo(...start);
-    for(const {end,c1,c2} of segments){
-     if(c1)path.bezierCurveTo(...c1,...c2,...end);
-     else path.lineTo(...end);
-    }
-    path.closePath();return path;
-   });
+  const toPath=({start,segments})=>{
+   const path=new Path2D();path.moveTo(...start);
+   for(const {end,c1,c2} of segments){
+    if(c1)path.bezierCurveTo(...c1,...c2,...end);
+    else path.lineTo(...end);
+   }
+   path.closePath();return path;
+  };
+  function accept(fit,candidate){
+   if(!traceTopologyIsSafe(fit))return false;
    const fittedNesting=nesting(candidate,fit.map(loop=>loop.start));
-   if(fittedNesting.every((row,i)=>row.length===originalNesting[i].length&&row.every((value,j)=>value===originalNesting[i][j]))){
-    paths=candidate;break;
+   if(!fittedNesting.every((row,i)=>row.length===originalNesting[i].length&&row.every((value,j)=>value===originalNesting[i][j])))return false;
+   accepted=fit;paths=candidate;return true;
+  }
+  const fit=points.map(loop=>fitTracedOutline(loop,limit));
+  const candidate=fit.map(toPath);
+  if(!accept(fit,candidate)){
+   for(let i=0;i<points.length;i++){
+    for(const tolerance of [limit,limit/2,limit/4,limit/8]){
+     const outline=tolerance===limit?fit[i]:fitTracedOutline(points[i],tolerance);
+     if(outline.segments.length>=accepted[i].segments.length)continue;
+     const next=accepted.slice(), nextPaths=paths.slice();
+     next[i]=outline;nextPaths[i]=tolerance===limit?candidate[i]:toPath(outline);
+     if(accept(next,nextPaths))break;
+    }
    }
   }
  }
@@ -621,7 +643,11 @@ function externalGeometry(model,strength=defaultExternalSmoothing){
   ink.addPath(path,matrix);
   if(!originalNesting[i].length)back.addPath(path,matrix);
  });
- const geometry={ink,back,holes:new Path2D(),strokes:[],inset:[],evenOdd:true,top:-model.height,half:model.width/2};
+ const originalInk=new Path2D();
+ originals.forEach(path=>originalInk.addPath(path,matrix));
+ const nodeCount=outlines=>outlines.reduce((count,loop)=>count+loop.segments.length,0);
+ const geometry={ink,back,originalInk,originalNodes:nodeCount(baseline),nodes:nodeCount(accepted),
+  deviation:accepted.reduce((largest,loop)=>Math.max(largest,loop.deviation??0),0),holes:new Path2D(),strokes:[],inset:[],evenOdd:true,top:-model.height,half:model.width/2};
  if(variants.size>=4)variants.delete(variants.keys().next().value);
  variants.set(strength,geometry);return geometry;
 }

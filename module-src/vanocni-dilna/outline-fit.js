@@ -11,7 +11,7 @@ function fitTracedOutline(points, tolerance) {
  const dot = (a,b) => a[0]*b[0]+a[1]*b[1];
  const polyline = () => points.slice(1).concat([points[0]]).map(end=>({end}));
  if(n<5 || n>12000 || tolerance<=0)return {start:points[0],segments:polyline()};
- const reach = Math.max(3,tolerance*2);
+ const reach = 5;
  const angles = points.map((p,i)=>{
   const neighbor = (sign,radius) => {
    let length=0,prev=p;
@@ -34,14 +34,15 @@ function fitTracedOutline(points, tolerance) {
  function subcurveWithin(p,q,a,b,delta,depth=0){
   // Bounds the difference from the matched line using the convex hull of
   // the difference cubic; subdivision tightens that bound near the limit.
-  if(distance(p,a)>tolerance || distance(q,b)>tolerance)return false;
-  if(distance(delta[0],mix(a,b,1/3))<=tolerance &&
-     distance(delta[1],mix(a,b,2/3))<=tolerance)return true;
-  if(depth===5)return false;
+  const endpointError=Math.max(distance(p,a),distance(q,b));
+  if(endpointError>tolerance)return Infinity;
+  const bound=Math.max(endpointError,distance(delta[0],mix(a,b,1/3)),distance(delta[1],mix(a,b,2/3)));
+  if(bound<=tolerance&&(bound-endpointError<=.05||depth>=3))return bound;
+  if(depth===5)return Infinity;
   const ab=mix(p,delta[0],.5),bc=mix(delta[0],delta[1],.5),cd=mix(delta[1],q,.5);
   const left=mix(ab,bc,.5),right=mix(bc,cd,.5),center=mix(left,right,.5),mid=mix(a,b,.5);
-  return subcurveWithin(p,center,a,mid,[ab,left],depth+1) &&
-   subcurveWithin(center,q,mid,b,[right,cd],depth+1);
+  const leftBound=subcurveWithin(p,center,a,mid,[ab,left],depth+1);
+  return Math.max(leftBound,subcurveWithin(center,q,mid,b,[right,cd],depth+1));
  }
  function fit(span,first,last,tangentStart,tangentEnd){
   const start=span[first],end=span[last],arc=[0];
@@ -71,21 +72,22 @@ function fitTracedOutline(points, tolerance) {
    const s=1-t;
    return start.map((x,i)=>3*(s*s*(c1[i]-x)+2*s*t*(c2[i]-c1[i])+t*t*(end[i]-c2[i])));
   };
-  let split=Math.floor((first+last)/2),error=0,accepted=true,previous=start;
+  let split=Math.floor((first+last)/2),error=0,bound=0,previous=start;
   for(let i=1;i<arc.length;i++){
    const t=arc[i]/length, prior=arc[i-1]/length, point=at(t);
    const difference=distance(point,span[first+i]);
    if(difference>error&&first+i<last){error=difference;split=first+i;}
-   if(accepted){
+   if(Number.isFinite(bound)){
     const a=derivative(prior),b=derivative(t),factor=(t-prior)/3;
-    accepted=subcurveWithin(previous,point,span[first+i-1],span[first+i],
-     [previous.map((v,j)=>v+a[j]*factor),point.map((v,j)=>v-b[j]*factor)]);
+    bound=Math.max(bound,subcurveWithin(previous,point,span[first+i-1],span[first+i],
+     [previous.map((v,j)=>v+a[j]*factor),point.map((v,j)=>v-b[j]*factor)]));
    }
    previous=point;
   }
-  return accepted?{segment:{end,c1,c2},error}:{split};
+  return Number.isFinite(bound)?{segment:{end,c1,c2},error:bound}:{split};
  }
  const segments=[];
+ let deviation=0;
  for(let i=0;i<corners.length;i++){
   const from=corners[i],to=corners[i+1]??corners[0]+n;
   const span=Array.from({length:to-from+1},(_,j)=>points[(from+j)%n]);
@@ -111,20 +113,23 @@ function fitTracedOutline(points, tolerance) {
   const best=[{count:0,error:0}];
   for(let j=1;j<=pieces.length;j++){
    const piece=pieces[j-1];
-   best[j]={count:best[j-1].count+1,error:best[j-1].error+piece.error,previous:j-1,segment:piece.segment};
+   best[j]={count:best[j-1].count+1,error:best[j-1].error+piece.error,previous:j-1,segment:piece.segment,bound:piece.error};
    for(let k=Math.max(0,j-8);k<j-1;k++){
     const count=best[k].count+1;
     if(count>best[j].count)continue;
     const {segment,error}=candidate(pieces[k].a,piece.b);
     const total=best[k].error+error;
-    if(segment&&(count<best[j].count||total<best[j].error))best[j]={count,error:total,previous:k,segment};
+    if(segment&&(count<best[j].count||total<best[j].error))best[j]={count,error:total,previous:k,segment,bound:error};
    }
   }
   const fitted=[];
-  for(let j=pieces.length;j>0;j=best[j].previous)fitted.push(best[j].segment);
+  for(let j=pieces.length;j>0;j=best[j].previous){
+   fitted.push(best[j].segment);
+   deviation=Math.max(deviation,best[j].bound);
+  }
   segments.push(...fitted.reverse());
  }
- return {start:points[corners[0]],segments};
+ return {start:points[corners[0]],segments,deviation};
 }
 
 // Detect crossings on a finely flattened copy before committing the vector fit.
