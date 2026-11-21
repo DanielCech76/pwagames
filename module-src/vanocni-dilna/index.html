@@ -307,7 +307,7 @@ dialog{max-width:min(430px,calc(100% - 26px));background:#fff8e9;color:var(--ink
 <header class="masthead">
  <button id="setup-open" class="header-icon" aria-label="Nastavení řezu" title="Nastavení řezu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
  <svg class="winter left" viewBox="0 0 88 64" aria-hidden="true"><path d="M25 10l3 7 7 3-7 3-3 7-3-7-7-3 7-3zm24-8 10 15h-5l11 12h-8l13 13H53v12h-8V42H29l13-13h-8l11-12h-6zm27 27 7 11h-3l7 10h-8v9h-5v-9h-8l7-10h-3z" fill="currentColor"/></svg>
- <h1>Vánoční dílna <small class="app-version">1.13.0</small></h1>
+ <h1>Vánoční dílna <small class="app-version">1.14.0</small></h1>
  <svg class="winter right-winter" viewBox="0 0 88 64" aria-hidden="true"><path d="M18 27l8 13h-4l9 10H20v9h-5v-9H5l9-10h-4zm29-25 10 15h-5l11 12h-8l13 13H51v12h-8V42H27l13-13h-8l11-12h-6zm28 8 3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="currentColor"/></svg>
  <svg class="snow-edge" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><path d="M0 13Q45-4 82 11T158 13T236 10T311 15T400 12V22H0Z" fill="currentColor"/></svg>
 </header>
@@ -915,7 +915,7 @@ function applySnowGeometry(item,g){
  return {...g,solids:[...(g.solids||[]),snowPaths.get(cacheKey)]};
 }
 function geometry(item){
- if(item.externalSvg)return externalGeometry(item.externalSvg);
+ if(item.externalSvg)return externalGeometry(item.externalSvg,item.smoothing);
  if(item.winterSpruce!=null){
   const [,width,height,path]=snowySpruces[item.winterSpruce],ink=new Path2D(),back=new Path2D();
   const matrix=new DOMMatrix().translate(-width/2,-height);
@@ -1182,6 +1182,10 @@ function detailLabel(item){
  if(item.type==='snow')return 'Sníh';
  if(g.back||g.inset.length||item.parts)return ['house','church'].includes(item.type)?'Okna a další uzavřené detaily':'Uzavřené detaily';
  return 'Uzavřené detaily';
+}
+function objectDimensions(item,scaled=true){
+ const g=geometry(item),r=item.height/(item.unitTop??g.reference??-g.top);
+ return [2*g.half*r*(scaled?item.scaleX??1:1),((g.bottom||0)-g.top)*r*(scaled?item.scaleY??1:1)];
 }
 function bounds(item){
  const g=geometry(item),r=item.height/(item.unitTop??g.reference??-g.top);
@@ -1899,6 +1903,7 @@ function syncSize(item){
  $('lock-aspect').checked=item.aspectLocked!==false;
  for(const [axis,key] of [['x','scaleX'],['y','scaleY']]){
   const percent=Math.round((item[key]??1)*100);
+  $('scale-'+axis).max=Math.min(objectScaleMax*100,Math.max(200,percent*2));
   $('scale-'+axis).value=percent;paintRangeProgress($('scale-'+axis));$('scale-'+axis+'-value').textContent=percent+' %';
  }
 }
@@ -1908,13 +1913,18 @@ $('size-open').onclick=()=>{
 };
 $('size-done').onclick=()=>{$('size-panel').hidden=true;};
 $('lock-aspect').onchange=()=>{const item=selectedObject();if(item){item.aspectLocked=$('lock-aspect').checked;syncInspector(item);}};
-function resizeSceneItem(item,key,other,value){
- value=clamp(value,.2,2);
+const objectScaleMin=.2,objectScaleMax=100;
+function setObjectScale(item,key,other,value){
+ value=clamp(value,objectScaleMin,objectScaleMax);
  if(item.aspectLocked!==false){
   const current=item[key]??1,paired=item[other]??1;
-  const multiplier=clamp(value/current,.2/Math.min(current,paired),2/Math.max(current,paired));
-  item[key]=current*multiplier;item[other]=paired*multiplier;
+  const multiplier=clamp(value/current,objectScaleMin/Math.min(current,paired),objectScaleMax/Math.max(current,paired));
+  item[key]=clamp(current*multiplier,objectScaleMin,objectScaleMax);
+  item[other]=clamp(paired*multiplier,objectScaleMin,objectScaleMax);
  }else item[key]=value;
+}
+function resizeSceneItem(item,key,other,value){
+ setObjectScale(item,key,other,value);
  syncSize(item);syncInspector(item);keepOnCanvas(item);schedule();
 }
 for(const [axis,key,other] of [['x','scaleX','scaleY'],['y','scaleY','scaleX']]){
@@ -1948,11 +1958,15 @@ $('quick-layer').onclick=()=>{
 };
 function syncInspector(item){
  if(!item)return;
- const b=bounds(item),mm=outputMm/cutWidth;
+ const [width,height]=objectDimensions(item),mm=workPageMm()[0]/W;
+ for(const axis of ['x','y']){
+  const input=$('inspector-scale-'+axis),scale=(axis==='x'?item.scaleX:item.scaleY)??1;
+  input.max=Math.min(objectScaleMax*100,Math.max(200,Math.round(scale*200)));
+ }
  $('inspector-scale-x').value=Math.round((item.scaleX??1)*100);
  $('inspector-scale-y').value=Math.round((item.scaleY??1)*100);
- $('inspector-x').value=((b.right-b.left)*mm).toFixed(1);
- $('inspector-y').value=((b.bottom-b.top)*mm).toFixed(1);
+ $('inspector-x').value=(width*mm).toFixed(2);
+ $('inspector-y').value=(height*mm).toFixed(2);
  $('inspector-lock').checked=item.aspectLocked!==false;
 }
 function refreshSceneControls(item,index){
@@ -1976,7 +1990,7 @@ $('inspector-lock').onchange=()=>{
 for(const [id,key,other] of [['inspector-x','scaleX','scaleY'],['inspector-y','scaleY','scaleX']]){
  $(id).onchange=()=>{
   const item=selectedObject();if(!item)return;
-  const b=bounds(item),dimension=(key==='scaleX'?b.right-b.left:b.bottom-b.top)*outputMm/cutWidth;
+  const dimension=objectDimensions(item)[key==='scaleX'?0:1]*workPageMm()[0]/W;
   const requested=$(id).valueAsNumber;
   if(Number.isFinite(requested)&&dimension>0)resizeSceneItem(item,key,other,(item[key]??1)*requested/dimension);
   else syncInspector(item);
@@ -2223,7 +2237,8 @@ function readProject(text){
  for(const o of data.objects){
   if(!o||!Object.hasOwn(catalog,o.type)||!Number.isSafeInteger(o.id)||o.id<1||o.id>=Number.MAX_SAFE_INTEGER-1||ids.has(o.id)||
     !between(o.x,-8800,8800)||!between(o.y,-6000,6000)||!between(o.height,.01,10000)||
-    !between(o.scaleX??1,.2,2.01)||!between(o.scaleY??1,.2,2.01)||
+    !between(o.scaleX??1,objectScaleMin,objectScaleMax+1e-8)||!between(o.scaleY??1,objectScaleMin,objectScaleMax+1e-8)||
+    (o.smoothing!=null&&(!Number.isInteger(o.smoothing)||!between(o.smoothing,0,100)))||
     (o.unitTop!=null&&!between(o.unitTop,1,1000))||!index(o.variant,catalog[o.type][1].length))fail();
   if(o.externalSvg!=null)o.externalSvg=validateExternalModel(o.externalSvg);
   ids.add(o.id);

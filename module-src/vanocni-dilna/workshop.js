@@ -99,7 +99,7 @@ function closeEditorForm(id,instance=stagedForm){
  $(id).close();
 }
 function workNumberRow(input,label,config){
- const [min,max,step,unit]=config;
+ const [min,max,step,unit,logarithmic=false]=config;
  const element=document.createElement('div');element.className='work-number-row';
  const title=document.createElement('label');title.textContent=label;
  const range=document.createElement('input');range.type='range';range.setAttribute('aria-label',label);
@@ -110,13 +110,17 @@ function workNumberRow(input,label,config){
  value.append(input,suffix);element.append(title,value);
  function sync(){
   const current=input.valueAsNumber;
-  range.min=min();range.max=Math.max(max(),Number.isFinite(current)?current:max());range.step=step();
-  if(Number.isFinite(current))range.value=current;
+  range.min=logarithmic?0:min();
+  range.max=logarithmic?1000:Math.max(max(),Number.isFinite(current)?current:max());
+  range.step=logarithmic?1:step();
+  if(Number.isFinite(current))range.value=logarithmic?Math.round(1000*Math.log(Math.max(min(),current)/min())/Math.log(max()/min())):current;
   suffix.textContent=unit();
   paintRangeProgress(range);
  }
  range.oninput=()=>{
-  input.value=Number(range.valueAsNumber.toPrecision(10));
+  const position=range.valueAsNumber;
+  const value=logarithmic?(position===1000?max():min()*(max()/min())**(position/1000)):position;
+  input.value=logarithmic?value:Number(value.toPrecision(10));
   input.dispatchEvent(new Event('input',{bubbles:true}));sync();
  };
  range.onchange=()=>input.dispatchEvent(new Event('change',{bubbles:true}));
@@ -306,31 +310,50 @@ function showWorkshopObject(){
  workButton('Zpět na objekty',()=>{if(toolHistory.at(-1)?.title==='Objekty')backToolPanel();else rootTool(showWorkshopObjects);},row);
  if(sceneLocked)return;
  const controls=document.createElement('div');controls.className='work-object-fields';workContent.insertBefore(controls,row);
- const g=geometry(item),r=item.height/(item.unitTop??g.reference??-g.top);
- const factor=workPageMm()[0]/W/unitFactor(workPreferences.unit);
+ const [naturalWidth,naturalHeight]=objectDimensions(item,false);
+ const [pageWidth,pageHeight]=workPageMm();
+ const factor=pageWidth/W/unitFactor(workPreferences.unit);
  const ratioButton=workButton('Poměr stran',()=>{
-  $('lock-aspect').checked=!$('lock-aspect').checked;
+  item.aspectLocked=item.aspectLocked===false;
+  $('lock-aspect').checked=item.aspectLocked;
   ratioButton.setAttribute('aria-pressed',String($('lock-aspect').checked));
  },controls);
+ $('lock-aspect').checked=item.aspectLocked!==false;
  ratioButton.setAttribute('aria-pressed',String($('lock-aspect').checked));
- function number(label,value,min,max,onchange,unit=''){
+ const dimensions=[];
+ function number(label,value,min,max,onchange,unit='',logarithmic=false){
   const input=document.createElement('input');
-  input.type='number';input.min=min;input.max=max;input.step='any';input.value=Number(value.toFixed(unit==='″'?4:2));
-  const row=workNumberRow(input,label,[()=>min,()=>max,()=>unit==='°'?1:unit==='mm'?.1:.01,()=>unit]);
+  input.type='number';input.min=min;input.max=max;input.step='any';input.value=logarithmic?clamp(Number(value.toPrecision(7)),min,max):value;
+  const row=workNumberRow(input,label,[()=>min,()=>max,()=>unit==='°'||unit==='%'?1:unit==='mm'?.1:.01,()=>unit,logarithmic]);
   input.oninput=()=>{if(Number.isFinite(input.valueAsNumber)&&input.validity.valid){onchange(input.valueAsNumber);refresh();}};
-  if(unit!=='°')input.onchange=()=>showWorkshopObject();
-  controls.append(row.element);
+  controls.append(row.element);return {input,sync:row.sync};
  }
- for(const [label,key,other,baseSize] of [['Šířka','scaleX','scaleY',2*g.half*r],['Výška','scaleY','scaleX',((g.bottom||0)-g.top)*r]]){
+ for(const [label,key,other,baseSize] of [['Šířka','scaleX','scaleY',naturalWidth],['Výška','scaleY','scaleX',naturalHeight]]){
   const unit=baseSize*factor;if(!(unit>0))continue;
-  number(label,(item[key]??1)*unit,Math.floor(unit*.2*1e6)/1e6,Math.ceil(unit*2*1e6)/1e6,value=>{
-   const scale=clamp(value/unit,.2,2),relative=scale/(item[key]??1);
-   item[key]=scale;
-   if($('lock-aspect').checked)item[other]=clamp((item[other]??1)*relative,.2,2);
+  let field;
+  field=number(label,(item[key]??1)*unit,unit*objectScaleMin,unit*objectScaleMax,value=>{
+   if(!fullPage&&pageWidth>=30&&pageWidth<=1500&&pageHeight>=20&&pageHeight<=1000){
+    fullPage=true;outputMm=pageWidth;pageHeightMm=pageHeight;
+    $('mm').value=outputMm;
+   }
+   setObjectScale(item,key,other,value/unit);
+   for(const [paired,axis,nominal] of dimensions){
+    if(paired!==field||Math.abs((item[axis]??1)*nominal-value)>1e-5){
+     paired.input.value=(item[axis]??1)*nominal;paired.sync();
+    }
+   }
    positionWorkshopHandle();
-  },workUnit());
+  },workUnit(),true);
+  dimensions.push([field,key,unit]);
  }
  number('Otočení',item.rotation??0,-180,180,value=>{item.rotation=value;positionWorkshopHandle();},'°');
+ if(item.externalSvg){
+  const smoothing=number('Chytré vyhlazení',item.smoothing??defaultExternalSmoothing,0,100,value=>{
+   if(Number.isInteger(value))item.smoothing=value;
+  },'%');
+  smoothing.input.step='1';
+  workButton('Původní obrys',()=>{item.smoothing=0;refresh();showWorkshopObject();},row);
+ }
  if(moveDraft?.item===item){
   workButton('Dokončit přesun',()=>{finishWorkshopMove(true);showWorkshopObject();},row);
   workButton('Zrušit přesun',()=>{finishWorkshopMove(false);showWorkshopObject();},row);
@@ -510,6 +533,7 @@ function validateExternalModel(model){
  return {name:model.name,path:model.path,width:model.width,height:model.height};
 }
 const externalGeometries=new WeakMap();
+const defaultExternalSmoothing=25;
 function externalLoops(path){
  return [...path.matchAll(/M([^MZ]+)Z/gi)].map(match=>{
   const coords=match[1].match(/-?(?:\d+(?:\.\d*)?|\.\d+)/g)?.map(Number)??[];
@@ -524,7 +548,10 @@ function roundedExternalLoop(points,limit){
   const prev=points.at(i-1),next=points[(i+1)%points.length];
   const a=Math.hypot(p[0]-prev[0],p[1]-prev[1]),b=Math.hypot(p[0]-next[0],p[1]-next[1]);
   const short=Math.min(a,b);
-  const amount=short>limit*2.2?0:Math.min(short*.46,limit);
+  const angle=a&&b?((prev[0]-p[0])*(next[0]-p[0])+(prev[1]-p[1])*(next[1]-p[1]))/(a*b):1;
+  // A short side alone is insufficient: protect sharp turns and tips on longer edges.
+  const protectedCorner=angle>-.24&&Math.max(a,b)>limit*2.5;
+  const amount=protectedCorner||short>limit*2.2?0:Math.min(short*.38,limit);
   return [a? p.map((v,j)=>v+(prev[j]-v)*amount/a):p,p,b?p.map((v,j)=>v+(next[j]-v)*amount/b):p];
  });
  const loop=new Path2D();loop.moveTo(...corners[0][0]);
@@ -533,11 +560,11 @@ function roundedExternalLoop(points,limit){
  }
  loop.closePath();return loop;
 }
-function externalGeometry(model){
+function externalGeometry(model,strength=defaultExternalSmoothing){
  const cached=externalGeometries.get(model);
- if(cached)return cached;
+ if(cached?.strength===strength)return cached.geometry;
  const ink=new Path2D(),back=new Path2D(),matrix=new DOMMatrix().translate(-model.width/2,-model.height);
- const limit=Math.max(.5,Math.min(4,Math.max(model.width,model.height)*.0027));
+ const limit=Math.min(12,Math.max(.5,Math.max(model.width,model.height)*.0027)*(strength/25));
  const loops=externalLoops(model.path).map(points=>{
   const box=[Infinity,Infinity,-Infinity,-Infinity];
   for(const [x,y] of points){
@@ -556,7 +583,7 @@ function externalGeometry(model){
   if(!nested)back.addPath(loop.outline,matrix);
  }
  const geometry={ink,back,holes:new Path2D(),strokes:[],inset:[],evenOdd:true,top:-model.height,half:model.width/2};
- externalGeometries.set(model,geometry);return geometry;
+ externalGeometries.set(model,{strength,geometry});return geometry;
 }
 function safeSvg(source){
  if(source.length>maxAssetSize||/<!DOCTYPE|<!ENTITY/i.test(source))throw Error('SVG je příliš velké nebo má nepodporovanou deklaraci.');
