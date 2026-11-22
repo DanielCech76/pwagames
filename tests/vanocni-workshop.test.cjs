@@ -92,3 +92,30 @@ test('reports only detected vertices and increases sensitivity independently of 
  for(const vertex of high.vertices)assert(high.segments.some(({end})=>end===vertex));
  assert(high.deviation<=2);
 });
+
+test('suppresses nearby corners by closed-contour distance, including across the seam',()=>{
+ const points=[[0,0],[15,0],[30,0],[30,10],[30,20],[15,20],[0,20],[0,10]];
+ const before=run('fitTracedOutline(points,0,90).vertices',{points});
+ const after=run('fitTracedOutline(points,0,90,25).vertices',{points});
+ assert(after.length<before.length);
+ const arc=[0];
+ for(let i=0;i<points.length;i++){
+  const [x,y]=points[i], [a,b]=points[(i+1)%points.length];
+  arc.push(arc.at(-1)+Math.hypot(x-a,y-b));
+ }
+ for(let i=0;i<after.length;i++)for(let j=i+1;j<after.length;j++){
+  const gap=Math.abs(arc[points.indexOf(after[i])]-arc[points.indexOf(after[j])]);
+  assert(Math.min(gap,arc.at(-1)-gap)>=25);
+ }
+});
+
+test('fits a contour above the former twelve-thousand-node cutoff',()=>{
+ const points=Array.from({length:13028},(_,i)=>{
+  const angle=i*Math.PI*2/13028;
+  return [150*Math.cos(angle),100*Math.sin(angle)];
+ });
+ const outline=run('fitTracedOutline(points,1)',{points});
+ assert(outline.segments.length<100);
+ assert(outline.deviation<=1);
+ assert(run('traceTopologyIsSafe([outline])',{outline}));
+});

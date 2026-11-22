@@ -542,11 +542,13 @@ function externalLoops(path){
 }
 const externalTolerance=strength=>strength*.08;
 const smoothingLimits={relative:15,mm:1000};
-const smoothingDefaults={unit:'relative',value:.6,sensitivity:50};
+const smoothingDefaults={unit:'relative',value:.6,sensitivity:50,spacing:0,target:0};
 function validSmoothingSettings(settings){
  return !!settings&&Object.hasOwn(smoothingLimits,settings.unit)&&
   Number.isFinite(settings.value)&&settings.value>=0&&settings.value<=smoothingLimits[settings.unit]&&
-  Number.isInteger(settings.sensitivity)&&settings.sensitivity>=0&&settings.sensitivity<=100;
+  Number.isInteger(settings.sensitivity)&&settings.sensitivity>=0&&settings.sensitivity<=100&&
+  Number.isFinite(settings.spacing??0)&&(settings.spacing??0)>=0&&(settings.spacing??0)<=1000&&
+  Number.isInteger(settings.target??0)&&(settings.target??0)>=0&&(settings.target??0)<=60000;
 }
 function smoothingDimensions(item){
  const model=item.externalSvg,scale=item.height/(item.unitTop??model.height);
@@ -557,10 +559,10 @@ function smoothingDimensions(item){
 }
 function smoothedObjectGeometry(item){
  if(!item.smoothingSettings)return externalGeometry(item.externalSvg,item.smoothing);
- const {shortSide,mmPerUnit}=smoothingDimensions(item);
- const {unit,value,sensitivity}=item.smoothingSettings;
+ const {shortSide,mmPerUnit,sx,sy}=smoothingDimensions(item);
+ const {unit,value,sensitivity,spacing=0,target=0}=item.smoothingSettings;
  const mm=unit==='relative'?value*shortSide/100:value;
- return externalGeometry(item.externalSvg,item.smoothing,mm/mmPerUnit,sensitivity);
+ return externalGeometry(item.externalSvg,item.smoothing,mm/mmPerUnit,sensitivity,spacing/mmPerUnit,target,spacing?[sx/Math.max(sx,sy),sy/Math.max(sx,sy)]:undefined);
 }
 function showWorkshopSmoothing(item){
  workPanel('Chytré vyhlazení','smoothing');
@@ -571,7 +573,7 @@ function showWorkshopSmoothing(item){
  const start=item.smoothingSettings??(legacyPercent<=smoothingLimits.relative
   ?{...smoothingDefaults,value:Number(legacyPercent.toPrecision(10))}
   :{...smoothingDefaults,unit:'mm',value:Math.min(smoothingLimits.mm,legacyMm)});
- let draft={...start},zoom=1,frameRequest=0,fitted;
+ let draft={...smoothingDefaults,...start},zoom=1,frameRequest=0,fitted;
  const created=(tag,cls,parent=workContent)=>{
   const element=document.createElement(tag);element.className=cls;parent.append(element);return element;
  };
@@ -648,6 +650,12 @@ function showWorkshopSmoothing(item){
  const tolerance=field('Povolená odchylka',0,15,.001,()=>draft.unit==='mm'?'mm':'%',value=>draft.value=value);
  const sensitivity=field('Citlivost vrcholů',0,100,1,()=> '%',value=>draft.sensitivity=Math.round(value));
  sensitivity.input.step='1';
+ const spacing=field('Rozestup vrcholů podél obrysu',0,1000,.1,()=> 'mm',value=>draft.spacing=value);
+ spacing.input.dataset.rangeMax=Math.max(1,shortSide*.2);
+ const target=field('Cílový počet uzlů',0,60000,1,()=> '',value=>draft.target=value);
+ target.input.dataset.rangeMax=500;target.input.step='1';
+ workText('Hodnota 0 vypne rozestup nebo cílový počet.');
+
  const conversion=workText('');
  const stats=workText('');stats.className='work-fit-stats';stats.setAttribute('aria-live','polite');
  const row=workActions();row.classList.add('work-fit-actions');
@@ -659,7 +667,7 @@ function showWorkshopSmoothing(item){
  },row);
  const fmt=value=>value.toLocaleString('cs-CZ',{maximumFractionDigits:3});
  function fieldsValid(){
-  return [tolerance.input,sensitivity.input].every(input=>input.value!==''&&input.validity.valid);
+  return [tolerance.input,sensitivity.input,spacing.input,target.input].every(input=>input.value!==''&&input.validity.valid);
  }
  function schedule(){
   const rel=draft.unit==='relative';
@@ -674,6 +682,9 @@ function showWorkshopSmoothing(item){
    conversion.textContent='Kratší strana '+fmt(shortSide)+' mm · Limit '+fmt(mm)+' mm';
    const bound=Math.ceil(fitted.deviation*mmPerUnit*1000)/1000;
    stats.textContent='Uzly '+fitted.originalNodes+' → '+fitted.nodes+' · Odchylka ≤ '+fmt(bound)+' mm';
+   stats.textContent+=' · Ostré vrcholy '+fitted.vertices.length;
+   if(fitted.reason)stats.textContent+=' · '+fitted.reason;
+   if(draft.target)stats.textContent+=fitted.nodes<=draft.target?' · Cíl splněn':' · Cíl '+draft.target+' při této toleranci nedosažen';
    render();
   });
  }
@@ -684,7 +695,9 @@ function showWorkshopSmoothing(item){
   tolerance.input.max=smoothingLimits[draft.unit];
   tolerance.input.dataset.rangeMax=rel?3:Math.max(1,Math.min(smoothingLimits.mm,shortSide*.03));
   tolerance.input.value=draft.value;tolerance.sync();
-  sensitivity.input.value=draft.sensitivity;sensitivity.sync();schedule();
+  sensitivity.input.value=draft.sensitivity;sensitivity.sync();
+  spacing.input.value=draft.spacing;spacing.sync();
+  target.input.value=draft.target;target.sync();schedule();
  }
  function setUnit(unit){
   if(unit===draft.unit)return;
@@ -694,8 +707,8 @@ function showWorkshopSmoothing(item){
  }
  zoomOut.disabled=true;sync();
 }
-function externalGeometry(model,strength=defaultExternalSmoothing,limit=externalTolerance(strength),sensitivity=50){
- const key=limit+':'+sensitivity;
+function externalGeometry(model,strength=defaultExternalSmoothing,limit=externalTolerance(strength),sensitivity=50,spacing=0,target=0,spacingScale){
+ const key=[limit,sensitivity,spacing,target,spacingScale].join(':');
  let cached=externalGeometries.get(model);
  if(!cached){
   cached={points:externalLoops(model.path),variants:new Map()};
@@ -720,8 +733,21 @@ function externalGeometry(model,strength=defaultExternalSmoothing,limit=external
  const baseline=points.map(loop=>({start:loop[0],segments:loop.slice(1).concat([loop[0]]).map(end=>({end}))}));
  const originalNesting=nesting(originals,baseline.map(loop=>loop.start));
  let paths=originals, accepted=baseline;
- let vertices=[];
- if( points.reduce((count,loop)=>count+loop.length,0)<=12000 && points.length<=128){
+ let vertices=[],reason='';
+ const nodeCount=outlines=>outlines.reduce((count,loop)=>count+loop.segments.length,0);
+ // Removing points in the middle of a straight edge preserves the original shape exactly.
+ const fitPoints=points.map(loop=>{
+  if(loop.length<5)return loop;
+  const cleaned=loop.filter(([x,y],i)=>{
+   const [a,b]=loop[(i+loop.length-1)%loop.length], [c,d]=loop[(i+1)%loop.length];
+   return (x-a)*(d-y)!==(y-b)*(c-x)||(x-a)*(c-x)+(y-b)*(d-y)<0;
+  });
+  return cleaned.length>=3?cleaned:loop;
+ });
+ const total=points.reduce((count,loop)=>count+loop.length,0);
+ if(total<=60000&&points.length<=256){
+  const simplified=fitPoints.map(loop=>total>12000&&limit>0
+   ?simplifyDenseOutline(loop,Math.min(.2,limit*.06)):{points:loop,deviation:0});
   const toPath=({start,segments})=>{
    const path=new Path2D();path.moveTo(...start);
    for(const {end,c1,c2} of segments){
@@ -730,35 +756,67 @@ function externalGeometry(model,strength=defaultExternalSmoothing,limit=external
    }
    path.closePath();return path;
   };
-  function accept(fit,candidate){
+  function isSafe(fit,candidate){
    if(!traceTopologyIsSafe(fit))return false;
    const fittedNesting=nesting(candidate,fit.map(loop=>loop.start));
    if(!fittedNesting.every((row,i)=>row.length===originalNesting[i].length&&row.every((value,j)=>value===originalNesting[i][j])))return false;
-   accepted=fit;paths=candidate;return true;
+   return true;
   }
-  const fit=points.map(loop=>fitTracedOutline(loop,limit,sensitivity));
-  vertices=fit.flatMap(outline=>outline.vertices);
-  const candidate=fit.map(toPath);
-  if(limit>0&&!accept(fit,candidate)){
-   for(let i=0;i<points.length;i++){
-    for(const tolerance of [limit,limit/2,limit/4,limit/8]){
-     const outline=tolerance===limit?fit[i]:fitTracedOutline(points[i],tolerance,sensitivity);
-     if(outline.segments.length>=accepted[i].segments.length)continue;
-     const next=accepted.slice(), nextPaths=paths.slice();
-     next[i]=outline;nextPaths[i]=tolerance===limit?candidate[i]:toPath(outline);
-     if(accept(next,nextPaths))break;
+  function fitLoop(i,amount){
+   const {points,deviation}=simplified[i];
+   if(amount<deviation)return baseline[i];
+   const outline=fitTracedOutline(points,amount-deviation,sensitivity,spacing,spacingScale);
+   outline.deviation=(outline.deviation??0)+deviation;
+   return outline;
+  }
+  const fitAt=amount=>points.map((_,i)=>fitLoop(i,amount));
+  const full=fitAt(limit);
+  vertices=full.flatMap(outline=>outline.vertices??[]);
+  const count=nodeCount(baseline);
+  let bestCount=count,bestCost=Infinity;
+  function consider(fit,candidate){
+   const nodes=nodeCount(fit),cost=fit.reduce((sum,loop)=>sum+(loop.cost??0),0);
+   const better=target&&nodes<=target&&bestCount<=target?cost<bestCost:nodes<bestCount;
+   if(!better||!isSafe(fit,candidate))return false;
+   accepted=fit;paths=candidate;bestCount=nodes;bestCost=cost;return true;
+  }
+  if(limit>0){
+   const candidate=full.map(toPath);
+   if(!consider(full,candidate)){
+    if(total>12000){
+     const reduced=simplified.map(({points,deviation})=>({
+      start:points[0],deviation,segments:points.slice(1).concat([points[0]]).map(end=>({end}))
+     }));
+     const reducedPaths=reduced.map(toPath);
+     if(isSafe(reduced,reducedPaths)){accepted=reduced;paths=reducedPaths;bestCount=nodeCount(reduced);}
+    }
+    for(let i=0;i<points.length;i++){
+     for(const factor of [1,.5,.25,.125]){
+      const outline=factor===1?full[i]:fitLoop(i,limit*factor);
+      if(outline.segments.length>=accepted[i].segments.length)continue;
+      const next=accepted.slice(),nextPaths=paths.slice();
+      next[i]=outline;nextPaths[i]=factor===1?candidate[i]:toPath(outline);
+      if(consider(next,nextPaths))break;
+     }
     }
    }
-  }
- }
+   if(target){
+    for(const factor of [.75,.5,.25,.125]){
+     const fit=fitAt(limit*factor);
+     consider(fit,fit.map(toPath));
+    }
+   }
+   if(accepted===baseline)reason='Při této toleranci se nepodařilo zjednodušit obrys se zachováním výřezů a bez křížení.';
+  }else reason='Nulová tolerance ponechá původní obrys.';
+ }else reason='Počet obrysů nebo uzlů překročil limit výpočtu.';
+
  paths.forEach((path,i)=>{
   ink.addPath(path,matrix);
   if(!originalNesting[i].length)back.addPath(path,matrix);
  });
  const originalInk=new Path2D();
  originals.forEach(path=>originalInk.addPath(path,matrix));
- const nodeCount=outlines=>outlines.reduce((count,loop)=>count+loop.segments.length,0);
- const geometry={ink,back,originalInk,vertices:vertices.map(([x,y])=>[x-model.width/2,y-model.height]),originalNodes:nodeCount(baseline),nodes:nodeCount(accepted),
+ const geometry={ink,back,originalInk,reason,vertices:vertices.map(([x,y])=>[x-model.width/2,y-model.height]),originalNodes:nodeCount(baseline),nodes:nodeCount(accepted),
   deviation:accepted.reduce((largest,loop)=>Math.max(largest,loop.deviation??0),0),holes:new Path2D(),strokes:[],inset:[],evenOdd:true,top:-model.height,half:model.width/2};
  if(variants.size>=4)variants.delete(variants.keys().next().value);
  variants.set(key,geometry);return geometry;

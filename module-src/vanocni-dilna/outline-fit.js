@@ -1,6 +1,36 @@
+// Simplify dense polylines using a small, independently bounded error budget.
+function simplifyDenseOutline(points,tolerance){
+ const n=points.length, arc=[0], kept=[];
+ for(let i=1;i<=n;i++){
+  const [a,b]=points[i-1], [x,y]=points[i%n];
+  arc.push(arc[i-1]+Math.hypot(x-a,y-b));
+ }
+ const middle=Math.floor(n/2), spans=[[middle,n,0],[0,middle,0]];
+ let deviation=0;
+ while(spans.length){
+  const [a,b,depth]=spans.pop();
+  const [x,y]=points[a], [u,v]=points[b%n];
+  const length=arc[b]-arc[a];
+  let error=0,split=a+1;
+  for(let i=a+1;i<b;i++){
+   const t=(arc[i]-arc[a])/length;
+   const [px,py]=points[i];
+   const distance=Math.hypot(px-x-(u-x)*t,py-y-(v-y)*t);
+   if(distance>error){error=distance;split=i;}
+  }
+  if(error<=tolerance){
+   kept.push(points[a]);deviation=Math.max(deviation,error);
+  }else{
+   if(depth>=12)split=Math.floor((a+b)/2);
+   spans.push([split,b,depth+1],[a,split,depth+1]);
+  }
+ }
+ return kept.length<3?{points,deviation:0}:{points:kept,deviation};
+}
+
 // Fit traced polygons in their original coordinate system. Each accepted cubic
 // is checked against the entire corresponding polyline, in both directions.
-function fitTracedOutline(points, tolerance, sensitivity=50) {
+function fitTracedOutline(points, tolerance, sensitivity=50, spacing=0, spacingScale=[1,1]) {
  const n = points.length;
  const distance = (a,b) => Math.hypot(a[0]-b[0],a[1]-b[1]);
  const mix = (a,b,t) => a.map((v,i) => v+(b[i]-v)*t);
@@ -10,12 +40,11 @@ function fitTracedOutline(points, tolerance, sensitivity=50) {
  };
  const dot = (a,b) => a[0]*b[0]+a[1]*b[1];
  const polyline = () => points.slice(1).concat([points[0]]).map(end=>({end}));
- if(n<5 || n>12000)return {start:points[0],segments:polyline(),vertices:n<5?points:[]};
  const reach = 5;
  const angles = points.map((p,i)=>{
   const neighbor = (sign,radius) => {
    let length=0,prev=p;
-   for(let step=1;step<n && step<=40;step++){
+   for(let step=1;step<n && step<=256;step++){
     const next=points[(i+sign*step+n)%n], edge=distance(prev,next);
     if(length+edge>=radius)return mix(prev,next,(radius-length)/edge);
     length+=edge;prev=next;
@@ -27,8 +56,30 @@ function fitTracedOutline(points, tolerance, sensitivity=50) {
  });
  const threshold=-.42-(sensitivity-50)*.01;
  const corners=angles.flatMap((angle,i)=>angle>threshold && angle>angles[(i+n-1)%n] && angle>=angles[(i+1)%n]?[i]:[]);
+ if(n<5)corners.splice(0,corners.length,...points.map((_,i)=>i));
+ if(spacing>0&&corners.length>1){
+  const arc=[0];
+  for(let i=0;i<n;i++){
+   const [a,b]=points[i], [x,y]=points[(i+1)%n];
+   arc.push(arc[i]+Math.hypot((x-a)*spacingScale[0],(y-b)*spacingScale[1]));
+  }
+  const perimeter=arc[n],cells=Math.max(1,Math.floor(perimeter/spacing));
+  const width=perimeter/cells,kept=new Map();
+  corners.sort((a,b)=>angles[b]-angles[a]||a-b);
+  for(const index of corners){
+   const cell=Math.min(cells-1,Math.floor(arc[index]/width));
+   const nearby=[cell,(cell+1)%cells,(cell+cells-1)%cells];
+   if(nearby.some(key=>{
+    if(!kept.has(key))return false;
+    const gap=Math.abs(arc[index]-arc[kept.get(key)]);
+    return Math.min(gap,perimeter-gap)<spacing;
+   }))continue;
+   kept.set(cell,index);
+  }
+  corners.splice(0,corners.length,...[...kept.values()].sort((a,b)=>a-b));
+ }
  const vertices=corners.map(index=>points[index]);
- if(tolerance<=0)return {start:points[0],segments:polyline(),vertices};
+ if(n<5||tolerance<=0)return {start:points[0],segments:polyline(),vertices};
  if(corners.length<2){
   const first=corners[0]??0;
   corners.push(...(corners.length?[]:[first]),(first+Math.floor(n/2))%n);
@@ -52,8 +103,14 @@ function fitTracedOutline(points, tolerance, sensitivity=50) {
   for(let i=first+1;i<=last;i++)arc.push(arc.at(-1)+distance(span[i-1],span[i]));
   const length=arc.at(-1);
   if(!(length>0))return {segment:{end},error:0};
-  const lineError=arc.reduce((max,value,i)=>Math.max(max,distance(span[first+i],mix(start,end,value/length))),0);
-  if(lineError<=tolerance*.35)return {segment:{end},error:lineError};
+  let lineError=0,lineCost=0,previousLineError=0;
+  for(let i=1;i<arc.length;i++){
+   const error=distance(span[first+i],mix(start,end,arc[i]/length));
+   lineError=Math.max(lineError,error);
+   lineCost+=(error+previousLineError)*(arc[i]-arc[i-1])/2;
+   previousLineError=error;
+  }
+  if(lineError<=tolerance*.35)return {segment:{end},error:lineError,cost:lineCost};
   let aa=0,ab=0,bb=0,ar=0,br=0;
   for(let i=1;i<arc.length-1;i++){
    const t=arc[i]/length,s=1-t,u=3*s*s*t,v=3*s*t*t;
@@ -75,10 +132,12 @@ function fitTracedOutline(points, tolerance, sensitivity=50) {
    const s=1-t;
    return start.map((x,i)=>3*(s*s*(c1[i]-x)+2*s*t*(c2[i]-c1[i])+t*t*(end[i]-c2[i])));
   };
-  let split=Math.floor((first+last)/2),error=0,bound=0,previous=start;
+  let split=Math.floor((first+last)/2),error=0,bound=0,cost=0,previousError=0,previous=start;
   for(let i=1;i<arc.length;i++){
    const t=arc[i]/length, prior=arc[i-1]/length, point=at(t);
    const difference=distance(point,span[first+i]);
+   cost+=(difference+previousError)*(arc[i]-arc[i-1])/2;
+   previousError=difference;
    if(difference>error&&first+i<last){error=difference;split=first+i;}
    if(Number.isFinite(bound)){
     const a=derivative(prior),b=derivative(t),factor=(t-prior)/3;
@@ -87,10 +146,10 @@ function fitTracedOutline(points, tolerance, sensitivity=50) {
    }
    previous=point;
   }
-  return Number.isFinite(bound)?{segment:{end,c1,c2},error:bound}:{split};
+  return Number.isFinite(bound)?{segment:{end,c1,c2},error:bound,cost}:{split};
  }
  const segments=[];
- let deviation=0;
+ let deviation=0,totalCost=0;
  for(let i=0;i<corners.length;i++){
   const from=corners[i],to=corners[i+1]??corners[0]+n;
   const span=Array.from({length:to-from+1},(_,j)=>points[(from+j)%n]);
@@ -106,7 +165,7 @@ function fitTracedOutline(points, tolerance, sensitivity=50) {
   const pieces=[];
   function split(a,b,depth=0){
    const result=candidate(a,b);
-   if(result.segment){pieces.push({a,b,segment:result.segment,error:result.error});return;}
+   if(result.segment){pieces.push({a,b,segment:result.segment,error:result.error,cost:result.cost??0});return;}
    const middle=depth<14?result.split:Math.floor((a+b)/2);
    split(a,middle,depth+1);split(middle,b,depth+1);
   }
@@ -116,12 +175,12 @@ function fitTracedOutline(points, tolerance, sensitivity=50) {
   const best=[{count:0,error:0}];
   for(let j=1;j<=pieces.length;j++){
    const piece=pieces[j-1];
-   best[j]={count:best[j-1].count+1,error:best[j-1].error+piece.error,previous:j-1,segment:piece.segment,bound:piece.error};
+   best[j]={count:best[j-1].count+1,error:best[j-1].error+piece.cost,previous:j-1,segment:piece.segment,bound:piece.error};
    for(let k=Math.max(0,j-8);k<j-1;k++){
     const count=best[k].count+1;
     if(count>best[j].count)continue;
-    const {segment,error}=candidate(pieces[k].a,piece.b);
-    const total=best[k].error+error;
+    const {segment,error,cost=0}=candidate(pieces[k].a,piece.b);
+    const total=best[k].error+cost;
     if(segment&&(count<best[j].count||total<best[j].error))best[j]={count,error:total,previous:k,segment,bound:error};
    }
   }
@@ -130,14 +189,15 @@ function fitTracedOutline(points, tolerance, sensitivity=50) {
    fitted.push(best[j].segment);
    deviation=Math.max(deviation,best[j].bound);
   }
+  totalCost+=best.at(-1).error;
   segments.push(...fitted.reverse());
  }
- return {start:points[corners[0]],segments,deviation,vertices};
+ return {start:points[corners[0]],segments,deviation,vertices,cost:totalCost};
 }
 
 // Detect crossings on a finely flattened copy before committing the vector fit.
 function traceTopologyIsSafe(outlines) {
- const grid=new Map(), cell=24;
+ const grid=new Map(), cell=8;
  const cross=(a,b,c)=>(b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0]);
  const middle=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
  function flatten(a,b,c,d,output,depth=0){
@@ -161,10 +221,10 @@ function traceTopologyIsSafe(outlines) {
    const x0=Math.floor(Math.min(a[0],b[0])/cell),x1=Math.floor(Math.max(a[0],b[0])/cell);
    const y0=Math.floor(Math.min(a[1],b[1])/cell),y1=Math.floor(Math.max(a[1],b[1])/cell);
    for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
-    if(++work>250000)return false;
+    if(++work>1000000)return false;
     const key=x+','+y, bucket=grid.get(key)??[];
     for(const [c,d] of bucket){
-     if(++work>250000)return false;
+     if(++work>1000000)return false;
      if(cross(a,b,c)*cross(a,b,d)<-1e-9&&cross(c,d,a)*cross(c,d,b)<-1e-9)return false;
     }
     bucket.push([a,b]);grid.set(key,bucket);
